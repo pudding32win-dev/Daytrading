@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>當沖交易記錄</title>
+<title>每日衝浪紀錄</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -510,7 +510,7 @@ canvas.d-chart { width:100%; display:block; }
 </div>
 
 <div class="topbar">
-  <div class="topbar-logo">⚡ 當沖交易記錄</div>
+  <div class="topbar-logo">⚡ 每日衝浪紀錄</div>
   <div class="topbar-right">
     <span class="readonly-badge">👁 唯讀</span>
     <button class="theme-btn" style="font-size:11px;color:#a78bfa" onclick="showBackups()" title="查看/還原本機備份">↩ 備份</button>
@@ -696,10 +696,6 @@ canvas.d-chart { width:100%; display:block; }
  </div><!-- /dpanel-detail -->
   <!-- ② 每日損益 -->
   <div class="dtab-panel" id="dpanel-daily">
-    <div class="d-chart-wrap">
-      <div class="d-chart-title"><span>📅 每日損益（長條）＋ 累計（折線）</span></div>
-      <div style="position:relative;height:240px"><canvas id="chart-daily"></canvas></div>
-    </div>
     <!-- 權益金核對 -->
     <div class="card">
       <div class="card-hd">📊 權益金核對＆出入金明細</div>
@@ -732,6 +728,11 @@ canvas.d-chart { width:100%; display:block; }
           <tbody id="tbody-D-daily"></tbody>
         </table>
       </div>
+    </div>
+    <!-- 每日損益圖表：移到本頁最下面，避免一進入每日損益頁就顯眼 -->
+    <div class="d-chart-wrap" style="margin-top:12px">
+      <div class="d-chart-title"><span>📅 每日損益（長條）＋ 累計（折線）</span></div>
+      <div style="position:relative;height:240px"><canvas id="chart-daily"></canvas></div>
     </div>
   </div>
 
@@ -828,7 +829,7 @@ canvas.d-chart { width:100%; display:block; }
 </div>
 
 
-<div class="footer">當沖交易記錄 · 精簡獨立版 · Firebase 雲端同步 · 僅供參考</div>
+<div class="footer">每日衝浪紀錄 · 精簡獨立版 · Firebase 雲端同步 · 僅供參考</div>
 
 <script type="module">
 
