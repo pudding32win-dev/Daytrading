@@ -634,20 +634,15 @@ canvas.d-chart { width:100%; display:block; }
       <button id="btn-query" onclick="renderDDetailTab()" style="font-size:11px;padding:5px 14px;border-radius:6px;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;cursor:pointer;font-weight:600;font-family:var(--font)">查詢</button>
       <span id="D-count-label" style="margin-left:auto;font-size:11px;color:var(--muted)"></span>
     </div>
-    <!-- ★ 浪級圖卡：放在新增交易上方，直接看到小浪／中浪／大浪表現 -->
-    <div class="card" id="D-wave-amplitude-card">
-  <div class="card-hd">📊 20日市場振幅｜Apps Script 自動更新</div>
-  <div class="card-bd" id="D-wave-amplitude-body"></div>
-</div>
-<div class="card" id="D-wave-detail-card">
-  <div class="card-hd">📋 浪級交易明細</div>
-  <div class="card-bd" id="D-wave-detail-body"></div>
-</div>
-<div class="card" id="D-wave-cards">
+    <!-- ★ 浪級與市場振幅：放在新增當沖交易上方 -->
+    <div class="card" id="D-wave-cards">
       <div class="card-hd">🌊 浪級績效｜小浪・中浪・大浪</div>
       <div class="card-bd" id="D-wave-cards-body"></div>
     </div>
-
+    <div class="card" id="D-wave-amplitude-card">
+      <div class="card-hd">📊 20日市場振幅｜Apps Script 自動更新</div>
+      <div class="card-bd" id="D-wave-amplitude-body"></div>
+    </div>
     <!-- ★ 新增交易（置頂）-->
     <div class="card">
       <div class="card-hd">➕ 新增當沖交易</div>
@@ -688,6 +683,7 @@ canvas.d-chart { width:100%; display:block; }
       <div class="card-bd" id="D-stats-block"></div>
       <!-- 可展開圖表區 -->
       <div id="d-stats-charts" style="display:none;padding:0 14px 14px">
+
         <!-- 風報比 &amp; 期望值 KPI -->
         <div id="d-rr-block" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px"></div>
         <!-- 最大連贏/連輸 -->
@@ -731,6 +727,7 @@ canvas.d-chart { width:100%; display:block; }
           <button onclick="saveDeq()" style="padding:7px 12px;border-radius:7px;background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);color:#f87171;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">💾 儲存</button>
         </div>
         <div id="D-equity-diff"></div>
+        <div id="D-equity-kpi" style="margin-top:8px"></div>
         <div id="D-eq-list" style="margin-top:8px"></div>
         <div id="D-io-block" style="margin-top:10px"></div>
       </div>
@@ -1588,7 +1585,7 @@ function dParseDate(s) { return normalizeDate(s); }
 
 // ══ 自動浪級：依實際進出場點數判定 ══
 /* ── 浪級：使用 Apps Script 的實際市場振幅資料，不再使用固定 30/60 點 ── */
-var D_WAVE_AMPLITUDE = { small:478, medium:650, large:924, avg20:672, latest:575, date:'2026/09/16' };
+var D_WAVE_AMPLITUDE = { small:478, medium:650, large:924, avg20:672, latest:575, date:'2026/09/16', source:'Apps Script' };
 function getDWaveMarketAmplitude(){
   try{
     if (window.D_WAVE_AMPLITUDE && typeof window.D_WAVE_AMPLITUDE==='object') return window.D_WAVE_AMPLITUDE;
@@ -1601,11 +1598,10 @@ function getDWavePoints(r) {
   return Math.abs(r.dir === 'B' ? (parseFloat(r.ex)-parseFloat(r.en)) : (parseFloat(r.en)-parseFloat(r.ex)));
 }
 function getDWaveLevel(r) {
-  var pts=getDWavePoints(r), a=getDWaveMarketAmplitude();
+  var pts=getDWavePoints(r);
   if (pts==null) return '—';
-  /* 小浪：不超過實際小浪門檻；中浪：小浪至中浪門檻；大浪：超過中浪門檻 */
-  if (pts <= Number(a.small||478)) return '小浪';
-  if (pts <= Number(a.medium||650)) return '中浪';
+  if (pts <= 30) return '小浪';
+  if (pts <= 60) return '中浪';
   return '大浪';
 }
 function getDWaveColor(level) {
@@ -1792,30 +1788,50 @@ window.renderDeqList = function() {
 
 // 手動輸入當日權益金 → 計算差異
 window.renderDEquityDiff = function() {
-  var inputVal = parseFloat(document.getElementById('D-equity-input').value);
+  var inputEl = document.getElementById('D-equity-input');
   var el = document.getElementById('D-equity-diff');
-  if (isNaN(inputVal) || inputVal <= 0) { el.innerHTML = ''; return; }
-  // 計算系統累計權益金 = 固定資金 + 累計淨額 + 累計出入金
+  if (!inputEl || !el) return;
+  var inputVal = parseFloat(inputEl.value);
   var trades = DATA.D || [];
   var io = DATA.D_io || [];
   var totalNet = trades.reduce(function(a,r){ return a + (r.net||0); }, 0);
   var totalIo  = io.reduce(function(a,r){ return a + (r.amt||0); }, 0);
   var sysEquity = totalIo + totalNet;
+  if (isNaN(inputVal) || inputVal <= 0) {
+    el.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">'
+      + '<div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted)">系統計算權益金</div><div style="font-size:18px;font-weight:700;font-family:monospace;color:var(--text);margin-top:3px">$'+Math.round(sysEquity).toLocaleString()+'</div><div style="font-size:9px;color:var(--muted);margin-top:2px">累計出入金＋當沖淨額</div></div>'
+      + '<div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted)">手動核對</div><div style="font-size:12px;color:var(--muted);margin-top:6px">輸入末場權益金後自動顯示差異</div></div></div>';
+    return;
+  }
   var diff = inputVal - sysEquity;
   var absDiff = Math.abs(diff);
   var color = absDiff < 500 ? '#34d399' : absDiff < 5000 ? '#f59e0b' : '#f87171';
   var statusText = absDiff < 500 ? '✅ 吻合' : diff > 0 ? '⚠️ 實際高於系統' : '⚠️ 實際低於系統';
-  el.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px">'
-    + '<div style="background:var(--bg3);border-radius:7px;padding:8px 10px"><div style="font-size:10px;color:var(--muted);margin-bottom:3px">系統計算權益金</div>'
-    + '<div style="font-size:14px;font-weight:700;font-family:monospace;color:var(--muted2)">$' + sysEquity.toLocaleString() + '</div>'
-    + '<div style="font-size:9px;color:var(--muted)">累計出入金+淨額</div></div>'
-    + '<div style="background:var(--bg3);border-radius:7px;padding:8px 10px"><div style="font-size:10px;color:var(--muted);margin-bottom:3px">手動輸入</div>'
-    + '<div style="font-size:14px;font-weight:700;font-family:monospace;color:var(--text)">$' + inputVal.toLocaleString() + '</div></div>'
-    + '<div style="background:var(--bg3);border-radius:7px;padding:8px 10px;border:1px solid ' + color.replace('#','rgba(') + ',0.3)">'
-    + '<div style="font-size:10px;color:var(--muted);margin-bottom:3px">差異</div>'
-    + '<div style="font-size:14px;font-weight:700;font-family:monospace;color:' + color + '">' + (diff>=0?'+':'') + diff.toLocaleString() + '</div>'
-    + '<div style="font-size:9px;color:' + color + '">' + statusText + '</div></div></div>';
+  el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px">'
+    + '<div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted)">系統計算權益金</div><div style="font-size:16px;font-weight:700;font-family:monospace;color:var(--muted2);margin-top:3px">$'+Math.round(sysEquity).toLocaleString()+'</div><div style="font-size:9px;color:var(--muted)">累計出入金＋淨額</div></div>'
+    + '<div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted)">手動輸入</div><div style="font-size:16px;font-weight:700;font-family:monospace;color:var(--text);margin-top:3px">$'+Math.round(inputVal).toLocaleString()+'</div></div>'
+    + '<div style="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid '+color+'55"><div style="font-size:10px;color:var(--muted)">差異</div><div style="font-size:16px;font-weight:700;font-family:monospace;color:'+color+';margin-top:3px">'+(diff>=0?'+':'')+Math.round(diff).toLocaleString()+'</div><div style="font-size:9px;color:'+color+';margin-top:2px">'+statusText+'</div></div></div>';
 };
+
+function renderDEquityKPI() {
+  var el = document.getElementById('D-equity-kpi');
+  if (!el) return;
+  var trades = DATA.D || [], io = DATA.D_io || [], eqList = DATA.D_eq || [];
+  var totalNet = trades.reduce(function(a,r){ return a + (r.net||0); }, 0);
+  var totalIo  = io.reduce(function(a,r){ return a + (r.amt||0); }, 0);
+  var sysEquity = totalIo + totalNet;
+  var latest = eqList.length ? eqList.slice().sort(function(a,b){return a.date.localeCompare(b.date);})[eqList.length-1] : null;
+  var diff = latest ? latest.equity - sysEquity : null;
+  var abs = diff == null ? null : Math.abs(diff);
+  var color = diff == null ? 'var(--muted)' : abs < 500 ? '#34d399' : abs < 5000 ? '#f59e0b' : '#f87171';
+  var status = diff == null ? '尚未輸入手動權益金' : abs < 500 ? '✅ 吻合' : '⚠️ 有差異';
+  el.innerHTML = '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;color:var(--muted)">📌 權益金差異確認</span><span style="font-size:11px;font-weight:700;color:'+color+'">'+status+'</span></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+    + '<div><div style="font-size:9px;color:var(--muted)">系統</div><div style="font-size:14px;font-weight:700;font-family:monospace">$'+Math.round(sysEquity).toLocaleString()+'</div></div>'
+    + '<div><div style="font-size:9px;color:var(--muted)">最近手動</div><div style="font-size:14px;font-weight:700;font-family:monospace">'+(latest?'$'+Math.round(latest.equity).toLocaleString():'—')+'</div></div>'
+    + '<div><div style="font-size:9px;color:var(--muted)">差異</div><div style="font-size:14px;font-weight:700;font-family:monospace;color:'+color+'">'+(diff==null?'—':(diff>=0?'+':'')+Math.round(diff).toLocaleString())+'</div></div></div></div>';
+}
 
 // 動態預覽淨額
 (function() {
@@ -1920,6 +1936,7 @@ function renderDPanel() {
     deqDateEl.value = new Date().toISOString().slice(0,10);
   }
   renderDeqList();
+  renderDEquityKPI();
   var trades = DATA.D || [];
   var io = DATA.D_io || [];
 
@@ -2091,6 +2108,8 @@ function renderDPanel() {
    renderDMonthlyTable();
   renderDIoTable();
   renderAmpCard();
+  renderDWaveAmplitude();
+  
   setTimeout(renderDCharts, 50);
 }
 // ── 啟動 ──
@@ -2868,11 +2887,40 @@ async function initData() {
 var _ampData = null;
 async function loadAmplitude() {
   try {
-    const res = await fetch('/api/amplitude');
+    const res = await fetch('/api/amplitude', { cache: 'no-store' });
     const data = await res.json();
-    if (data.ok) { _ampData = data; renderAmpCard(); }
-    else console.error('振幅資料錯誤', data.error);
-  } catch (e) { console.error('振幅抓取失敗', e); }
+    if (data.ok) {
+      _ampData = data;
+      var src = data.data || data.amplitude || data.wave || data;
+      function pick(keys, fallback) {
+        for (var i=0;i<keys.length;i++) {
+          var v = src && src[keys[i]];
+          if (v != null && v !== '' && isFinite(Number(v))) return Number(v);
+        }
+        return fallback;
+      }
+      D_WAVE_AMPLITUDE = {
+        small:  pick(['small','smallWave','small_wave','waveSmall','wave_small','小浪'], D_WAVE_AMPLITUDE.small),
+        medium: pick(['medium','mid','middle','mediumWave','midWave','waveMedium','waveMid','wave_medium','中浪'], D_WAVE_AMPLITUDE.medium),
+        large:  pick(['large','largeWave','waveLarge','wave_large','大浪'], D_WAVE_AMPLITUDE.large),
+        avg20:  pick(['avg20','average20','avg_20','20日總平均','20日平均振幅'], D_WAVE_AMPLITUDE.avg20),
+        latest: pick(['latest','latestAmplitude','latest_amplitude','最新振幅'], D_WAVE_AMPLITUDE.latest),
+        date: data.lastDate || data.date || (src && (src.lastDate || src.date)) || D_WAVE_AMPLITUDE.date,
+        source: 'Apps Script'
+      };
+      window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
+      renderAmpCard();
+      renderDWaveAmplitude();
+      
+      renderDPanel();
+    } else {
+      console.error('振幅資料錯誤', data.error);
+    }
+  } catch (e) {
+    console.error('振幅抓取失敗', e);
+    renderDWaveAmplitude();
+    
+  }
 }
 
 function renderAmpCard() {
@@ -2916,6 +2964,16 @@ function renderAmpCard() {
     + ratioHtml;
 }
 
+// ══ 統計分析用：Apps Script 市場振幅與浪級交易明細 ══
+function renderDWaveAmplitude(){
+  var el=document.getElementById('D-wave-amplitude-body'); if(!el) return;
+  var a=getDWaveMarketAmplitude();
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+    +[['🌊 小浪',a.small],['🌊 中浪',a.medium],['🌊 大浪',a.large]].map(function(x){
+      return '<div style="padding:12px;border:1px solid var(--border2);border-radius:10px;text-align:center"><div style="font-size:14px;font-weight:700">'+x[0]+'</div><div style="font-size:24px;font-weight:800;margin-top:5px">'+Number(x[1]||0).toLocaleString()+' 點</div></div>';
+    }).join('')
+    +'</div><div style="margin-top:10px;font-size:13px;color:var(--muted);line-height:1.7">20日總平均 <b style="color:var(--text);font-size:16px">'+Number(a.avg20||0).toLocaleString()+' 點</b>　｜　最新振幅 <b style="color:var(--text);font-size:16px">'+Number(a.latest||0).toLocaleString()+' 點</b>　｜　最新交易日 '+(a.date||'—')+'</div>';
+}
 updateLastBackupInfo();
 initData();
 loadAmplitude();
@@ -2923,22 +2981,4 @@ loadAmplitude();
 </script>
 
 </body>
-</html>function renderDWaveAmplitude(){
-  var el=document.getElementById('D-wave-amplitude-body'); if(!el) return;
-  var a=getDWaveMarketAmplitude();
-  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-    +[['🌊 小浪',a.small],['🌊 中浪',a.medium],['🌊 大浪',a.large]].map(function(x){return '<div style="padding:12px;border:1px solid var(--border2);border-radius:10px;text-align:center"><div style="font-size:14px;font-weight:700">'+x[0]+'</div><div style="font-size:24px;font-weight:800;margin-top:5px">'+Number(x[1]||0).toLocaleString()+' 點</div></div>';}).join('')
-    +'</div><div style="margin-top:10px;font-size:13px;color:var(--muted);line-height:1.7">20日總平均 <b style="color:var(--text);font-size:16px">'+Number(a.avg20||0).toLocaleString()+' 點</b>　｜　最新振幅 <b style="color:var(--text);font-size:16px">'+Number(a.latest||0).toLocaleString()+' 點</b>　｜　最新交易日 '+(a.date||'—')+'</div>';
-}
-function renderDWaveDetails(){
-  var el=document.getElementById('D-wave-detail-body'); if(!el) return;
-  var arr=(typeof DATA!=='undefined'&&Array.isArray(DATA.D))?DATA.D:[];
-  var groups={小浪:[],中浪:[],大浪:[]};
-  arr.forEach(function(r){var w=getDWaveLevel(r); if(groups[w]) groups[w].push(r);});
-  el.innerHTML=['小浪','中浪','大浪'].map(function(w){
-    var rows=groups[w];
-    return '<div style="margin-top:12px"><div style="font-size:16px;font-weight:800;margin-bottom:6px">🌊 '+w+' <span style="color:var(--muted);font-size:12px">'+rows.length+'筆</span></div>'
-      + (rows.length?'<div style="overflow:auto"><table style="width:100%;font-size:12px"><tr><th>日期</th><th>方向</th><th>進場</th><th>出場</th><th>點數</th><th>損益</th></tr>'+rows.map(function(r){var pts=getDWavePoints(r)||0;return '<tr><td>'+r.date+'</td><td>'+r.wave+'/'+r.dir+'</td><td>'+r.en+'</td><td>'+r.ex+'</td><td>'+pts+'</td><td style="color:'+(r.net>=0?'var(--gain)':'var(--loss)')+'">'+(r.net>=0?'+':'')+Number(r.net||0).toLocaleString()+'</td></tr>';}).join('')+'</table></div>':'<div style="color:var(--muted);font-size:12px">尚無資料</div>')+'</div>';
-  }).join('');
-}
-
+</html>
