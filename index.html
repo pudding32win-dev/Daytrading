@@ -3097,7 +3097,6 @@ async function loadAmplitude() {
     }
 
     _ampData = data;
-    try { localStorage.setItem(AMP_CACHE_KEY, JSON.stringify(data)); } catch (cacheErr) { console.warn('[三浪] 振幅快取儲存失敗：', cacheErr); }
 
     D_WAVE_AMPLITUDE = {
       smallWave: obj('smallWave', 'rank1', 'rank1to7Average'),
@@ -3122,6 +3121,8 @@ async function loadAmplitude() {
 
     window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
 
+    try { localStorage.setItem(AMP_CACHE_KEY, JSON.stringify(data)); } catch (cacheErr) { console.warn('[三浪] 振幅快取寫入失敗：', cacheErr); }
+
     console.log('[三浪] 已取得資料，最後日期：', D_WAVE_AMPLITUDE.date);
 
     renderAmpCard();
@@ -3131,74 +3132,58 @@ async function loadAmplitude() {
   } catch (e) {
     console.error('[三浪] 振幅抓取失敗：', e);
 
-    // API 失敗時保留最後一次成功資料；跨頁面重新整理也從 localStorage 還原。
-    var cachedAmplitude = null;
-    try {
-      var cachedRaw = localStorage.getItem(AMP_CACHE_KEY);
-      if (cachedRaw) cachedAmplitude = JSON.parse(cachedRaw);
-    } catch (cacheErr) {
-      console.warn('[三浪] 讀取振幅快取失敗：', cacheErr);
+    let cached = _ampData;
+    if (!cached) {
+      try {
+        const raw = localStorage.getItem(AMP_CACHE_KEY);
+        cached = raw ? JSON.parse(raw) : null;
+      } catch (cacheErr) {
+        console.warn('[三浪] 振幅快取讀取失敗：', cacheErr);
+      }
     }
 
-    if (cachedAmplitude && cachedAmplitude.ok) {
-      _ampData = cachedAmplitude;
-      var cachedSrc = cachedAmplitude.data || cachedAmplitude.amplitude || cachedAmplitude.wave || cachedAmplitude;
-      var cachedRv = cachedSrc.rankValues || cachedAmplitude.rankValues || {};
-      function cachedNum(v) {
-        return v != null && v !== '' && isFinite(Number(v)) ? Number(v) : null;
+    if (cached) {
+      _ampData = cached;
+      const csrc = cached.data || cached.amplitude || cached.wave || cached;
+      const crv = csrc.rankValues || cached.rankValues || {};
+      function cnum(v) { return v != null && v !== '' && isFinite(Number(v)) ? Number(v) : null; }
+      function cobj(name, minKey, maxKey) {
+        const o = csrc[name] || cached[name];
+        if (o && cnum(o.min) != null && cnum(o.max) != null) return { min:cnum(o.min), max:cnum(o.max) };
+        return { min:cnum(crv[minKey]), max:cnum(crv[maxKey]) };
       }
-      function cachedObj(name, minKey, maxKey) {
-        var o = cachedSrc[name] || cachedAmplitude[name];
-        if (o && cachedNum(o.min) != null && cachedNum(o.max) != null) return { min: cachedNum(o.min), max: cachedNum(o.max) };
-        return { min: cachedNum(cachedRv[minKey]), max: cachedNum(cachedRv[maxKey]) };
-      }
-
       D_WAVE_AMPLITUDE = {
-        smallWave: cachedObj('smallWave', 'rank1', 'rank1to7Average'),
-        middleWave: cachedObj('middleWave', 'rank5to10Average', 'rank5to15Average'),
-        largeWave: cachedObj('largeWave', 'rank15to20Average', 'rank20'),
-        rankValues: cachedRv,
-        small: cachedNum(cachedSrc.small),
-        medium: cachedNum(cachedSrc.medium),
-        large: cachedNum(cachedSrc.large),
-        avg20: cachedNum(cachedSrc.avg20 != null ? cachedSrc.avg20 : cachedAmplitude.avg20),
-        latest: cachedNum(cachedSrc.latestAmplitude != null ? cachedSrc.latestAmplitude : cachedAmplitude.latestAmplitude),
-        date: cachedSrc.latestDate || cachedSrc.lastDate || cachedSrc.date || cachedAmplitude.latestDate || cachedAmplitude.lastDate || cachedAmplitude.date || null,
-        recent3Days: Array.isArray(cachedSrc.recent3Days) ? cachedSrc.recent3Days : (Array.isArray(cachedAmplitude.recent3Days) ? cachedAmplitude.recent3Days : []),
-        volatilityStructure: cachedSrc.volatilityStructure || cachedAmplitude.volatilityStructure || null,
-        source: 'Apps Script（上次成功資料）',
-        dataReady: true,
-        stale: true,
-        error: String(e.message || e)
+        smallWave: cobj('smallWave', 'rank1', 'rank1to7Average'),
+        middleWave: cobj('middleWave', 'rank5to10Average', 'rank5to15Average'),
+        largeWave: cobj('largeWave', 'rank15to20Average', 'rank20'),
+        rankValues: crv,
+        small: cnum(csrc.small), medium: cnum(csrc.medium), large: cnum(csrc.large),
+        avg20: cnum(csrc.avg20 != null ? csrc.avg20 : cached.avg20),
+        latest: cnum(csrc.latestAmplitude != null ? csrc.latestAmplitude : cached.latestAmplitude),
+        date: csrc.latestDate || csrc.lastDate || csrc.date || cached.latestDate || cached.lastDate || cached.date || null,
+        recent3Days: Array.isArray(csrc.recent3Days) ? csrc.recent3Days : (Array.isArray(cached.recent3Days) ? cached.recent3Days : []),
+        volatilityStructure: csrc.volatilityStructure || cached.volatilityStructure || null,
+        source: 'Apps Script（上次成功資料）', dataReady: true, stale: true, error: String(e.message || e)
       };
       window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
       renderAmpCard();
       renderDWaveAmplitude();
       renderDPanel();
-      return;
+      console.warn('[三浪] 振幅 API 失敗，保留上一次成功資料：', D_WAVE_AMPLITUDE.date);
+      return cached;
     }
 
-    // 從未成功取得過資料時才顯示未同步狀態。
-    D_WAVE_AMPLITUDE = {
-      smallWave: { min: null, max: null },
-      middleWave: { min: null, max: null },
-      largeWave: { min: null, max: null },
-      rankValues: {},
-      small: null,
-      medium: null,
-      large: null,
-      avg20: null,
-      latest: null,
-      date: null,
-      recent3Days: [],
-      volatilityStructure: null,
-      source: 'Apps Script 未同步',
-      dataReady: false,
-      error: String(e.message || e)
-    };
-
-    window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
-    renderDWaveAmplitude();
+    // 沒有任何成功快取時，才顯示未同步；不主動清除既有資料。
+    if (!_ampData && !window.D_WAVE_AMPLITUDE) {
+      D_WAVE_AMPLITUDE = {
+        smallWave: { min: null, max: null }, middleWave: { min: null, max: null }, largeWave: { min: null, max: null },
+        rankValues: {}, small: null, medium: null, large: null, avg20: null, latest: null, date: null,
+        recent3Days: [], volatilityStructure: null, source: 'Apps Script 未同步', dataReady: false, error: String(e.message || e)
+      };
+      window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
+      renderDWaveAmplitude();
+    }
+    return null;
   }
 }
 
