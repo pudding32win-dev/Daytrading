@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪紀錄｜小浪中浪大浪版</title>
+<title>每日衝浪紀錄</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -485,8 +485,6 @@ body.light .theme-btn { background:rgba(0,0,0,0.06); border-color:rgba(0,0,0,0.1
 .d-chart-title { font-size:12px; font-weight:600; color:var(--muted2); margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
 canvas.d-chart { width:100%; display:block; }
 
-/* ── 浪級標籤 ── */ .wave-badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap}.wave-small{background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25);color:#60a5fa}.wave-mid{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.28);color:#fbbf24}.wave-large{background:rgba(248,113,113,.10);border:1px solid rgba(248,113,113,.28);color:#f87171}.wave-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.wave-stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 12px}.wave-stat-title{font-size:11px;font-weight:700;margin-bottom:7px}.wave-stat-row{display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:3px 0}.wave-stat-row span:first-child{color:var(--muted)}@media(max-width:520px){.wave-stat-grid{grid-template-columns:1fr}}
-
 /* ── 篩選列 ── */
 .filter-bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:10px 14px; background:var(--bg3); border-radius:8px; margin-bottom:10px; }
 .filter-bar select,.filter-bar input { font-size:11px; padding:5px 8px; border-radius:6px; background:var(--bg2); border:1px solid var(--border2); color:var(--text); font-family:var(--font); outline:none; }
@@ -619,13 +617,12 @@ canvas.d-chart { width:100%; display:block; }
       <select id="flt-year">
         <option value="">全部</option>
       </select>
-      <label>方向</label>
+      <label>浪級</label>
       <select id="flt-wave">
-        <option value="">全部</option><option value="多">多</option><option value="空">空</option>
+        <option value="">全部</option><option value="__小浪__">小浪</option><option value="__中浪__">中浪</option><option value="__大浪__">大浪</option>
+        <option value="多">多</option><option value="空">空</option>
         <option value="__順勢__">順勢</option><option value="__逆勢__">逆勢</option>
       </select>
-      <label>浪級</label>
-      <select id="flt-wave-level"><option value="">全部</option><option value="小浪">小浪 ≤30點</option><option value="中浪">中浪 31–60點</option><option value="大浪">大浪 ≥61點</option></select>
       <label>損益</label>
       <select id="flt-pnl">
         <option value="">全部</option><option value="win">獲利</option><option value="loss">虧損</option>
@@ -634,6 +631,12 @@ canvas.d-chart { width:100%; display:block; }
       <button id="btn-query" onclick="renderDDetailTab()" style="font-size:11px;padding:5px 14px;border-radius:6px;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;cursor:pointer;font-weight:600;font-family:var(--font)">查詢</button>
       <span id="D-count-label" style="margin-left:auto;font-size:11px;color:var(--muted)"></span>
     </div>
+    <!-- ★ 浪級圖卡：放在新增交易上方，直接看到小浪／中浪／大浪表現 -->
+    <div class="card" id="D-wave-cards">
+      <div class="card-hd">🌊 浪級績效｜小浪・中浪・大浪</div>
+      <div class="card-bd" id="D-wave-cards-body"></div>
+    </div>
+
     <!-- ★ 新增交易（置頂）-->
     <div class="card">
       <div class="card-hd">➕ 新增當沖交易</div>
@@ -1572,7 +1575,17 @@ function dExcelToDate(n) {
 }
 function dParseDate(s) { return normalizeDate(s); }
 
-function getDPoints(r){if(!r||r.en==null||r.ex==null)return null;var n=r.dir==='B'?Number(r.ex)-Number(r.en):Number(r.en)-Number(r.ex);return isFinite(n)?Math.abs(n):null}function getDWaveLevel(r){var p=getDPoints(r);if(p==null)return '—';return p<=30?'小浪':p<=60?'中浪':'大浪'}function getDWaveClass(x){return x==='小浪'?'wave-small':x==='中浪'?'wave-mid':x==='大浪'?'wave-large':''}
+// ══ 自動浪級：依實際進出場點數判定 ══
+function getDWaveLevel(r) {
+  if (!r || r.en == null || r.ex == null || isNaN(parseFloat(r.en)) || isNaN(parseFloat(r.ex))) return '—';
+  var pts = Math.abs(r.dir === 'B' ? (parseFloat(r.ex)-parseFloat(r.en)) : (parseFloat(r.en)-parseFloat(r.ex)));
+  if (pts <= 30) return '小浪';
+  if (pts <= 60) return '中浪';
+  return '大浪';
+}
+function getDWaveColor(level) {
+  return level==='小浪' ? '#60a5fa' : level==='中浪' ? '#fbbf24' : level==='大浪' ? '#f87171' : 'var(--muted)';
+}
 
 window.addDtrade = async function() {
   if (!canEdit) { alert('⛔ 唯讀模式，請用含編輯金鑰的網址開啟'); return; }
@@ -1795,7 +1808,7 @@ window.renderDEquityDiff = function() {
     var net = Math.round(pts * D_MULT * lots) - fee;
     var margin = lots * _dMargin();
     el.style.color = net >= 0 ? 'var(--gain)' : 'var(--loss)';
-    el.innerHTML = '差價 ' + (pts>=0?'+':'')+pts + ' 點　淨額 ' + (net>=0?'+':'') + net.toLocaleString()
+    el.innerHTML = '🌊 '+getDWaveLevel({en:en,ex:ex,dir:dir})+'　｜　差價 ' + (pts>=0?'+':'')+pts + ' 點　淨額 ' + (net>=0?'+':'') + net.toLocaleString()
       + '　｜　保證金佔用 $' + margin.toLocaleString() + '（'+lots+'口×$'+_dMargin().toLocaleString()+'）';
     // 即時顯示警告
     if (warnEl) {
@@ -1872,8 +1885,6 @@ window.editMarginPerLot = async function() {
   renderDPanel();
   await saveData();
 };
-
-function renderDWaveStats(){var t=DATA.D||[],h=document.getElementById('D-wave-stats');if(!h)return;var html='<div style="font-size:10px;color:var(--muted);margin-bottom:5px">浪級績效（依進出場價差點數自動分類）</div><div style="font-size:10px;color:var(--muted2);margin-bottom:7px">小浪 ≤30點　中浪 31–60點　大浪 ≥61點</div><div class="wave-stat-grid">';['小浪','中浪','大浪'].forEach(function(l){var a=t.filter(function(r){return getDWaveLevel(r)===l}),n=a.reduce(function(x,r){return x+(r.net||0)},0),w=a.filter(function(r){return(r.net||0)>0}).length,p=a.map(getDPoints).filter(function(x){return x!=null}),ap=p.length?Math.round(p.reduce(function(x,y){return x+y},0)/p.length):0;html+='<div class="wave-stat-card"><div class="wave-stat-title"><span class="wave-badge '+getDWaveClass(l)+'">'+l+'</span></div><div class="wave-stat-row"><span>筆數</span><b>'+a.length+' 筆</b></div><div class="wave-stat-row"><span>勝率</span><b>'+(a.length?(w/a.length*100).toFixed(1)+'%':'—')+'</b></div><div class="wave-stat-row"><span>淨損益</span><b style="color:'+(n>=0?'var(--gain)':'var(--loss)')+'">'+(n>=0?'+$':'-$')+Math.abs(Math.round(n)).toLocaleString()+'</b></div><div class="wave-stat-row"><span>平均點數</span><b>'+ap+' 點</b></div></div>'});h.innerHTML=html+'</div>'}
 
 function renderDPanel() {
   renderDSubtitle();
@@ -2005,8 +2016,35 @@ function renderDPanel() {
         +'<span style="font-size:12px;color:var(--muted)">'+label+'</span>'
         +'<span style="font-size:13px;font-weight:600;font-family:monospace;color:'+(color||'var(--text)')+'">'+val+'</span></div>';
     }
+    var waveLevels = ['小浪','中浪','大浪'];
+    var waveStats = waveLevels.map(function(level){
+      var arr = trades.filter(function(r){ return getDWaveLevel(r)===level; });
+      var wn = arr.reduce(function(a,r){return a+(r.net||0);},0);
+      var ww = arr.filter(function(r){return (r.net||0)>0;}).length;
+      var wp = arr.reduce(function(a,r){
+        var pts = r.dir==='B' ? (r.ex-r.en) : (r.en-r.ex);
+        return a + Math.abs(pts||0);
+      },0);
+      return {level:level,n:arr.length,win:arr.length?ww/arr.length*100:0,net:wn,avg:arr.length?wn/arr.length:0,pts:arr.length?wp/arr.length:0};
+    });
+    var waveCardEl=document.getElementById('D-wave-cards-body');
+    if(waveCardEl){
+      waveCardEl.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'+waveStats.map(function(x){
+        var c=getDWaveColor(x.level);
+        return '<div style="background:var(--bg3);border:1px solid '+c+'44;border-radius:10px;padding:12px;text-align:center">'
+          +'<div style="font-size:13px;font-weight:700;color:'+c+'">'+x.level+'</div>'
+          +'<div style="font-size:20px;font-weight:700;font-family:monospace;margin-top:4px">'+x.n+'<span style="font-size:10px;color:var(--muted);font-weight:400"> 筆</span></div>'
+          +'<div style="font-size:11px;color:var(--muted2);margin-top:3px">勝率 '+(x.n?x.win.toFixed(1):'-')+'%</div>'
+          +'<div style="font-size:12px;font-weight:700;font-family:monospace;color:'+(x.net>=0?'var(--gain)':'var(--loss)')+';margin-top:5px">'+(x.net>=0?'+$':'-$')+Math.abs(Math.round(x.net)).toLocaleString()+'</div>'
+          +'<div style="font-size:10px;color:var(--muted);margin-top:2px">平均 '+(x.n?Math.round(x.pts):'-')+' 點/筆</div></div>';
+      }).join('')+'</div>'
+      +'<div style="font-size:10px;color:var(--muted);margin-top:8px">自動判定：小浪 ≤30 點　｜　中浪 31–60 點　｜　大浪 ≥61 點</div>';
+    }
+
     statsEl.innerHTML =
-      '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em">損益統計</div>'
+      '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em">浪級統計</div>'
+      + waveStats.map(function(x){return sr(x.level, x.n+'筆　勝率 '+(x.n?x.win.toFixed(1):'-')+'%　'+(x.net>=0?'+$':'-$')+Math.abs(Math.round(x.net)).toLocaleString(), getDWaveColor(x.level));}).join('')
+      + '<div style="font-size:10px;color:var(--muted);margin:10px 0 6px;letter-spacing:.04em">損益統計</div>'
       + sr('平均每筆淨額', (avgNet>=0?'+$':'-$')+Math.abs(avgNet).toLocaleString(), avgNet>=0?'var(--gain)':'var(--loss)')
       + sr('平均獲利筆', '+$'+avgWin.toLocaleString(), '#34d399')
       + sr('平均虧損筆', '$'+avgLoss.toLocaleString(), '#f87171')
@@ -2020,9 +2058,7 @@ function renderDPanel() {
       + sr('最大單筆口數', maxLots+' 口', 'var(--text)')
       + sr('最大保證金佔用', '$'+marginUsed.toLocaleString()+'（'+maxLots+'口×$'+_dMargin().toLocaleString()+'）', '#f59e0b')
       + sr('累計出入金', (totalIo>=0?'+$':'-$')+Math.abs(totalIo).toLocaleString(), totalIo>=0?'#fbbf24':'#f87171')
-      + sr('系統計算權益金', '$'+sysEquity.toLocaleString(), '#60a5fa')
-      + '<div id="D-wave-stats" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)"></div>';
-    renderDWaveStats();
+      + sr('系統計算權益金', '$'+sysEquity.toLocaleString(), '#60a5fa');
   }
 
   // 更新差異顯示（如果已有輸入）
@@ -2414,7 +2450,7 @@ window.autoFormatDDate = function(input) {
 };
 
 window.clearDFilter = function() {
-  ['flt-date','flt-month','flt-year','flt-wave','flt-wave-level','flt-pnl'].forEach(function(id){
+  ['flt-date','flt-month','flt-year','flt-wave','flt-pnl'].forEach(function(id){
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -2629,8 +2665,10 @@ window.renderDDetailTab = function() {
     } else if (fWave === '__逆勢__') {
       var _isContra2 = r.wave && r.dir && ((r.wave==='多'&&r.dir==='S')||(r.wave==='空'&&r.dir==='B'));
       if (!_isContra2) return false;
-    } else if (fWave && r.wave !== fWave) return false;
-    var _fLevel=(document.getElementById('flt-wave-level')||{}).value||''; if(_fLevel&&getDWaveLevel(r)!==_fLevel)return false;
+    } else if (fWave === '__小浪__' && getDWaveLevel(r) !== '小浪') return false;
+    else if (fWave === '__中浪__' && getDWaveLevel(r) !== '中浪') return false;
+    else if (fWave === '__大浪__' && getDWaveLevel(r) !== '大浪') return false;
+    else if (fWave && fWave !== '__順勢__' && fWave !== '__逆勢__' && r.wave !== fWave) return false;
     if (fPnl==='win'  && (r.net||0)<=0) return false;
     if (fPnl==='loss' && (r.net||0)>=0) return false;
     return true;
@@ -2691,7 +2729,7 @@ window.renderDDetailTab = function() {
       + '<thead><tr>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">口數</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">波段</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">浪級</th><th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">方向</th>'
+      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">方向</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">進場</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">出場</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">差價</th>'
@@ -2710,12 +2748,11 @@ window.renderDDetailTab = function() {
       var ptsCls  = pts>=0?'color:var(--gain)':'color:var(--loss)';
       var isContra = r.wave && r.dir && ((r.wave==='多'&&r.dir==='S')||(r.wave==='空'&&r.dir==='B'));
       var waveColor = r.wave==='多' ? 'color:#34d399' : 'color:#a78bfa';
-      var waveLevel=getDWaveLevel(r), waveLevelHtml=waveLevel==='—'?'<span style="color:var(--muted)">—</span>':'<span class="wave-badge '+getDWaveClass(waveLevel)+'">'+waveLevel+'</span>';
       var cumVal = cumMap[origIdx];
       html += '<tr>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace">'+r.lots+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="font-size:10px;font-weight:600;'+waveColor+'">'+(r.wave||'—')+'</span>'+(isContra?'<span style="font-size:9px;color:#f59e0b;margin-left:3px">逆</span>':'')+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)">'+waveLevelHtml+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
         + (r.dir==='B'?'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399':'background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#a78bfa')
         + '">'+(r.dir==='B'?'多 B':'空 S')+'</span></td>'
