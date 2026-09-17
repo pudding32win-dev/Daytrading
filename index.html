@@ -2929,7 +2929,8 @@ async function initData() {
 var _ampData = null;
 async function loadAmplitude() {
   try {
-    const res = await fetch('/api/amplitude', { cache: 'no-store' });
+    const WAVE_API_URL = 'https://script.google.com/macros/s/AKfycbwcOoHVMfVIUlT9JbVhrZqwEkLwRyXgdg8CakKAnWHSN4y4UjfCqvlqKQF1O_r2H5vQ/exec';
+    const res = await fetch(WAVE_API_URL, { cache: 'no-store', redirect: 'follow' });
     const data = await res.json();
     var src = data && (data.data || data.amplitude || data.wave || data);
     if (!data || !data.ok || !src) {
@@ -3031,7 +3032,7 @@ function renderDWaveAmplitude(){
   var a=getDWaveMarketAmplitude(), r=getDWaveRanges();
   var rv=a.rankValues||{};
   if(!a.dataReady){
-    el.innerHTML='<div style="padding:14px;border:1px solid rgba(251,191,36,.35);border-radius:10px;background:var(--bg3);color:var(--muted);line-height:1.8">⚠️ <b style="color:var(--text)">三浪資料尚未同步</b><br>目前不顯示任何預設／假資料。請確認 Apps Script Web App 的 <code>/api/amplitude</code> 已部署並可讀取「歷史資料區」。</div>';
+    el.innerHTML='<div style="padding:14px;border:1px solid rgba(251,191,36,.35);border-radius:10px;background:var(--bg3);color:var(--muted);line-height:1.8">⚠️ <b style="color:var(--text)">三浪資料尚未同步</b><br>目前不顯示任何預設／假資料。請確認 Apps Script Web App 已部署、可公開存取，並可讀取「歷史資料區」。</div>';
     return;
   }
   function fmt(v){ return isFinite(Number(v)) ? Math.round(Number(v)).toLocaleString() : '—'; }
