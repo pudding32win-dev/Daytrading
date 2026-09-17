@@ -2289,7 +2289,7 @@ function renderRRBlock() {
   var winRate = trades.length ? wins.length / trades.length : 0;
   // Kelly & EV
   var ev = winRate * avgWin - (1-winRate) * avgLoss;
-  var kelly = avgLoss > 0 ? (winRate / avgLoss - (1-winRate) / avgWin) : 0;
+  var kelly = (avgWin > 0) ? (winRate - (1-winRate) * (avgLoss / avgWin)) : 0;
   // Profit Factor
   var grossWin  = wins.reduce(function(a,r){ return a+r.net; },0);
   var grossLoss = Math.abs(losses.reduce(function(a,r){ return a+r.net; },0));
@@ -3033,6 +3033,9 @@ var _ampData = null;
 // 3. 程式也會優先讀取 localStorage 中之前儲存的網址。
 // 注意：不要再使用 /api/amplitude，因為目前 Apps Script 的 doGet() 本身就直接回傳 JSON。
 const WAVE_API_URL = '';
+// 保留最後一次成功取得的振幅資料；API 暫時失敗時不清空畫面。
+let lastSuccessfulAmplitudeData = null;
+let lastSuccessfulWaveAmplitude = null;
 
 async function loadAmplitude() {
   try {
@@ -3096,6 +3099,7 @@ async function loadAmplitude() {
     }
 
     _ampData = data;
+    lastSuccessfulAmplitudeData = data;
 
     D_WAVE_AMPLITUDE = {
       smallWave: obj('smallWave', 'rank1', 'rank1to7Average'),
@@ -3119,6 +3123,7 @@ async function loadAmplitude() {
     };
 
     window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
+    lastSuccessfulWaveAmplitude = D_WAVE_AMPLITUDE;
 
     console.log('[三浪] 已取得資料，最後日期：', D_WAVE_AMPLITUDE.date);
 
@@ -3129,6 +3134,19 @@ async function loadAmplitude() {
   } catch (e) {
     console.error('[三浪] 振幅抓取失敗：', e);
 
+    // API 失敗時保留最後一次成功資料，不清空目前畫面。
+    if (lastSuccessfulAmplitudeData && lastSuccessfulWaveAmplitude) {
+      _ampData = lastSuccessfulAmplitudeData;
+      D_WAVE_AMPLITUDE = lastSuccessfulWaveAmplitude;
+      window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
+      console.warn('[三浪] API 暫時失敗，保留上一次成功資料。');
+      renderAmpCard();
+      renderDWaveAmplitude();
+      renderDPanel();
+      return;
+    }
+
+    // 尚未有任何成功資料時，才顯示未同步狀態。
     _ampData = null;
 
     D_WAVE_AMPLITUDE = {
