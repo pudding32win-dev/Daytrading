@@ -1592,12 +1592,12 @@ function dParseDate(s) { return normalizeDate(s); }
 // 大浪 = rank15~20平均 ～ rank20
 // 因區間可能重疊，分類函式會保留重疊資訊，不再用固定 30/60 點。
 var D_WAVE_AMPLITUDE = {
-  smallWave:{min:478,max:478},
-  middleWave:{min:478,max:478},
-  largeWave:{min:478,max:924},
-  rankValues:{rank1:478,rank20:924,rank1to7Average:478,rank5to10Average:478,rank5to15Average:650,rank15to20Average:924},
-  small:478, medium:650, large:924, avg20:672, latest:575, date:'2026/09/16',
-  recent3Days:[], volatilityStructure:null, source:'Apps Script'
+  smallWave:{min:null,max:null},
+  middleWave:{min:null,max:null},
+  largeWave:{min:null,max:null},
+  rankValues:{},
+  small:null, medium:null, large:null, avg20:null, latest:null, date:null,
+  recent3Days:[], volatilityStructure:null, source:'等待 Apps Script', dataReady:false
 };
 function getDWaveMarketAmplitude(){
   try{
@@ -1616,23 +1616,26 @@ function _waveRange(a, name, fallbackMin, fallbackMax){
   return {min:Number(fallbackMin||0),max:Number(fallbackMax||0)};
 }
 function getDWaveRanges(){
-  var a=getDWaveMarketAmplitude(), rv=a.rankValues||{};
-  var s=_waveRange(a,'smallWave',rv.rank1,rv.rank1to7Average);
-  var m=_waveRange(a,'middleWave',rv.rank5to10Average,rv.rank5to15Average);
-  var l=_waveRange(a,'largeWave',rv.rank15to20Average,rv.rank20);
-  // 相容舊版 API：若沒有新區間，才退回 small/medium/large 數值。
-  if (!isFinite(s.min)||!isFinite(s.max)) s={min:Number(a.small||0),max:Number(a.small||0)};
-  if (!isFinite(m.min)||!isFinite(m.max)) m={min:Number(a.medium||0),max:Number(a.medium||0)};
-  if (!isFinite(l.min)||!isFinite(l.max)) l={min:Number(a.large||0),max:Number(a.large||0)};
+  var a=getDWaveMarketAmplitude() || {}, rv=a.rankValues||{};
+  function valid(v){ return v!=null && isFinite(Number(v)); }
+  function make(min,max){ return {min:valid(min)?Number(min):null,max:valid(max)?Number(max):null}; }
+  // 優先使用 Apps Script 依新版公式計算出的 rankValues。
+  var s=make(rv.rank1,rv.rank1to7Average);
+  var m=make(rv.rank5to10Average,rv.rank5to15Average);
+  var l=make(rv.rank15to20Average,rv.rank20);
+  if(a.smallWave && valid(a.smallWave.min) && valid(a.smallWave.max)) s=make(a.smallWave.min,a.smallWave.max);
+  if(a.middleWave && valid(a.middleWave.min) && valid(a.middleWave.max)) m=make(a.middleWave.min,a.middleWave.max);
+  if(a.largeWave && valid(a.largeWave.min) && valid(a.largeWave.max)) l=make(a.largeWave.min,a.largeWave.max);
   return {small:s,middle:m,large:l};
 }
 function classifyAmplitudeValue(value){
   if (value==null || !isFinite(Number(value))) return '—';
   value=Math.abs(Number(value));
   var r=getDWaveRanges(), hit=[];
-  if(value>=r.small.min && value<=r.small.max) hit.push('小浪');
-  if(value>=r.middle.min && value<=r.middle.max) hit.push('中浪');
-  if(value>=r.large.min && value<=r.large.max) hit.push('大浪');
+  function inRange(x){ return x && x.min!=null && x.max!=null && value>=x.min && value<=x.max; }
+  if(inRange(r.small)) hit.push('小浪');
+  if(inRange(r.middle)) hit.push('中浪');
+  if(inRange(r.large)) hit.push('大浪');
   if(!hit.length) return '區間外';
   return hit.join('＋');
 }
@@ -2928,50 +2931,56 @@ async function loadAmplitude() {
   try {
     const res = await fetch('/api/amplitude', { cache: 'no-store' });
     const data = await res.json();
-    if (data.ok) {
-      _ampData = data;
-      var src = data.data || data.amplitude || data.wave || data;
-      function pick(keys, fallback) {
-        for (var i=0;i<keys.length;i++) {
-          var v = src && src[keys[i]];
-          if (v != null && v !== '' && isFinite(Number(v))) return Number(v);
-        }
-        return fallback;
-      }
-      // 新版 Apps Script 直接提供三個區間與最近3日結構；同時保留舊欄位相容性。
-      var rv = src && src.rankValues ? src.rankValues : (data.rankValues || {});
-      function pickObj(name, oldMin, oldMax){
-        var o = src && src[name] ? src[name] : (data[name] || null);
-        if(o && isFinite(Number(o.min)) && isFinite(Number(o.max))) return {min:Number(o.min),max:Number(o.max)};
-        return {min:Number(oldMin||0),max:Number(oldMax||0)};
-      }
-      D_WAVE_AMPLITUDE = {
-        smallWave: pickObj('smallWave', rv.rank1 != null ? rv.rank1 : D_WAVE_AMPLITUDE.small, rv.rank1to7Average != null ? rv.rank1to7Average : D_WAVE_AMPLITUDE.small),
-        middleWave: pickObj('middleWave', rv.rank5to10Average != null ? rv.rank5to10Average : D_WAVE_AMPLITUDE.medium, rv.rank5to15Average != null ? rv.rank5to15Average : D_WAVE_AMPLITUDE.medium),
-        largeWave: pickObj('largeWave', rv.rank15to20Average != null ? rv.rank15to20Average : D_WAVE_AMPLITUDE.large, rv.rank20 != null ? rv.rank20 : D_WAVE_AMPLITUDE.large),
-        rankValues: rv,
-        small:  pick(['small','smallWaveValue','小浪'], D_WAVE_AMPLITUDE.small),
-        medium: pick(['medium','mid','middle','mediumWaveValue','中浪'], D_WAVE_AMPLITUDE.medium),
-        large:  pick(['large','largeWaveValue','大浪'], D_WAVE_AMPLITUDE.large),
-        avg20:  pick(['avg20','average20','avg_20','20日總平均','20日平均振幅'], D_WAVE_AMPLITUDE.avg20),
-        latest: pick(['latest','latestAmplitude','latest_amplitude','最新振幅'], D_WAVE_AMPLITUDE.latest),
-        date: data.lastDate || data.date || (src && (src.lastDate || src.date)) || D_WAVE_AMPLITUDE.date,
-        recent3Days: data.recent3Days || (src && src.recent3Days) || D_WAVE_AMPLITUDE.recent3Days || [],
-        volatilityStructure: data.volatilityStructure || (src && src.volatilityStructure) || D_WAVE_AMPLITUDE.volatilityStructure || null,
-        source: 'Apps Script'
-      };
-      window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
-      renderAmpCard();
-      renderDWaveAmplitude();
-      
-      renderDPanel();
-    } else {
-      console.error('振幅資料錯誤', data.error);
+    var src = data && (data.data || data.amplitude || data.wave || data);
+    if (!data || !data.ok || !src) {
+      throw new Error((data && data.error) || 'Apps Script 沒有回傳有效資料');
     }
+
+    var rv = src.rankValues || data.rankValues || {};
+    var required = ['rank1','rank20','rank1to7Average','rank5to10Average','rank5to15Average','rank15to20Average'];
+    var missing = required.filter(function(k){ return rv[k] == null || !isFinite(Number(rv[k])); });
+    if (missing.length) {
+      throw new Error('三浪計算欄位不足：' + missing.join(', '));
+    }
+
+    function num(v){ return v != null && v !== '' && isFinite(Number(v)) ? Number(v) : null; }
+    function obj(name, minKey, maxKey){
+      var o = src[name] || data[name];
+      if(o && num(o.min)!=null && num(o.max)!=null) return {min:num(o.min),max:num(o.max)};
+      return {min:num(rv[minKey]),max:num(rv[maxKey])};
+    }
+
+    _ampData = data;
+    D_WAVE_AMPLITUDE = {
+      smallWave: obj('smallWave','rank1','rank1to7Average'),
+      middleWave: obj('middleWave','rank5to10Average','rank5to15Average'),
+      largeWave: obj('largeWave','rank15to20Average','rank20'),
+      rankValues: rv,
+      small: num(src.small),
+      medium: num(src.medium),
+      large: num(src.large),
+      avg20: num(src.avg20 != null ? src.avg20 : data.avg20),
+      latest: num(src.latestAmplitude != null ? src.latestAmplitude : data.latestAmplitude),
+      date: src.latestDate || src.lastDate || src.date || data.latestDate || data.lastDate || data.date || null,
+      recent3Days: Array.isArray(src.recent3Days) ? src.recent3Days : (Array.isArray(data.recent3Days) ? data.recent3Days : []),
+      volatilityStructure: src.volatilityStructure || data.volatilityStructure || null,
+      source: 'Apps Script',
+      dataReady: true
+    };
+    window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
+    renderAmpCard();
+    renderDWaveAmplitude();
+    renderDPanel();
   } catch (e) {
     console.error('振幅抓取失敗', e);
+    _ampData = null;
+    D_WAVE_AMPLITUDE = {
+      smallWave:{min:null,max:null}, middleWave:{min:null,max:null}, largeWave:{min:null,max:null},
+      rankValues:{}, small:null, medium:null, large:null, avg20:null, latest:null, date:null,
+      recent3Days:[], volatilityStructure:null, source:'Apps Script 未同步', dataReady:false, error:String(e.message || e)
+    };
+    window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
     renderDWaveAmplitude();
-    
   }
 }
 
@@ -3021,6 +3030,10 @@ function renderDWaveAmplitude(){
   var el=document.getElementById('D-wave-amplitude-body'); if(!el) return;
   var a=getDWaveMarketAmplitude(), r=getDWaveRanges();
   var rv=a.rankValues||{};
+  if(!a.dataReady){
+    el.innerHTML='<div style="padding:14px;border:1px solid rgba(251,191,36,.35);border-radius:10px;background:var(--bg3);color:var(--muted);line-height:1.8">⚠️ <b style="color:var(--text)">三浪資料尚未同步</b><br>目前不顯示任何預設／假資料。請確認 Apps Script Web App 的 <code>/api/amplitude</code> 已部署並可讀取「歷史資料區」。</div>';
+    return;
+  }
   function fmt(v){ return isFinite(Number(v)) ? Math.round(Number(v)).toLocaleString() : '—'; }
   function rangeText(x){ return fmt(x.min)+' ～ '+fmt(x.max)+' 點'; }
   var seq=a.recent3Days||[];
