@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪紀錄</title>
+<title>每日衝浪紀錄｜Wave Range Fixed 2026-09-17</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1585,7 +1585,20 @@ function dParseDate(s) { return normalizeDate(s); }
 
 // ══ 自動浪級：依實際進出場點數判定 ══
 /* ── 浪級：使用 Apps Script 的實際市場振幅資料，不再使用固定 30/60 點 ── */
-var D_WAVE_AMPLITUDE = { small:478, medium:650, large:924, avg20:672, latest:575, date:'2026/09/16', source:'Apps Script' };
+// ══ 浪級：完全跟隨 Apps Script 的「20日市場振幅區間」══
+// 新版區間：
+// 小浪 = rank1 ～ rank1~7平均
+// 中浪 = rank5~10平均 ～ rank5~15平均
+// 大浪 = rank15~20平均 ～ rank20
+// 因區間可能重疊，分類函式會保留重疊資訊，不再用固定 30/60 點。
+var D_WAVE_AMPLITUDE = {
+  smallWave:{min:478,max:478},
+  middleWave:{min:478,max:478},
+  largeWave:{min:478,max:924},
+  rankValues:{rank1:478,rank20:924,rank1to7Average:478,rank5to10Average:478,rank5to15Average:650,rank15to20Average:924},
+  small:478, medium:650, large:924, avg20:672, latest:575, date:'2026/09/16',
+  recent3Days:[], volatilityStructure:null, source:'Apps Script'
+};
 function getDWaveMarketAmplitude(){
   try{
     if (window.D_WAVE_AMPLITUDE && typeof window.D_WAVE_AMPLITUDE==='object') return window.D_WAVE_AMPLITUDE;
@@ -1597,15 +1610,41 @@ function getDWavePoints(r) {
   if (!r || r.en == null || r.ex == null || isNaN(parseFloat(r.en)) || isNaN(parseFloat(r.ex))) return null;
   return Math.abs(r.dir === 'B' ? (parseFloat(r.ex)-parseFloat(r.en)) : (parseFloat(r.en)-parseFloat(r.ex)));
 }
-function getDWaveLevel(r) {
-  var pts=getDWavePoints(r);
-  if (pts==null) return '—';
-  if (pts <= 30) return '小浪';
-  if (pts <= 60) return '中浪';
-  return '大浪';
+function _waveRange(a, name, fallbackMin, fallbackMax){
+  var obj = a && a[name];
+  if (obj && isFinite(Number(obj.min)) && isFinite(Number(obj.max))) return {min:Number(obj.min),max:Number(obj.max)};
+  return {min:Number(fallbackMin||0),max:Number(fallbackMax||0)};
 }
+function getDWaveRanges(){
+  var a=getDWaveMarketAmplitude(), rv=a.rankValues||{};
+  var s=_waveRange(a,'smallWave',rv.rank1,rv.rank1to7Average);
+  var m=_waveRange(a,'middleWave',rv.rank5to10Average,rv.rank5to15Average);
+  var l=_waveRange(a,'largeWave',rv.rank15to20Average,rv.rank20);
+  // 相容舊版 API：若沒有新區間，才退回 small/medium/large 數值。
+  if (!isFinite(s.min)||!isFinite(s.max)) s={min:Number(a.small||0),max:Number(a.small||0)};
+  if (!isFinite(m.min)||!isFinite(m.max)) m={min:Number(a.medium||0),max:Number(a.medium||0)};
+  if (!isFinite(l.min)||!isFinite(l.max)) l={min:Number(a.large||0),max:Number(a.large||0)};
+  return {small:s,middle:m,large:l};
+}
+function classifyAmplitudeValue(value){
+  if (value==null || !isFinite(Number(value))) return '—';
+  value=Math.abs(Number(value));
+  var r=getDWaveRanges(), hit=[];
+  if(value>=r.small.min && value<=r.small.max) hit.push('小浪');
+  if(value>=r.middle.min && value<=r.middle.max) hit.push('中浪');
+  if(value>=r.large.min && value<=r.large.max) hit.push('大浪');
+  if(!hit.length) return '區間外';
+  return hit.join('＋');
+}
+function getDWaveLevel(r) { return classifyAmplitudeValue(getDWavePoints(r)); }
 function getDWaveColor(level) {
-  return level==='小浪' ? '#60a5fa' : level==='中浪' ? '#fbbf24' : level==='大浪' ? '#f87171' : 'var(--muted)';
+  if(level==='小浪') return '#60a5fa';
+  if(level==='中浪') return '#fbbf24';
+  if(level==='大浪') return '#f87171';
+  if(level.indexOf('小浪')>=0 && level.indexOf('中浪')>=0) return '#60a5fa';
+  if(level.indexOf('中浪')>=0 && level.indexOf('大浪')>=0) return '#fbbf24';
+  if(level.indexOf('大浪')>=0) return '#f87171';
+  return 'var(--muted)';
 }
 
 window.addDtrade = async function() {
@@ -2080,7 +2119,7 @@ function renderDPanel() {
           +'<div style="font-size:12px;font-weight:700;font-family:monospace;color:'+(x.net>=0?'var(--gain)':'var(--loss)')+';margin-top:5px">'+(x.net>=0?'+$':'-$')+Math.abs(Math.round(x.net)).toLocaleString()+'</div>'
           +'<div style="font-size:10px;color:var(--muted);margin-top:2px">平均 '+(x.n?Math.round(x.pts):'-')+' 點/筆</div></div>';
       }).join('')+'</div>'
-      +'<div style="font-size:10px;color:var(--muted);margin-top:8px">自動判定：小浪 ≤30 點　｜　中浪 31–60 點　｜　大浪 ≥61 點</div>';
+      +'<div style="font-size:10px;color:var(--muted);margin-top:8px">自動判定：依 Apps Script 20日市場振幅區間；區間重疊時保留重疊標記</div>';
     }
 
     statsEl.innerHTML =
@@ -2899,13 +2938,26 @@ async function loadAmplitude() {
         }
         return fallback;
       }
+      // 新版 Apps Script 直接提供三個區間與最近3日結構；同時保留舊欄位相容性。
+      var rv = src && src.rankValues ? src.rankValues : (data.rankValues || {});
+      function pickObj(name, oldMin, oldMax){
+        var o = src && src[name] ? src[name] : (data[name] || null);
+        if(o && isFinite(Number(o.min)) && isFinite(Number(o.max))) return {min:Number(o.min),max:Number(o.max)};
+        return {min:Number(oldMin||0),max:Number(oldMax||0)};
+      }
       D_WAVE_AMPLITUDE = {
-        small:  pick(['small','smallWave','small_wave','waveSmall','wave_small','小浪'], D_WAVE_AMPLITUDE.small),
-        medium: pick(['medium','mid','middle','mediumWave','midWave','waveMedium','waveMid','wave_medium','中浪'], D_WAVE_AMPLITUDE.medium),
-        large:  pick(['large','largeWave','waveLarge','wave_large','大浪'], D_WAVE_AMPLITUDE.large),
+        smallWave: pickObj('smallWave', rv.rank1 != null ? rv.rank1 : D_WAVE_AMPLITUDE.small, rv.rank1to7Average != null ? rv.rank1to7Average : D_WAVE_AMPLITUDE.small),
+        middleWave: pickObj('middleWave', rv.rank5to10Average != null ? rv.rank5to10Average : D_WAVE_AMPLITUDE.medium, rv.rank5to15Average != null ? rv.rank5to15Average : D_WAVE_AMPLITUDE.medium),
+        largeWave: pickObj('largeWave', rv.rank15to20Average != null ? rv.rank15to20Average : D_WAVE_AMPLITUDE.large, rv.rank20 != null ? rv.rank20 : D_WAVE_AMPLITUDE.large),
+        rankValues: rv,
+        small:  pick(['small','smallWaveValue','小浪'], D_WAVE_AMPLITUDE.small),
+        medium: pick(['medium','mid','middle','mediumWaveValue','中浪'], D_WAVE_AMPLITUDE.medium),
+        large:  pick(['large','largeWaveValue','大浪'], D_WAVE_AMPLITUDE.large),
         avg20:  pick(['avg20','average20','avg_20','20日總平均','20日平均振幅'], D_WAVE_AMPLITUDE.avg20),
         latest: pick(['latest','latestAmplitude','latest_amplitude','最新振幅'], D_WAVE_AMPLITUDE.latest),
         date: data.lastDate || data.date || (src && (src.lastDate || src.date)) || D_WAVE_AMPLITUDE.date,
+        recent3Days: data.recent3Days || (src && src.recent3Days) || D_WAVE_AMPLITUDE.recent3Days || [],
+        volatilityStructure: data.volatilityStructure || (src && src.volatilityStructure) || D_WAVE_AMPLITUDE.volatilityStructure || null,
         source: 'Apps Script'
       };
       window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
@@ -2967,13 +3019,40 @@ function renderAmpCard() {
 // ══ 統計分析用：Apps Script 市場振幅與浪級交易明細 ══
 function renderDWaveAmplitude(){
   var el=document.getElementById('D-wave-amplitude-body'); if(!el) return;
-  var a=getDWaveMarketAmplitude();
-  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-    +[['🌊 小浪',a.small],['🌊 中浪',a.medium],['🌊 大浪',a.large]].map(function(x){
-      return '<div style="padding:12px;border:1px solid var(--border2);border-radius:10px;text-align:center"><div style="font-size:14px;font-weight:700">'+x[0]+'</div><div style="font-size:24px;font-weight:800;margin-top:5px">'+Number(x[1]||0).toLocaleString()+' 點</div></div>';
-    }).join('')
-    +'</div><div style="margin-top:10px;font-size:13px;color:var(--muted);line-height:1.7">20日總平均 <b style="color:var(--text);font-size:16px">'+Number(a.avg20||0).toLocaleString()+' 點</b>　｜　最新振幅 <b style="color:var(--text);font-size:16px">'+Number(a.latest||0).toLocaleString()+' 點</b>　｜　最新交易日 '+(a.date||'—')+'</div>';
+  var a=getDWaveMarketAmplitude(), r=getDWaveRanges();
+  var rv=a.rankValues||{};
+  function fmt(v){ return isFinite(Number(v)) ? Math.round(Number(v)).toLocaleString() : '—'; }
+  function rangeText(x){ return fmt(x.min)+' ～ '+fmt(x.max)+' 點'; }
+  var seq=a.recent3Days||[];
+  var vs=a.volatilityStructure||null;
+  var status=vs && vs.status ? String(vs.status) : '';
+  var statusText = status==='compressing' ? '📉 振幅連續收縮' : status==='expanding' ? '📈 振幅連續擴張' : status==='stable' ? '➡️ 振幅穩定／混合' : (vs&&vs.description?vs.description:'尚無最近3日結構');
+  var direction='';
+  if(seq.length>=3){
+    var c0=Number(seq[0].close), c2=Number(seq[2].close);
+    if(isFinite(c0)&&isFinite(c2)) direction=c0>c2?'價格方向：近3日偏上行':c0<c2?'價格方向：近3日偏下行':'價格方向：近3日持平';
+  }
+  var stateText = status==='compressing' ? '偏向壓縮／等待波動選擇' : status==='expanding' ? '偏向波動擴張' : '波動方向尚不明確';
+  var cards=[['🌊 小浪',r.small,'#60a5fa'],['🌊 中浪',r.middle,'#fbbf24'],['🌊 大浪',r.large,'#f87171']];
+  var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'+cards.map(function(x){
+    return '<div style="padding:12px;border:1px solid '+x[2]+'55;border-radius:10px;text-align:center;background:var(--bg3)">'
+      +'<div style="font-size:14px;font-weight:700;color:'+x[2]+'">'+x[0]+'</div>'
+      +'<div style="font-size:19px;font-weight:800;margin-top:6px">'+rangeText(x[1])+'</div>'
+      +'</div>';
+  }).join('')+'</div>'
+    +'<div style="margin-top:12px;padding:11px 12px;background:var(--bg3);border-radius:9px;font-size:11px;color:var(--muted);line-height:1.8">'
+    +'排序20日：第1名 <b style="color:var(--text)">'+fmt(rv.rank1)+'</b>　｜　1～7平均 <b style="color:var(--text)">'+fmt(rv.rank1to7Average)+'</b>　｜　5～10平均 <b style="color:var(--text)">'+fmt(rv.rank5to10Average)+'</b><br>'
+    +'5～15平均 <b style="color:var(--text)">'+fmt(rv.rank5to15Average)+'</b>　｜　15～20平均 <b style="color:var(--text)">'+fmt(rv.rank15to20Average)+'</b>　｜　第20名 <b style="color:var(--text)">'+fmt(rv.rank20)+'</b>'
+    +'</div>'
+    +'<div style="margin-top:10px;padding:12px;border:1px solid var(--border2);border-radius:10px;background:var(--bg3)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:13px;color:var(--text)">📅 最近3個交易日</b><span style="font-size:12px;font-weight:700;color:'+(status==='compressing'?'#60a5fa':status==='expanding'?'#f87171':'var(--muted2)')+'">'+statusText+'</span></div>'
+    +(seq.length ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">'+seq.slice(0,3).map(function(d){ return '<div style="padding:8px;border-radius:7px;background:var(--bg2);font-size:10px"><div style="color:var(--muted)">'+(d.date||'—')+'</div><div style="font-size:15px;font-weight:800;font-family:monospace;margin-top:3px">'+fmt(d.amplitude)+' 點</div><div style="margin-top:2px;color:var(--text)">'+(d.wave||classifyAmplitudeValue(d.amplitude)||'—')+'</div>'+(d.close!=null?'<div style="color:var(--muted);margin-top:2px">收 '+fmt(d.close)+'</div>':'')+'</div>'; }).join('')+'</div>' : '<div style="margin-top:8px;color:var(--muted);font-size:11px">Apps Script 尚未回傳最近3日資料。</div>')
+    +'<div style="margin-top:8px;font-size:11px;color:var(--muted2)">'+direction+(direction?'　｜　':'')+stateText+'</div>'
+    +'</div>'
+    +'<div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.7">20日總平均 <b style="color:var(--text);font-size:15px">'+fmt(a.avg20)+' 點</b>　｜　最新振幅 <b style="color:var(--text);font-size:15px">'+fmt(a.latest)+' 點</b>　｜　資料日期 '+(a.date||'—')+'<br>※ 三浪區間可重疊；重疊日會顯示「小浪＋中浪」等，不再硬切成單一浪級。</div>';
+  el.innerHTML=html;
 }
+
 updateLastBackupInfo();
 initData();
 loadAmplitude();
