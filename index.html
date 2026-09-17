@@ -2289,7 +2289,7 @@ function renderRRBlock() {
   var winRate = trades.length ? wins.length / trades.length : 0;
   // Kelly & EV
   var ev = winRate * avgWin - (1-winRate) * avgLoss;
-  var kelly = (avgWin > 0) ? (winRate - (1-winRate) * (avgLoss / avgWin)) : 0;
+  var kelly = (avgWin > 0 && avgLoss > 0) ? (winRate - (1 - winRate) * (avgLoss / avgWin)) : 0;
   // Profit Factor
   var grossWin  = wins.reduce(function(a,r){ return a+r.net; },0);
   var grossLoss = Math.abs(losses.reduce(function(a,r){ return a+r.net; },0));
@@ -3026,6 +3026,7 @@ async function initData() {
 
 // ══ 20日平均振幅（抓自 Google Sheet 台指日盤）══
 var _ampData = null;
+var AMP_CACHE_KEY = 'daytrading_last_successful_amplitude_v8';
 // ══ 20日平均振幅：直接連 Apps Script Web App doGet() ══
 // 設定方式：
 // 1. 把你的 Apps Script「部署 > Web 應用程式」網址填到 WAVE_API_URL。
@@ -3033,9 +3034,6 @@ var _ampData = null;
 // 3. 程式也會優先讀取 localStorage 中之前儲存的網址。
 // 注意：不要再使用 /api/amplitude，因為目前 Apps Script 的 doGet() 本身就直接回傳 JSON。
 const WAVE_API_URL = '';
-// 保留最後一次成功取得的振幅資料；API 暫時失敗時不清空畫面。
-let lastSuccessfulAmplitudeData = null;
-let lastSuccessfulWaveAmplitude = null;
 
 async function loadAmplitude() {
   try {
@@ -3099,7 +3097,7 @@ async function loadAmplitude() {
     }
 
     _ampData = data;
-    lastSuccessfulAmplitudeData = data;
+    try { localStorage.setItem(AMP_CACHE_KEY, JSON.stringify(data)); } catch (cacheErr) { console.warn('[三浪] 振幅快取儲存失敗：', cacheErr); }
 
     D_WAVE_AMPLITUDE = {
       smallWave: obj('smallWave', 'rank1', 'rank1to7Average'),
@@ -3123,7 +3121,6 @@ async function loadAmplitude() {
     };
 
     window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
-    lastSuccessfulWaveAmplitude = D_WAVE_AMPLITUDE;
 
     console.log('[三浪] 已取得資料，最後日期：', D_WAVE_AMPLITUDE.date);
 
@@ -3134,21 +3131,54 @@ async function loadAmplitude() {
   } catch (e) {
     console.error('[三浪] 振幅抓取失敗：', e);
 
-    // API 失敗時保留最後一次成功資料，不清空目前畫面。
-    if (lastSuccessfulAmplitudeData && lastSuccessfulWaveAmplitude) {
-      _ampData = lastSuccessfulAmplitudeData;
-      D_WAVE_AMPLITUDE = lastSuccessfulWaveAmplitude;
+    // API 失敗時保留最後一次成功資料；跨頁面重新整理也從 localStorage 還原。
+    var cachedAmplitude = null;
+    try {
+      var cachedRaw = localStorage.getItem(AMP_CACHE_KEY);
+      if (cachedRaw) cachedAmplitude = JSON.parse(cachedRaw);
+    } catch (cacheErr) {
+      console.warn('[三浪] 讀取振幅快取失敗：', cacheErr);
+    }
+
+    if (cachedAmplitude && cachedAmplitude.ok) {
+      _ampData = cachedAmplitude;
+      var cachedSrc = cachedAmplitude.data || cachedAmplitude.amplitude || cachedAmplitude.wave || cachedAmplitude;
+      var cachedRv = cachedSrc.rankValues || cachedAmplitude.rankValues || {};
+      function cachedNum(v) {
+        return v != null && v !== '' && isFinite(Number(v)) ? Number(v) : null;
+      }
+      function cachedObj(name, minKey, maxKey) {
+        var o = cachedSrc[name] || cachedAmplitude[name];
+        if (o && cachedNum(o.min) != null && cachedNum(o.max) != null) return { min: cachedNum(o.min), max: cachedNum(o.max) };
+        return { min: cachedNum(cachedRv[minKey]), max: cachedNum(cachedRv[maxKey]) };
+      }
+
+      D_WAVE_AMPLITUDE = {
+        smallWave: cachedObj('smallWave', 'rank1', 'rank1to7Average'),
+        middleWave: cachedObj('middleWave', 'rank5to10Average', 'rank5to15Average'),
+        largeWave: cachedObj('largeWave', 'rank15to20Average', 'rank20'),
+        rankValues: cachedRv,
+        small: cachedNum(cachedSrc.small),
+        medium: cachedNum(cachedSrc.medium),
+        large: cachedNum(cachedSrc.large),
+        avg20: cachedNum(cachedSrc.avg20 != null ? cachedSrc.avg20 : cachedAmplitude.avg20),
+        latest: cachedNum(cachedSrc.latestAmplitude != null ? cachedSrc.latestAmplitude : cachedAmplitude.latestAmplitude),
+        date: cachedSrc.latestDate || cachedSrc.lastDate || cachedSrc.date || cachedAmplitude.latestDate || cachedAmplitude.lastDate || cachedAmplitude.date || null,
+        recent3Days: Array.isArray(cachedSrc.recent3Days) ? cachedSrc.recent3Days : (Array.isArray(cachedAmplitude.recent3Days) ? cachedAmplitude.recent3Days : []),
+        volatilityStructure: cachedSrc.volatilityStructure || cachedAmplitude.volatilityStructure || null,
+        source: 'Apps Script（上次成功資料）',
+        dataReady: true,
+        stale: true,
+        error: String(e.message || e)
+      };
       window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
-      console.warn('[三浪] API 暫時失敗，保留上一次成功資料。');
       renderAmpCard();
       renderDWaveAmplitude();
       renderDPanel();
       return;
     }
 
-    // 尚未有任何成功資料時，才顯示未同步狀態。
-    _ampData = null;
-
+    // 從未成功取得過資料時才顯示未同步狀態。
     D_WAVE_AMPLITUDE = {
       smallWave: { min: null, max: null },
       middleWave: { min: null, max: null },
