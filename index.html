@@ -649,7 +649,8 @@ canvas.d-chart { width:100%; display:block; }
       <div class="card-bd">
         <div class="form-grid">
           <div class="fg"><label>日期</label><input id="D-date" placeholder="2026/5/27" onblur="autoFormatDDate(this)"></div>
-          <div class="fg"><label>口數</label><input id="D-lots" type="number" placeholder="2"></div>
+          <div class="fg"><label>初始口數</label><input id="D-entry-lots" type="number" min="1" placeholder="例：3"></div>
+          <div class="fg"><label>本次出場口數</label><input id="D-lots" type="number" min="1" placeholder="例：1"></div>
           <div class="fg"><label>波段</label>
             <select id="D-wave" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none;-webkit-appearance:none">
               <option value="多">多</option><option value="空">空</option>
@@ -663,6 +664,11 @@ canvas.d-chart { width:100%; display:block; }
           <div class="fg"><label>進場價</label><input id="D-en" type="number" placeholder="22500"></div>
           <div class="fg"><label>出場價</label><input id="D-ex" type="number" placeholder="22580"></div>
           <div class="fg"><label>手續費（元）</label><input id="D-fee" type="number" placeholder="0"></div>
+          <div class="fg" style="grid-column:1/-1;display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--bg3);border-radius:8px">
+            <input id="D-same-trade" type="checkbox" style="width:16px;height:16px;accent-color:#f87171">
+            <label for="D-same-trade" style="margin:0;cursor:pointer">延續上一筆交易（分批出場）</label>
+            <span id="D-trade-id-label" style="margin-left:auto;font-family:monospace;font-size:11px;color:var(--muted)">交易ID：新增後自動產生</span>
+          </div>
         </div>
         <div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:7px;font-size:12px;color:var(--muted)" id="D-preview">輸入後自動計算淨額</div>
         <div id="D-inline-warn" style="display:none;margin-top:6px;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7"></div>
@@ -821,7 +827,8 @@ canvas.d-chart { width:100%; display:block; }
     <input type="hidden" id="Dedit-idx">
     <div class="form-grid" style="grid-template-columns:1fr 1fr">
       <div class="fg"><label>日期</label><input id="Dedit-date" placeholder="2026/5/27" onblur="autoFormatDDate(this)"></div>
-      <div class="fg"><label>口數</label><input id="Dedit-lots" type="number" placeholder="2"></div>
+      <div class="fg"><label>初始口數</label><input id="Dedit-entry-lots" type="number" min="1" placeholder="3"></div>
+      <div class="fg"><label>本次出場口數</label><input id="Dedit-lots" type="number" min="1" placeholder="1"></div>
       <div class="fg"><label>波段</label>
         <select id="Dedit-wave" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
           <option value="多">多</option><option value="空">空</option>
@@ -1118,10 +1125,10 @@ window.showExportModal = function() {
 
 window.exportTradesCSV = function() {
   var trades = (DATA.D || []).slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
-  var rows = [['日期','口數','波段','方向','進場','出場','差價','手續費','淨額']];
+  var rows = [['日期','交易ID','TP段次','初始口數','本次出場口數','波段','方向','進場','出場','差價','手續費','淨額']];
   trades.forEach(function(r){
     var pts = (r.en!=null && r.ex!=null) ? (r.dir==='B' ? (r.ex-r.en) : (r.en-r.ex)) : '';
-    rows.push([r.date, r.lots, r.wave||'', r.dir==='B'?'多':'空', r.en, r.ex, pts, r.fee||0, r.net||0]);
+    rows.push([r.date, r.tradeId||'', r.tpStage||1, r.entryLots||r.lots||1, r.lots, r.wave||'', r.dir==='B'?'多':'空', r.en, r.ex, pts, r.fee||0, r.net||0]);
   });
   var csv = String.fromCharCode(0xFEFF) + rows.map(function(row){ return row.map(_csvCell).join(','); }).join(String.fromCharCode(13,10));
   _downloadFile('當沖交易明細_'+_exportTs()+'.csv', csv, 'text/csv;charset=utf-8;');
@@ -1504,7 +1511,25 @@ window.showAllTimeOverview = function() {
 //      也不會再把 Firestore 文件裡本頁完全不管的欄位（例如主站的 MKT 大盤週期）整個砍掉。
 //   2. 版本衝突偵測改用本頁專屬的 _revD 欄位，不再讀寫主站共用的 _rev，
 //      避免兩邊互相誤判「被別人改過」。
+function normalizeDTradeRecords() {
+  if (!DATA.D) DATA.D = [];
+  var perDate = {};
+  DATA.D.forEach(function(r, idx) {
+    if (!r) return;
+    r.lots = Math.max(1, parseInt(r.lots) || 1);
+    r.entryLots = Math.max(1, parseInt(r.entryLots) || r.lots);
+    r.date = dParseDate(r.date || '');
+    if (!r.tradeId) {
+      var key = r.date || 'unknown';
+      perDate[key] = (perDate[key] || 0) + 1;
+      r.tradeId = key.replace(/\//g,'-') + '-' + String(perDate[key]).padStart(2,'0');
+      r.tpStage = 1;
+    } else if (!r.tpStage) r.tpStage = 1;
+  });
+}
+
 async function saveData() {
+  normalizeDTradeRecords();
   normalizeDDates(DATA); // 儲存前強制正規化所有日期格式，避免舊資料/未轉換格式被寫回 Firebase
   // ── 寫入前先檢查雲端「本頁欄位」是否已被其他分頁/裝置更新過，避免「舊分頁蓋掉新資料」──
   try {
@@ -1572,7 +1597,7 @@ function _dMargin() {
   return (DATA.D_marginPerLot != null && DATA.D_marginPerLot > 0) ? DATA.D_marginPerLot : D_INIT_MARGIN_DEFAULT;
 }
 
-// DATA.D  每筆交易 {date,lots,dir,en,ex,fee,net}
+// DATA.D 每筆成交/出場紀錄 {date,tradeId,tpStage,entryLots,lots,dir,en,ex,fee,net}; lots=本次出場口數
 // DATA.D_io 出入金 {date,amt,note}
 // DATA.D_eq 每日手動輸入權益金 {date,equity}
 
@@ -1654,6 +1679,8 @@ window.addDtrade = async function() {
   if (!canEdit) { alert('⛔ 唯讀模式，請用含編輯金鑰的網址開啟'); return; }
   var dateVal = document.getElementById('D-date').value.trim();
   var lots = parseInt(document.getElementById('D-lots').value) || 1;
+  var entryLots = parseInt(document.getElementById('D-entry-lots').value) || lots;
+  var sameTrade = !!(document.getElementById('D-same-trade') && document.getElementById('D-same-trade').checked);
   var wave = document.getElementById('D-wave').value || '多';
   var dir  = document.getElementById('D-dir').value || 'B';
   var en   = parseFloat(document.getElementById('D-en').value);
@@ -1664,8 +1691,14 @@ window.addDtrade = async function() {
   }
 
   var pts = dir === 'B' ? (ex - en) : (en - ex);
+  var tradeDateKey = dParseDate(dateVal);
+  var prior = (DATA.D || []).filter(function(r){ return (r.date||'') === tradeDateKey; });
+  var lastSame = prior.length ? prior[prior.length-1] : null;
+  var tradeId = sameTrade && lastSame && lastSame.tradeId ? lastSame.tradeId : (tradeDateKey.replace(/\//g,'-') + '-' + String(prior.filter(function(r){ return !sameTrade || !lastSame || r.tradeId !== (lastSame && lastSame.tradeId); }).length + 1).padStart(2,'0'));
+  var tpStage = sameTrade && lastSame && lastSame.tradeId === tradeId ? ((lastSame.tpStage || prior.filter(function(r){return r.tradeId===tradeId;}).length) + 1) : 1;
+  if (sameTrade && lastSame && lastSame.tradeId) entryLots = lastSame.entryLots || lastSame.lots || entryLots;
   var net = Math.round(pts * D_MULT * lots) - fee;
-  var rec = {date: dParseDate(dateVal), lots, wave, dir, en, ex, fee, net};
+  var rec = {date: tradeDateKey, tradeId, tpStage, entryLots, lots, wave, dir, en, ex, fee, net};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
@@ -1681,8 +1714,11 @@ window.addDtrade = async function() {
   DATA.D.push(rec);
   DATA.D.sort(function(a,b){ return a.date.localeCompare(b.date); });
   await saveData();
-  ['D-date','D-en','D-ex','D-fee'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['D-date','D-en','D-ex','D-fee','D-entry-lots'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('D-lots').value='';
+  if (document.getElementById('D-entry-lots')) document.getElementById('D-entry-lots').value='';
+  if (document.getElementById('D-same-trade')) document.getElementById('D-same-trade').checked=false;
+  if (document.getElementById('D-trade-id-label')) document.getElementById('D-trade-id-label').textContent='交易ID：新增後自動產生';
   document.getElementById('msg-D').textContent = '已新增 ' + dParseDate(dateVal) + ' 淨額 ' + (net>=0?'+':'')+net.toLocaleString();
   renderDPanel();
 };
@@ -1723,6 +1759,7 @@ window.openEditDtrade = function(idx) {
   if (!r) return;
   document.getElementById('Dedit-idx').value  = idx;
   document.getElementById('Dedit-date').value = r.date || '';
+  document.getElementById('Dedit-entry-lots').value = r.entryLots || r.lots || 1;
   document.getElementById('Dedit-lots').value = r.lots || 1;
   document.getElementById('Dedit-wave').value = r.wave || '多';
   document.getElementById('Dedit-dir').value  = r.dir  || 'B';
@@ -1736,6 +1773,7 @@ window.saveEditDtrade = async function() {
   var idx  = parseInt(document.getElementById('Dedit-idx').value);
   var dateVal = document.getElementById('Dedit-date').value.trim();
   var lots = parseInt(document.getElementById('Dedit-lots').value) || 1;
+  var entryLots = parseInt(document.getElementById('Dedit-entry-lots').value) || lots;
   var wave = document.getElementById('Dedit-wave').value || '多';
   var dir  = document.getElementById('Dedit-dir').value  || 'B';
   var en   = parseFloat(document.getElementById('Dedit-en').value);
@@ -1745,7 +1783,8 @@ window.saveEditDtrade = async function() {
 
   var pts = dir === 'B' ? (ex - en) : (en - ex);
   var net = Math.round(pts * D_MULT * lots) - fee;
-  var rec = {date: dParseDate(dateVal), lots, wave, dir, en, ex, fee, net};
+  var oldRec = DATA.D[idx] || {};
+  var rec = {date: dParseDate(dateVal), tradeId: oldRec.tradeId || (dParseDate(dateVal).replace(/\//g,'-')+'-01'), tpStage: oldRec.tpStage || 1, entryLots, lots, wave, dir, en, ex, fee, net};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
@@ -1879,6 +1918,7 @@ function renderDEquityKPI() {
 (function() {
   function updatePreview() {
     var lots = parseInt(document.getElementById('D-lots') && document.getElementById('D-lots').value) || 0;
+    var entryLots = parseInt(document.getElementById('D-entry-lots') && document.getElementById('D-entry-lots').value) || lots;
     var dir  = document.getElementById('D-dir') && document.getElementById('D-dir').value || 'B';
     var en   = parseFloat(document.getElementById('D-en') && document.getElementById('D-en').value);
     var ex   = parseFloat(document.getElementById('D-ex') && document.getElementById('D-ex').value);
@@ -1889,10 +1929,10 @@ function renderDEquityKPI() {
     if (!lots || isNaN(en) || isNaN(ex)) { el.textContent = '輸入後自動計算淨額'; el.style.color='var(--muted)'; if(warnEl) warnEl.style.display='none'; return; }
     var pts = dir === 'B' ? (ex-en) : (en-ex);
     var net = Math.round(pts * D_MULT * lots) - fee;
-    var margin = lots * _dMargin();
+    var margin = entryLots * _dMargin();
     el.style.color = net >= 0 ? 'var(--gain)' : 'var(--loss)';
     el.innerHTML = '🌊 '+getDWaveLevel({en:en,ex:ex,dir:dir})+'　｜　差價 ' + (pts>=0?'+':'')+pts + ' 點　淨額 ' + (net>=0?'+':'') + net.toLocaleString()
-      + '　｜　保證金佔用 $' + margin.toLocaleString() + '（'+lots+'口×$'+_dMargin().toLocaleString()+'）';
+      + '　｜　初始 '+entryLots+'口／本次出 '+lots+'口　保證金佔用 $' + margin.toLocaleString() + '（'+entryLots+'口×$'+_dMargin().toLocaleString()+'）';
     // 即時顯示警告
     if (warnEl) {
       var wave = document.getElementById('D-wave') && document.getElementById('D-wave').value || '多';
@@ -1921,12 +1961,35 @@ function renderDEquityKPI() {
   }
   window._updateDPreview = updatePreview;
   setTimeout(function() {
-    ['D-lots','D-en','D-ex','D-fee'].forEach(function(id) {
+    ['D-entry-lots','D-lots','D-en','D-ex','D-fee'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.addEventListener('input', updatePreview);
     });
     var ddir = document.getElementById('D-dir');
     if (ddir) ddir.addEventListener('change', updatePreview);
+    var same = document.getElementById('D-same-trade');
+    if (same) same.addEventListener('change', function(){
+      var trades = DATA.D || [];
+      var last = trades.length ? trades[trades.length-1] : null;
+      if (same.checked && last && last.tradeId) {
+        var dateEl = document.getElementById('D-date');
+        var entryEl = document.getElementById('D-entry-lots');
+        var waveEl = document.getElementById('D-wave');
+        var dirEl = document.getElementById('D-dir');
+        var enEl = document.getElementById('D-en');
+        if (dateEl) dateEl.value = last.date || '';
+        if (entryEl) entryEl.value = last.entryLots || last.lots || 1;
+        if (waveEl) waveEl.value = last.wave || '多';
+        if (dirEl) dirEl.value = last.dir || 'B';
+        if (enEl) enEl.value = last.en != null ? last.en : '';
+        var label = document.getElementById('D-trade-id-label');
+        if (label) label.textContent = '延續：' + last.tradeId;
+      } else {
+        var label2 = document.getElementById('D-trade-id-label');
+        if (label2) label2.textContent = '交易ID：新增後自動產生';
+      }
+      updatePreview();
+    });
   }, 2000);
 })();
 
@@ -1934,7 +1997,7 @@ function prefillDForm() {
   var trades = DATA.D || [];
   if (!trades.length) return;
   var last = trades[trades.length - 1];
-  var fields = { 'D-date': last.date, 'D-lots': last.lots, 'D-wave': last.wave, 'D-dir': last.dir, 'D-en': last.en, 'D-ex': last.ex, 'D-fee': last.fee };
+  var fields = { 'D-date': last.date, 'D-entry-lots': last.entryLots || last.lots, 'D-lots': last.lots, 'D-wave': last.wave, 'D-dir': last.dir, 'D-en': last.en, 'D-ex': last.ex, 'D-fee': last.fee };
   var filledAny = false;
   Object.keys(fields).forEach(function(id){
     var el = document.getElementById(id);
@@ -2011,7 +2074,7 @@ function renderDPanel() {
   var dayNets = days.map(function(d){ return dayMap[d].net; });
   var bestDay = dayNets.length ? Math.max.apply(null, dayNets) : 0;
   var worstDay = dayNets.length ? Math.min.apply(null, dayNets) : 0;
-  var maxLots = trades.length ? Math.max.apply(null, trades.map(function(r){return r.lots||0;})) : 0;
+  var maxLots = trades.length ? Math.max.apply(null, trades.map(function(r){return r.entryLots||r.lots||0;})) : 0;
 
   var metricsEl = document.getElementById('metrics-D');
   if (metricsEl) metricsEl.innerHTML = [
@@ -2813,7 +2876,7 @@ window.renderDDetailTab = function() {
       + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
       + '<table style="width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap">'
       + '<thead><tr>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">口數</th>'
+      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">初始／本次</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">波段</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">方向</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">進場</th>'
@@ -2836,7 +2899,7 @@ window.renderDDetailTab = function() {
       var waveColor = r.wave==='多' ? 'color:#34d399' : 'color:#a78bfa';
       var cumVal = cumMap[origIdx];
       html += '<tr>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace">'+r.lots+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace">'+(r.entryLots||r.lots||1)+'／'+r.lots+(r.tpStage?' <span style="color:var(--muted);font-size:10px">TP'+r.tpStage+'</span>':'')+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="font-size:10px;font-weight:600;'+waveColor+'">'+(r.wave||'—')+'</span>'+(isContra?'<span style="font-size:9px;color:#f59e0b;margin-left:3px">逆</span>':'')+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
@@ -2927,59 +2990,129 @@ async function initData() {
 
 // ══ 20日平均振幅（抓自 Google Sheet 台指日盤）══
 var _ampData = null;
+// ══ 20日平均振幅：直接連 Apps Script Web App doGet() ══
+// 設定方式：
+// 1. 把你的 Apps Script「部署 > Web 應用程式」網址填到 WAVE_API_URL。
+// 2. 也可在 HUB 網址後加 ?waveApi=你的網址，無需改程式。
+// 3. 程式也會優先讀取 localStorage 中之前儲存的網址。
+// 注意：不要再使用 /api/amplitude，因為目前 Apps Script 的 doGet() 本身就直接回傳 JSON。
+const WAVE_API_URL = '';
+
 async function loadAmplitude() {
   try {
-    const WAVE_API_URL = 'https://script.google.com/macros/s/AKfycbwcOoHVMfVIUlT9JbVhrZqwEkLwRyXgdg8CakKAnWHSN4y4UjfCqvlqKQF1O_r2H5vQ/exec';
-    const res = await fetch(WAVE_API_URL, { cache: 'no-store', redirect: 'follow' });
+    const params = new URLSearchParams(window.location.search);
+    const queryApi = params.get('waveApi');
+    const savedApi = localStorage.getItem('WAVE_API_URL') || '';
+
+    // 優先順序：網址參數 > 固定設定 > localStorage > 舊的相對路徑
+    const apiUrl = (queryApi || WAVE_API_URL || savedApi || '/api/amplitude').trim();
+
+    if (queryApi) {
+      try { localStorage.setItem('WAVE_API_URL', queryApi); } catch (e) {}
+    }
+
+    console.log('[三浪] API URL:', apiUrl);
+
+    const res = await fetch(apiUrl, {
+      cache: 'no-store',
+      redirect: 'follow'
+    });
+
+    if (!res.ok) {
+      throw new Error('API HTTP ' + res.status + '：' + res.statusText);
+    }
+
     const data = await res.json();
-    var src = data && (data.data || data.amplitude || data.wave || data);
+    const src = data && (data.data || data.amplitude || data.wave || data);
+
     if (!data || !data.ok || !src) {
       throw new Error((data && data.error) || 'Apps Script 沒有回傳有效資料');
     }
 
-    var rv = src.rankValues || data.rankValues || {};
-    var required = ['rank1','rank20','rank1to7Average','rank5to10Average','rank5to15Average','rank15to20Average'];
-    var missing = required.filter(function(k){ return rv[k] == null || !isFinite(Number(rv[k])); });
+    const rv = src.rankValues || data.rankValues || {};
+    const required = [
+      'rank1',
+      'rank20',
+      'rank1to7Average',
+      'rank5to10Average',
+      'rank5to15Average',
+      'rank15to20Average'
+    ];
+
+    const missing = required.filter(function(k) {
+      return rv[k] == null || !isFinite(Number(rv[k]));
+    });
+
     if (missing.length) {
       throw new Error('三浪計算欄位不足：' + missing.join(', '));
     }
 
-    function num(v){ return v != null && v !== '' && isFinite(Number(v)) ? Number(v) : null; }
-    function obj(name, minKey, maxKey){
-      var o = src[name] || data[name];
-      if(o && num(o.min)!=null && num(o.max)!=null) return {min:num(o.min),max:num(o.max)};
-      return {min:num(rv[minKey]),max:num(rv[maxKey])};
+    function num(v) {
+      return v != null && v !== '' && isFinite(Number(v)) ? Number(v) : null;
+    }
+
+    function obj(name, minKey, maxKey) {
+      const o = src[name] || data[name];
+      if (o && num(o.min) != null && num(o.max) != null) {
+        return { min: num(o.min), max: num(o.max) };
+      }
+      return { min: num(rv[minKey]), max: num(rv[maxKey]) };
     }
 
     _ampData = data;
+
     D_WAVE_AMPLITUDE = {
-      smallWave: obj('smallWave','rank1','rank1to7Average'),
-      middleWave: obj('middleWave','rank5to10Average','rank5to15Average'),
-      largeWave: obj('largeWave','rank15to20Average','rank20'),
+      smallWave: obj('smallWave', 'rank1', 'rank1to7Average'),
+      middleWave: obj('middleWave', 'rank5to10Average', 'rank5to15Average'),
+      largeWave: obj('largeWave', 'rank15to20Average', 'rank20'),
       rankValues: rv,
       small: num(src.small),
       medium: num(src.medium),
       large: num(src.large),
       avg20: num(src.avg20 != null ? src.avg20 : data.avg20),
       latest: num(src.latestAmplitude != null ? src.latestAmplitude : data.latestAmplitude),
-      date: src.latestDate || src.lastDate || src.date || data.latestDate || data.lastDate || data.date || null,
-      recent3Days: Array.isArray(src.recent3Days) ? src.recent3Days : (Array.isArray(data.recent3Days) ? data.recent3Days : []),
-      volatilityStructure: src.volatilityStructure || data.volatilityStructure || null,
+      date: src.latestDate || src.lastDate || src.date ||
+            data.latestDate || data.lastDate || data.date || null,
+      recent3Days: Array.isArray(src.recent3Days)
+        ? src.recent3Days
+        : (Array.isArray(data.recent3Days) ? data.recent3Days : []),
+      volatilityStructure: src.volatilityStructure ||
+                           data.volatilityStructure || null,
       source: 'Apps Script',
       dataReady: true
     };
+
     window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
+
+    console.log('[三浪] 已取得資料，最後日期：', D_WAVE_AMPLITUDE.date);
+
     renderAmpCard();
     renderDWaveAmplitude();
     renderDPanel();
+
   } catch (e) {
-    console.error('振幅抓取失敗', e);
+    console.error('[三浪] 振幅抓取失敗：', e);
+
     _ampData = null;
+
     D_WAVE_AMPLITUDE = {
-      smallWave:{min:null,max:null}, middleWave:{min:null,max:null}, largeWave:{min:null,max:null},
-      rankValues:{}, small:null, medium:null, large:null, avg20:null, latest:null, date:null,
-      recent3Days:[], volatilityStructure:null, source:'Apps Script 未同步', dataReady:false, error:String(e.message || e)
+      smallWave: { min: null, max: null },
+      middleWave: { min: null, max: null },
+      largeWave: { min: null, max: null },
+      rankValues: {},
+      small: null,
+      medium: null,
+      large: null,
+      avg20: null,
+      latest: null,
+      date: null,
+      recent3Days: [],
+      volatilityStructure: null,
+      source: 'Apps Script 未同步',
+      dataReady: false,
+      error: String(e.message || e)
     };
+
     window.D_WAVE_AMPLITUDE = D_WAVE_AMPLITUDE;
     renderDWaveAmplitude();
   }
@@ -3032,7 +3165,7 @@ function renderDWaveAmplitude(){
   var a=getDWaveMarketAmplitude(), r=getDWaveRanges();
   var rv=a.rankValues||{};
   if(!a.dataReady){
-    el.innerHTML='<div style="padding:14px;border:1px solid rgba(251,191,36,.35);border-radius:10px;background:var(--bg3);color:var(--muted);line-height:1.8">⚠️ <b style="color:var(--text)">三浪資料尚未同步</b><br>目前不顯示任何預設／假資料。請確認 Apps Script Web App 已部署、可公開存取，並可讀取「歷史資料區」。</div>';
+    el.innerHTML='<div style="padding:14px;border:1px solid rgba(251,191,36,.35);border-radius:10px;background:var(--bg3);color:var(--muted);line-height:1.8">⚠️ <b style="color:var(--text)">三浪資料尚未同步</b><br>目前不顯示任何預設／假資料。請確認 Apps Script Web App 的 <code>/api/amplitude</code> 已部署並可讀取「歷史資料區」。</div>';
     return;
   }
   function fmt(v){ return isFinite(Number(v)) ? Math.round(Number(v)).toLocaleString() : '—'; }
