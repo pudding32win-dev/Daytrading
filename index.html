@@ -490,7 +490,10 @@ canvas.d-chart { width:100%; display:block; }
 .filter-bar select,.filter-bar input { font-size:11px; padding:5px 8px; border-radius:6px; background:var(--bg2); border:1px solid var(--border2); color:var(--text); font-family:var(--font); outline:none; }
 .filter-bar label { font-size:11px; color:var(--muted); }
 .filter-clear { font-size:11px; padding:5px 10px; border-radius:6px; background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.25); color:var(--red); cursor:pointer; }
-</style>
+
+@media (min-width: 700px){#D-wave-cards-body,#D-wave-amplitude-body,#D-wave-detail-body{font-size:15px}#D-wave-cards .card-hd,#D-wave-amplitude-card .card-hd,#D-wave-detail-card .card-hd{font-size:16px}#D-wave-cards-body .metric-value{font-size:24px!important}}
+@media (max-width: 699px){#D-wave-cards-body{font-size:13px}#D-wave-amplitude-body>div:first-child{grid-template-columns:1fr!important}#D-wave-detail-body table{min-width:620px}}
+''</style>
 </head>
 <body>
 
@@ -632,7 +635,15 @@ canvas.d-chart { width:100%; display:block; }
       <span id="D-count-label" style="margin-left:auto;font-size:11px;color:var(--muted)"></span>
     </div>
     <!-- ★ 浪級圖卡：放在新增交易上方，直接看到小浪／中浪／大浪表現 -->
-    <div class="card" id="D-wave-cards">
+    <div class="card" id="D-wave-amplitude-card">
+  <div class="card-hd">📊 20日市場振幅｜Apps Script 自動更新</div>
+  <div class="card-bd" id="D-wave-amplitude-body"></div>
+</div>
+<div class="card" id="D-wave-detail-card">
+  <div class="card-hd">📋 浪級交易明細</div>
+  <div class="card-bd" id="D-wave-detail-body"></div>
+</div>
+<div class="card" id="D-wave-cards">
       <div class="card-hd">🌊 浪級績效｜小浪・中浪・大浪</div>
       <div class="card-bd" id="D-wave-cards-body"></div>
     </div>
@@ -1576,11 +1587,25 @@ function dExcelToDate(n) {
 function dParseDate(s) { return normalizeDate(s); }
 
 // ══ 自動浪級：依實際進出場點數判定 ══
+/* ── 浪級：使用 Apps Script 的實際市場振幅資料，不再使用固定 30/60 點 ── */
+var D_WAVE_AMPLITUDE = { small:478, medium:650, large:924, avg20:672, latest:575, date:'2026/09/16' };
+function getDWaveMarketAmplitude(){
+  try{
+    if (window.D_WAVE_AMPLITUDE && typeof window.D_WAVE_AMPLITUDE==='object') return window.D_WAVE_AMPLITUDE;
+    if (typeof DATA!=='undefined' && DATA.D_WAVE_AMPLITUDE) return DATA.D_WAVE_AMPLITUDE;
+  }catch(e){}
+  return D_WAVE_AMPLITUDE;
+}
+function getDWavePoints(r) {
+  if (!r || r.en == null || r.ex == null || isNaN(parseFloat(r.en)) || isNaN(parseFloat(r.ex))) return null;
+  return Math.abs(r.dir === 'B' ? (parseFloat(r.ex)-parseFloat(r.en)) : (parseFloat(r.en)-parseFloat(r.ex)));
+}
 function getDWaveLevel(r) {
-  if (!r || r.en == null || r.ex == null || isNaN(parseFloat(r.en)) || isNaN(parseFloat(r.ex))) return '—';
-  var pts = Math.abs(r.dir === 'B' ? (parseFloat(r.ex)-parseFloat(r.en)) : (parseFloat(r.en)-parseFloat(r.ex)));
-  if (pts <= 30) return '小浪';
-  if (pts <= 60) return '中浪';
+  var pts=getDWavePoints(r), a=getDWaveMarketAmplitude();
+  if (pts==null) return '—';
+  /* 小浪：不超過實際小浪門檻；中浪：小浪至中浪門檻；大浪：超過中浪門檻 */
+  if (pts <= Number(a.small||478)) return '小浪';
+  if (pts <= Number(a.medium||650)) return '中浪';
   return '大浪';
 }
 function getDWaveColor(level) {
@@ -2898,4 +2923,22 @@ loadAmplitude();
 </script>
 
 </body>
-</html>
+</html>function renderDWaveAmplitude(){
+  var el=document.getElementById('D-wave-amplitude-body'); if(!el) return;
+  var a=getDWaveMarketAmplitude();
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+    +[['🌊 小浪',a.small],['🌊 中浪',a.medium],['🌊 大浪',a.large]].map(function(x){return '<div style="padding:12px;border:1px solid var(--border2);border-radius:10px;text-align:center"><div style="font-size:14px;font-weight:700">'+x[0]+'</div><div style="font-size:24px;font-weight:800;margin-top:5px">'+Number(x[1]||0).toLocaleString()+' 點</div></div>';}).join('')
+    +'</div><div style="margin-top:10px;font-size:13px;color:var(--muted);line-height:1.7">20日總平均 <b style="color:var(--text);font-size:16px">'+Number(a.avg20||0).toLocaleString()+' 點</b>　｜　最新振幅 <b style="color:var(--text);font-size:16px">'+Number(a.latest||0).toLocaleString()+' 點</b>　｜　最新交易日 '+(a.date||'—')+'</div>';
+}
+function renderDWaveDetails(){
+  var el=document.getElementById('D-wave-detail-body'); if(!el) return;
+  var arr=(typeof DATA!=='undefined'&&Array.isArray(DATA.D))?DATA.D:[];
+  var groups={小浪:[],中浪:[],大浪:[]};
+  arr.forEach(function(r){var w=getDWaveLevel(r); if(groups[w]) groups[w].push(r);});
+  el.innerHTML=['小浪','中浪','大浪'].map(function(w){
+    var rows=groups[w];
+    return '<div style="margin-top:12px"><div style="font-size:16px;font-weight:800;margin-bottom:6px">🌊 '+w+' <span style="color:var(--muted);font-size:12px">'+rows.length+'筆</span></div>'
+      + (rows.length?'<div style="overflow:auto"><table style="width:100%;font-size:12px"><tr><th>日期</th><th>方向</th><th>進場</th><th>出場</th><th>點數</th><th>損益</th></tr>'+rows.map(function(r){var pts=getDWavePoints(r)||0;return '<tr><td>'+r.date+'</td><td>'+r.wave+'/'+r.dir+'</td><td>'+r.en+'</td><td>'+r.ex+'</td><td>'+pts+'</td><td style="color:'+(r.net>=0?'var(--gain)':'var(--loss)')+'">'+(r.net>=0?'+':'')+Number(r.net||0).toLocaleString()+'</td></tr>';}).join('')+'</table></div>':'<div style="color:var(--muted);font-size:12px">尚無資料</div>')+'</div>';
+  }).join('');
+}
+
