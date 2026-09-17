@@ -345,6 +345,14 @@ body.readonly button[onclick*="openDioModal"],
 body.readonly button[onclick*="addDtrade"],
 body.readonly .card:has(.fg) { display:none !important; }
 body.readonly .notify-btn { pointer-events:none; opacity:0.4; }
+/* ── 當沖交易模式：不用 checkbox，黑白主題都清楚 ── */
+.d-trade-mode{display:grid;grid-template-columns:1fr 1.45fr;gap:8px;padding:5px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px}
+.d-mode-btn{min-height:40px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--muted2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+.d-mode-btn:hover{border-color:var(--red);color:var(--text)}
+.d-mode-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,.18)}
+body.light .d-mode-btn.active{background:#111827;color:#fff;border-color:#111827}
+.d-trade-mode-info{margin-top:6px;padding:7px 10px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);color:var(--muted2);font-size:11px;line-height:1.5}
+.d-trade-mode-info.continue{border-color:rgba(248,113,113,.45);color:var(--red)}
 .readonly-badge {
   display:none;
   background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.3);
@@ -664,10 +672,12 @@ canvas.d-chart { width:100%; display:block; }
           <div class="fg"><label>進場價</label><input id="D-en" type="number" placeholder="22500"></div>
           <div class="fg"><label>出場價</label><input id="D-ex" type="number" placeholder="22580"></div>
           <div class="fg"><label>手續費（元）</label><input id="D-fee" type="number" placeholder="0"></div>
-          <div class="fg" style="grid-column:1/-1;display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--bg3);border-radius:8px">
-            <input id="D-same-trade" type="checkbox" style="width:16px;height:16px;accent-color:#f87171">
-            <label for="D-same-trade" style="margin:0;cursor:pointer">延續上一筆交易（分批出場）</label>
-            <span id="D-trade-id-label" style="margin-left:auto;font-family:monospace;font-size:11px;color:var(--muted)">交易ID：新增後自動產生</span>
+          <div class="fg" style="grid-column:1/-1">
+            <div class="d-trade-mode" id="D-trade-mode">
+              <button type="button" id="D-new-trade-btn" class="d-mode-btn active" onclick="setDTradeMode(false)">＋ 新交易</button>
+              <button type="button" id="D-continue-trade-btn" class="d-mode-btn" onclick="setDTradeMode(true)">↳ 延續上一筆／分批出場</button>
+            </div>
+            <div id="D-trade-mode-info" class="d-trade-mode-info">新交易：儲存後自動產生交易 ID</div>
           </div>
         </div>
         <div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:7px;font-size:12px;color:var(--muted)" id="D-preview">輸入後自動計算淨額</div>
@@ -829,6 +839,8 @@ canvas.d-chart { width:100%; display:block; }
       <div class="fg"><label>日期</label><input id="Dedit-date" placeholder="2026/5/27" onblur="autoFormatDDate(this)"></div>
       <div class="fg"><label>初始口數</label><input id="Dedit-entry-lots" type="number" min="1" placeholder="3"></div>
       <div class="fg"><label>本次出場口數</label><input id="Dedit-lots" type="number" min="1" placeholder="1"></div>
+      <div class="fg"><label>交易ID</label><input id="Dedit-trade-id" type="text" placeholder="2026-09-17-01"></div>
+      <div class="fg"><label>TP段次</label><input id="Dedit-tp-stage" type="number" min="1" placeholder="1"></div>
       <div class="fg"><label>波段</label>
         <select id="Dedit-wave" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
           <option value="多">多</option><option value="空">空</option>
@@ -1675,12 +1687,33 @@ function getDWaveColor(level) {
   return 'var(--muted)';
 }
 
+window._DTradeMode = 'new';
+window.setDTradeMode = function(continueTrade) {
+  window._DTradeMode = continueTrade ? 'continue' : 'new';
+  var a=document.getElementById('D-new-trade-btn'), b=document.getElementById('D-continue-trade-btn'), info=document.getElementById('D-trade-mode-info');
+  if(a) a.classList.toggle('active', !continueTrade);
+  if(b) b.classList.toggle('active', !!continueTrade);
+  if(info){ info.classList.toggle('continue', !!continueTrade); info.textContent=continueTrade ? '延續上一筆：沿用同一交易 ID，系統自動編為下一個 TP 段次' : '新交易：儲存後自動產生新的交易 ID'; }
+  var entry=document.getElementById('D-entry-lots');
+  if(continueTrade){
+    var dateVal=(document.getElementById('D-date')||{}).value||'';
+    var key=dParseDate(dateVal);
+    var arr=(DATA.D||[]).filter(function(r){return (r.date||'')===key;});
+    var last=arr.length?arr[arr.length-1]:null;
+    if(last){
+      if(entry) entry.value=last.entryLots||last.lots||1;
+      var lbl=document.getElementById('D-trade-mode-info');
+      if(lbl) lbl.textContent='延續上一筆：'+(last.tradeId||'同日上一筆')+'，下一段 TP'+((last.tpStage||arr.filter(function(r){return r.tradeId===last.tradeId;}).length)+1);
+    }
+  }
+};
+
 window.addDtrade = async function() {
   if (!canEdit) { alert('⛔ 唯讀模式，請用含編輯金鑰的網址開啟'); return; }
   var dateVal = document.getElementById('D-date').value.trim();
   var lots = parseInt(document.getElementById('D-lots').value) || 1;
   var entryLots = parseInt(document.getElementById('D-entry-lots').value) || lots;
-  var sameTrade = !!(document.getElementById('D-same-trade') && document.getElementById('D-same-trade').checked);
+  var sameTrade = window._DTradeMode === 'continue';
   var wave = document.getElementById('D-wave').value || '多';
   var dir  = document.getElementById('D-dir').value || 'B';
   var en   = parseFloat(document.getElementById('D-en').value);
@@ -1717,8 +1750,7 @@ window.addDtrade = async function() {
   ['D-date','D-en','D-ex','D-fee','D-entry-lots'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('D-lots').value='';
   if (document.getElementById('D-entry-lots')) document.getElementById('D-entry-lots').value='';
-  if (document.getElementById('D-same-trade')) document.getElementById('D-same-trade').checked=false;
-  if (document.getElementById('D-trade-id-label')) document.getElementById('D-trade-id-label').textContent='交易ID：新增後自動產生';
+  setDTradeMode(false);
   document.getElementById('msg-D').textContent = '已新增 ' + dParseDate(dateVal) + ' 淨額 ' + (net>=0?'+':'')+net.toLocaleString();
   renderDPanel();
 };
@@ -1761,6 +1793,8 @@ window.openEditDtrade = function(idx) {
   document.getElementById('Dedit-date').value = r.date || '';
   document.getElementById('Dedit-entry-lots').value = r.entryLots || r.lots || 1;
   document.getElementById('Dedit-lots').value = r.lots || 1;
+  document.getElementById('Dedit-trade-id').value = r.tradeId || '';
+  document.getElementById('Dedit-tp-stage').value = r.tpStage || 1;
   document.getElementById('Dedit-wave').value = r.wave || '多';
   document.getElementById('Dedit-dir').value  = r.dir  || 'B';
   document.getElementById('Dedit-en').value   = r.en   || '';
@@ -1774,6 +1808,8 @@ window.saveEditDtrade = async function() {
   var dateVal = document.getElementById('Dedit-date').value.trim();
   var lots = parseInt(document.getElementById('Dedit-lots').value) || 1;
   var entryLots = parseInt(document.getElementById('Dedit-entry-lots').value) || lots;
+  var tradeId = document.getElementById('Dedit-trade-id').value.trim();
+  var tpStage = parseInt(document.getElementById('Dedit-tp-stage').value) || 1;
   var wave = document.getElementById('Dedit-wave').value || '多';
   var dir  = document.getElementById('Dedit-dir').value  || 'B';
   var en   = parseFloat(document.getElementById('Dedit-en').value);
@@ -1784,7 +1820,7 @@ window.saveEditDtrade = async function() {
   var pts = dir === 'B' ? (ex - en) : (en - ex);
   var net = Math.round(pts * D_MULT * lots) - fee;
   var oldRec = DATA.D[idx] || {};
-  var rec = {date: dParseDate(dateVal), tradeId: oldRec.tradeId || (dParseDate(dateVal).replace(/\//g,'-')+'-01'), tpStage: oldRec.tpStage || 1, entryLots, lots, wave, dir, en, ex, fee, net};
+  var rec = {date: dParseDate(dateVal), tradeId: tradeId || oldRec.tradeId || (dParseDate(dateVal).replace(/\//g,'-')+'-01'), tpStage, entryLots, lots, wave, dir, en, ex, fee, net};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
