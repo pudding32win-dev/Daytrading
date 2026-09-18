@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜0918 紀錄整合版</title>
+<title>每日衝浪板｜Wave Range Fixed 2026-09-18</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -549,20 +549,80 @@ body.light .dtab-wrap{box-shadow:0 1px 3px rgba(15,23,42,.04)}
 body.light .filter-bar{background:#fff;border-color:#e5e7eb}
 body.light .fg input,body.light .price-alert-input,body.light select{background:#fff;color:#111827}
 body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,body.light #archiveConfirmModal>div,body.light #backupModal>div,body.light #exportModal>div{background:#fff!important;color:#111827}
-@media(max-width:899px){.hub-sidebar{width:68px;padding:16px 8px}.hub-brand{font-size:0;text-align:center;padding:4px 0 16px}.hub-brand:before{content:'🌊';font-size:22px}.hub-brand small{display:none}.hub-section,.hub-side-bottom{display:none}.hub-nav button{font-size:0;text-align:center;padding:11px 6px}.hub-nav button:before{font-size:17px}.hub-nav button:nth-child(1):before{content:'⌂'}.hub-nav button:nth-child(2):before{content:'▤'}.hub-nav button:nth-child(3):before{content:'◷'}.hub-nav button:nth-child(4):before{content:'▥'}.hub-nav button:nth-child(5):before{content:'↕'}.hub-nav button:nth-child(6):before{content:'⇩'}.hub-nav button:nth-child(7):before{content:'▣'}.hub-nav button:nth-child(8):before{content:'⚙'}.hub-dummy,body.light .topbar{margin-left:68px}body.light .topbar{width:calc(100% - 68px)}body.light .panel{margin-left:68px;padding-left:14px;padding-right:14px}body.light .quotes-wrap,body.light .signal-bar{margin-left:82px}body.light .tabs-wrap{margin-left:68px}}
+@media(max-width:899px){.hub-sidebar{width:68px;padding:16px 8px}.hub-brand{font-size:0;text-align:center;padding:4px 0 16px}.hub-brand:before{content:'🌊';font-size:22px}.hub-brand small{display:none}.hub-section,.hub-side-bottom{display:none}.hub-nav button{font-size:0;text-align:center;padding:11px 6px}.hub-nav button:before{font-size:17px}.hub-nav button:nth-child(1):before{content:'⌂'}.hub-nav button:nth-child(2):before{content:'▤'}.hub-nav button:nth-child(3):before{content:'◷'}.hub-nav button:nth-child(4):before{content:'▥'}.hub-nav button:nth-child(5):before{content:'▥'}.hub-nav button:nth-child(6):before{content:'↕'}.hub-nav button:nth-child(7):before{content:'⇩'}.hub-nav button:nth-child(8):before{content:'▣'}.hub-nav button:nth-child(9):before{content:'⚙'}.hub-nav button:nth-child(10):before{content:'📦'}.hub-dummy,body.light .topbar{margin-left:68px}body.light .topbar{width:calc(100% - 68px)}body.light .panel{margin-left:68px;padding-left:14px;padding-right:14px}body.light .quotes-wrap,body.light .signal-bar{margin-left:82px}body.light .tabs-wrap{margin-left:68px}}
 @media(max-width:699px){.hub-sidebar{display:none}body.light .cloud-bar,body.light .topbar,body.light .panel,body.light .tabs-wrap,body.light .quotes-wrap,body.light .signal-bar{margin-left:0;width:auto}.topbar{position:sticky}.panel{padding-left:12px!important;padding-right:12px!important}}
+
+
+/* ══ HUB 完整首頁總覽：不取代原交易資料／統計模組 ══ */
+.hub-home{display:block;margin-bottom:14px}
+.hub-home-title{font-size:16px;font-weight:800;color:var(--text);padding:8px 0 10px}
+.hub-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.hub-kpi-card,.hub-card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.hub-kpi-card{padding:14px 16px;min-height:94px;box-sizing:border-box}
+.hub-kpi-label{font-size:11px;color:var(--muted2);font-weight:700}
+.hub-kpi-value{font-size:24px;line-height:1.2;font-weight:800;font-family:monospace;color:var(--text);margin-top:8px}
+.hub-kpi-sub{display:flex;align-items:center;gap:7px;margin-top:8px;font-size:10px;color:var(--muted)}
+.hub-kpi-sub b{color:var(--text);font-family:monospace}
+.hub-kpi-sub i{height:12px;width:1px;background:var(--border2);display:block}
+.hub-target-head{display:flex;justify-content:space-between;margin-top:7px;font-size:10px;color:var(--muted)}
+.hub-target-head b{color:var(--text)}
+.hub-progress{height:8px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin-top:6px}
+.hub-progress span{display:block;height:100%;width:0%;border-radius:99px;background:#334155;transition:width .25s ease}
+.hub-main-grid{display:grid;grid-template-columns:1.05fr 1.2fr .9fr;gap:10px;margin-top:10px;align-items:start}
+.hub-col-left,.hub-col-mid,.hub-col-right{display:flex;flex-direction:column;gap:10px;min-width:0}
+.hub-card{padding:13px 14px;box-sizing:border-box}
+.hub-card-title{font-size:12px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:5px;margin-bottom:10px}
+.hub-card-title>span{font-size:10px;color:var(--muted);font-weight:500}
+.hub-card-right{margin-left:auto!important;color:var(--muted2)!important;font-size:10px!important}
+.hub-bias-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.hub-bias-grid>div{padding:10px;border-right:1px solid var(--border)}
+.hub-bias-grid>div:last-child{border-right:0}
+.hub-mini-label{font-size:10px;color:var(--muted)}
+.hub-big{font-size:18px;font-weight:800;color:var(--text);margin-top:5px}
+.hub-card-note{font-size:10px;color:var(--muted);line-height:1.6;margin-top:8px}
+.hub-wave-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.hub-wave-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center}
+.hub-wave-name{font-size:11px;font-weight:800}
+.hub-wave-net{font:700 15px monospace;margin-top:5px}
+.hub-wave-meta{font-size:9px;color:var(--muted);margin-top:3px}
+.hub-recent-days{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.hub-day-box{background:var(--bg3);border-radius:7px;padding:8px}
+.hub-day-date{font-size:10px;color:var(--muted)}
+.hub-day-amp{font:800 15px monospace;color:var(--text);margin-top:3px}
+.hub-day-sub{font-size:9px;color:var(--muted2);margin-top:2px}
+.hub-wave-now{display:flex;justify-content:space-between;align-items:center;padding:4px 0 10px}
+.hub-wave-number{font:800 27px monospace;color:var(--text);margin-top:4px}
+.hub-ring{width:52px;height:52px;border:4px solid #cbd5e1;border-right-color:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 11px monospace;box-sizing:border-box}
+.hub-range-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.hub-range-box{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center}
+.hub-range-box b{display:block;font-size:10px;color:var(--muted)}
+.hub-range-box span{display:block;font:700 12px monospace;margin-top:4px;color:var(--text)}
+.hub-quote-strip{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:7px;align-items:center;margin-top:8px;padding:8px;background:var(--bg3);border-radius:7px;font-size:10px;color:var(--muted)}
+.hub-quote-strip b{text-align:right;font:700 12px monospace;color:var(--text)}
+.hub-trade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.hub-trade-field{background:var(--bg3);border-radius:7px;padding:8px}.hub-trade-field span{display:block;font-size:9px;color:var(--muted)}.hub-trade-field b{display:block;font-size:12px;color:var(--text);margin-top:3px;font-family:monospace}
+.hub-summary-grid,.hub-period-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.hub-summary-item,.hub-period-item{background:var(--bg3);border-radius:7px;padding:9px}.hub-summary-item span,.hub-period-item span{display:block;font-size:9px;color:var(--muted)}.hub-summary-item b,.hub-period-item b{display:block;font:700 15px monospace;margin-top:4px;color:var(--text)}
+.hub-pnl-list>div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px}.hub-pnl-list>div:last-child{border-bottom:0}.hub-pnl-list span{color:var(--muted)}.hub-pnl-list b{font:700 13px monospace;color:var(--text)}.hub-pnl-list .hub-total b{font-size:17px}
+.hub-io-list{display:flex;flex-direction:column;gap:5px}.hub-io-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;background:var(--bg3);border-radius:6px;padding:7px 8px;font-size:10px}.hub-io-row span:first-child{color:var(--muted)}.hub-io-row b{font-family:monospace;color:var(--text)}.hub-io-row small{color:var(--muted2)}
+.hub-seq-row{display:grid;grid-template-columns:35px 1fr auto;gap:7px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px}.hub-seq-row:last-child{border-bottom:0}.hub-seq-no{font:800 11px monospace;color:var(--muted)}.hub-seq-detail{color:var(--muted2)}.hub-seq-pnl{font:700 11px monospace}.hub-today-table-card{margin-top:10px}.hub-link-btn{margin-left:auto;border:1px solid var(--border2);background:var(--bg3);color:var(--muted2);border-radius:6px;padding:4px 8px;font-size:10px;cursor:pointer;font-family:var(--font)}.hub-table-wrap{overflow-x:auto}.hub-table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:10.5px}.hub-table th{padding:7px 8px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border2)}.hub-table td{padding:8px;border-bottom:1px solid var(--border);color:var(--text)}.hub-table td.mono{font-family:monospace}.hub-status{padding:2px 6px;border-radius:5px;font-size:9px;background:var(--bg3);color:var(--muted2)}
+.hub-home-active> :not(#hub-home){display:none!important}
+@media(max-width:1100px){.hub-kpi-grid{grid-template-columns:repeat(2,1fr)}.hub-main-grid{grid-template-columns:1fr 1fr}.hub-col-right{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,1fr)}}
+@media(max-width:699px){.hub-kpi-grid,.hub-main-grid{grid-template-columns:1fr}.hub-col-right{grid-column:auto;display:flex}.hub-bias-grid,.hub-wave-grid,.hub-range-grid{grid-template-columns:1fr}.hub-recent-days{grid-template-columns:1fr}.hub-table{font-size:10px}}
 
 </style>
 </head>
 <body class="light">
 
 <div class="hub-sidebar" id="hubSidebar">
-  <div class="hub-brand">小台指當沖 HUB<small>交易儀表板 · 2026</small></div>
+  <div class="hub-brand">每日衝浪板</div>
   <div class="hub-section">工作區</div>
   <div class="hub-nav">
-    <button class="active" onclick="hubNav(this,'detail')">總覽／交易明細</button>
+    <button class="active" onclick="hubNav(this,'home')">首頁</button>
+    <button onclick="hubNav(this,'detail')">交易紀錄</button>
     <button onclick="hubNav(this,'daily')">每日損益</button>
     <button onclick="hubNav(this,'monthly')">每月損益</button>
+    <button onclick="hubNav(this,'stats')">統計分析</button>
     <button onclick="hubNav(this,'io')">出入金／權益</button>
   </div>
   <div class="hub-section">資料管理</div>
@@ -661,10 +721,113 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 </div>
 <div class="panel active" id="panel-D">
   <div style="padding:12px 0 6px;font-size:12px;color:var(--muted)" id="dSubtitleBar">
-    小台指當沖　｜　每點 $50　｜　原始保證金 <span id="dMarginDisplay">$175,250</span>/口 <button onclick="editMarginPerLot()" title="手動調整原始保證金" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0 2px;vertical-align:middle">✎</button>　｜　資金基礎（累計出入金）<span id="dCapitalBaseDisplay">$0</span> <span id="D-embedded-status" style="display:inline-block;margin-left:8px;padding:3px 7px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.08);border-radius:6px;color:#60a5fa;font-size:10px">0918 基準紀錄載入中…</span>
+    小台指當沖　｜　每點 $50　｜　原始保證金 <span id="dMarginDisplay">$175,250</span>/口 <button onclick="editMarginPerLot()" title="手動調整原始保證金" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0 2px;vertical-align:middle">✎</button>　｜　資金基礎（累計出入金）<span id="dCapitalBaseDisplay">$0</span>
   </div>
 
-   <!-- 指標卡 -->
+   <!-- ══ 首頁／每日衝浪板總覽：只做顯示，不取代原有交易／統計功能 ══ -->
+  <div id="hub-home" class="hub-home">
+    <div class="hub-home-title">📅 今日狀態 <span id="hub-home-date" style="font-size:11px;color:var(--muted);font-weight:500"></span></div>
+
+    <div class="hub-kpi-grid">
+      <div class="hub-kpi-card">
+        <div class="hub-kpi-label">💰 今日損益</div>
+        <div class="hub-kpi-value" id="hub-today-pnl">—</div>
+        <div class="hub-kpi-sub"><span>今日最高</span><b id="hub-today-high">—</b><i></i><span>今日回撤</span><b id="hub-today-dd">—</b></div>
+      </div>
+      <div class="hub-kpi-card">
+        <div class="hub-kpi-label">◷ 目前 Trade #</div>
+        <div class="hub-kpi-value" id="hub-trade-no">—</div>
+        <div class="hub-kpi-sub"><span>已完成</span><b id="hub-trade-done">—</b><i></i><span>剩餘</span><b id="hub-trade-left">—</b></div>
+      </div>
+      <div class="hub-kpi-card">
+        <div class="hub-kpi-label">⏱ 目前持倉</div>
+        <div class="hub-kpi-value" id="hub-position">—</div>
+        <div class="hub-kpi-sub"><span>進場價</span><b id="hub-position-price">—</b><i></i><span>持倉時間</span><b id="hub-position-time">—</b></div>
+      </div>
+      <div class="hub-kpi-card hub-target-card">
+        <div class="hub-kpi-label">🎯 距離 +15,000 目標</div>
+        <div class="hub-kpi-value" id="hub-target-remain">—</div>
+        <div class="hub-target-head"><span>目標進度</span><b id="hub-target-pct">0%</b></div>
+        <div class="hub-progress"><span id="hub-target-progress"></span></div>
+      </div>
+    </div>
+
+    <div class="hub-main-grid">
+      <div class="hub-col-left">
+        <div class="hub-card">
+          <div class="hub-card-title">📊 市場方向認知 <span>（你判斷）</span></div>
+          <div class="hub-bias-grid">
+            <div><div class="hub-mini-label">月線方向</div><div class="hub-big" id="hub-bias-month">未選</div></div>
+            <div><div class="hub-mini-label">5日振幅差</div><div class="hub-big" id="hub-bias-diff">—</div></div>
+            <div><div class="hub-mini-label">整體認知</div><div class="hub-big" id="hub-bias-state">未選</div></div>
+          </div>
+          <div class="hub-card-note" id="hub-bias-note">資料會沿用你原本的「市場方向認知」，不由系統代判。</div>
+        </div>
+
+        <div class="hub-card">
+          <div class="hub-card-title">🌊 浪級績效</div>
+          <div class="hub-wave-grid" id="hub-wave-grid"></div>
+        </div>
+
+        <div class="hub-card">
+          <div class="hub-card-title">📅 最近 3 個交易日</div>
+          <div id="hub-recent-days" class="hub-recent-days"></div>
+        </div>
+      </div>
+
+      <div class="hub-col-mid">
+        <div class="hub-card">
+          <div class="hub-card-title">◷ 今日風浪／振幅 <span>（台指期）</span><span class="hub-card-right" id="hub-wave-status">—</span></div>
+          <div class="hub-wave-now">
+            <div><div class="hub-mini-label">今日振幅</div><div class="hub-wave-number" id="hub-today-amplitude">—</div></div>
+            <div class="hub-ring"><span id="hub-amplitude-pct">—</span></div>
+          </div>
+          <div class="hub-range-grid" id="hub-wave-ranges"></div>
+          <div class="hub-quote-strip"><span>目前 MTX</span><b id="hub-mtx-price">—</b><span>今日高／低</span><b id="hub-mtx-hl">—</b></div>
+        </div>
+
+        <div class="hub-card">
+          <div class="hub-card-title">📌 目前 Trade <span class="hub-card-right" id="hub-current-status">—</span></div>
+          <div id="hub-current-trade"></div>
+        </div>
+
+        <div class="hub-card">
+          <div class="hub-card-title">📋 今日交易概況</div>
+          <div class="hub-summary-grid" id="hub-today-summary"></div>
+        </div>
+      </div>
+
+      <div class="hub-col-right">
+        <div class="hub-card">
+          <div class="hub-card-title">💹 每日損益</div>
+          <div class="hub-pnl-list">
+            <div><span>交易損益</span><b id="hub-raw-pnl">—</b></div>
+            <div><span>權利金</span><b id="hub-premium">—</b></div>
+            <div class="hub-total"><span>每日淨損益</span><b id="hub-net-pnl">—</b></div>
+          </div>
+        </div>
+        <div class="hub-card">
+          <div class="hub-card-title">📈 週／月獲利損益</div>
+          <div class="hub-period-grid" id="hub-period-pnl"></div>
+        </div>
+        <div class="hub-card">
+          <div class="hub-card-title">💳 出入金</div>
+          <div id="hub-io-list" class="hub-io-list"></div>
+        </div>
+        <div class="hub-card">
+          <div class="hub-card-title">📊 Trade 1～5</div>
+          <div id="hub-trade-seq"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hub-card hub-today-table-card">
+      <div class="hub-card-title">📋 今日交易紀錄 <span>（真正以 Trade 分組；分批出場不重複計算）</span><button onclick="hubNav(null,'detail')" class="hub-link-btn">查看完整明細 →</button></div>
+      <div class="hub-table-wrap"><table class="hub-table"><thead><tr><th>Trade #</th><th>進場時間</th><th>進場價格</th><th>方向</th><th>波段</th><th>口數</th><th>出場</th><th>持倉時間</th><th>淨損益</th><th>狀態</th></tr></thead><tbody id="hub-today-trades"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- 指標卡（原功能保留；交易紀錄頁使用） -->
   <div class="metrics" id="metrics-D"></div>
 
   <!-- 今日操作狀態：小台指報價 + 市場方向認知 -->
@@ -983,7 +1146,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 </div>
 
 
-<div class="footer">每日衝浪板 · 0918 基準紀錄已內嵌 · Firebase 雲端同步 · 僅供參考</div>
+<div class="footer">每日衝浪板 · Firebase 雲端同步 · 僅供參考</div>
 
 <script type="module">
 
@@ -1007,47 +1170,6 @@ const SIGNAL_REF = doc(db, 'dashboard', 'signals');
 
 // ── 預設資料（僅在 Firebase 文件完全不存在時使用）──
 const DEFAULT_DATA = { G:[], Y:[], C:[], T:[], D:[], D_io:[], D_eq:[], D_archive:[], D_premium:[], D_marketBias:[], D_marginPerLot: null, PL:[], RC:{}, RB:null };
-
-// ══ 2026/09/18 基準紀錄：內嵌於本 HTML，避免預覽模式因網路限制看不到歷史資料。
-// 來源：當沖交易明細_20260918_0836.csv；共 110 筆出場紀錄、109 個 Trade ID。
-const EMBEDDED_0918_TRADES = [{"date":"2026/08/26","tradeId":"2026-08-26-01","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45195.0,"ex":44992.0,"fee":126.0,"net":10024.0,"entryTime":"","exitTime":""},{"date":"2026/08/26","tradeId":"2026-08-26-02","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45195.0,"ex":44898.0,"fee":126.0,"net":14724.0,"entryTime":"","exitTime":""},{"date":"2026/08/26","tradeId":"2026-08-26-03","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":46195.0,"ex":46195.0,"fee":126.0,"net":-126.0,"entryTime":"","exitTime":""},{"date":"2026/08/26","tradeId":"2026-08-26-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45288.0,"ex":45481.0,"fee":126.0,"net":9524.0,"entryTime":"","exitTime":""},{"date":"2026/08/26","tradeId":"2026-08-26-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45288.0,"ex":45620.0,"fee":104.0,"net":16496.0,"entryTime":"","exitTime":""},{"date":"2026/08/26","tradeId":"2026-08-26-06","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45804.0,"ex":46026.0,"fee":126.0,"net":10974.0,"entryTime":"","exitTime":""},{"date":"2026/08/26","tradeId":"2026-08-26-07","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45804.0,"ex":45995.0,"fee":126.0,"net":9424.0,"entryTime":"","exitTime":""},{"date":"2026/08/26","tradeId":"2026-08-26-08","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45804.0,"ex":46131.0,"fee":126.0,"net":16224.0,"entryTime":"","exitTime":""},{"date":"2026/08/27","tradeId":"2026-08-27-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46098.0,"ex":45826.0,"fee":96.0,"net":-13696.0,"entryTime":"","exitTime":""},{"date":"2026/08/27","tradeId":"2026-08-27-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46098.0,"ex":45826.0,"fee":128.0,"net":-13728.0,"entryTime":"","exitTime":""},{"date":"2026/08/27","tradeId":"2026-08-27-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46199.0,"ex":46350.0,"fee":130.0,"net":7420.0,"entryTime":"","exitTime":""},{"date":"2026/08/27","tradeId":"2026-08-27-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46199.0,"ex":46381.0,"fee":130.0,"net":8970.0,"entryTime":"","exitTime":""},{"date":"2026/08/27","tradeId":"2026-08-27-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46199.0,"ex":46422.0,"fee":130.0,"net":11020.0,"entryTime":"","exitTime":""},{"date":"2026/08/27","tradeId":"2026-08-27-06","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46298.0,"ex":46120.0,"fee":130.0,"net":-9030.0,"entryTime":"","exitTime":""},{"date":"2026/08/27","tradeId":"2026-08-27-07","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46298.0,"ex":46140.0,"fee":176.0,"net":-8076.0,"entryTime":"","exitTime":""},{"date":"2026/08/28","tradeId":"2026-08-28-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46124.0,"ex":46323.0,"fee":128.0,"net":9822.0,"entryTime":"","exitTime":""},{"date":"2026/08/28","tradeId":"2026-08-28-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46409.0,"ex":46476.0,"fee":128.0,"net":3222.0,"entryTime":"","exitTime":""},{"date":"2026/08/28","tradeId":"2026-08-28-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46494.0,"ex":46565.0,"fee":128.0,"net":3422.0,"entryTime":"","exitTime":""},{"date":"2026/08/28","tradeId":"2026-08-28-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46210.0,"ex":46210.0,"fee":128.0,"net":-128.0,"entryTime":"","exitTime":""},{"date":"2026/08/31","tradeId":"2026-08-31-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"S","en":45712.0,"ex":45512.0,"fee":128.0,"net":9872.0,"entryTime":"","exitTime":""},{"date":"2026/08/31","tradeId":"2026-08-31-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"S","en":45712.0,"ex":45481.0,"fee":128.0,"net":11422.0,"entryTime":"","exitTime":""},{"date":"2026/08/31","tradeId":"2026-08-31-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45712.0,"ex":45858.0,"fee":128.0,"net":7172.0,"entryTime":"","exitTime":""},{"date":"2026/08/31","tradeId":"2026-08-31-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45990.0,"ex":45813.0,"fee":138.0,"net":-8988.0,"entryTime":"","exitTime":""},{"date":"2026/08/31","tradeId":"2026-08-31-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45990.0,"ex":45800.0,"fee":166.0,"net":-9666.0,"entryTime":"","exitTime":""},{"date":"2026/09/01","tradeId":"2026-09-01-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46120.0,"ex":46742.0,"fee":128.0,"net":30972.0,"entryTime":"","exitTime":""},{"date":"2026/09/01","tradeId":"2026-09-01-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46120.0,"ex":46640.0,"fee":128.0,"net":25872.0,"entryTime":"","exitTime":""},{"date":"2026/09/01","tradeId":"2026-09-01-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46120.0,"ex":46321.0,"fee":128.0,"net":9922.0,"entryTime":"","exitTime":""},{"date":"2026/09/01","tradeId":"2026-09-01-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46307.0,"ex":47108.0,"fee":128.0,"net":39922.0,"entryTime":"","exitTime":""},{"date":"2026/09/01","tradeId":"2026-09-01-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46345.0,"ex":46443.0,"fee":128.0,"net":4772.0,"entryTime":"","exitTime":""},{"date":"2026/09/01","tradeId":"2026-09-01-06","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46345.0,"ex":46468.0,"fee":143.0,"net":6007.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-01","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46543.0,"ex":46415.0,"fee":128.0,"net":-12928.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-02","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46543.0,"ex":46415.0,"fee":128.0,"net":-12928.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46543.0,"ex":46415.0,"fee":128.0,"net":-6528.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-04","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46276.0,"ex":46178.0,"fee":128.0,"net":-9928.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-05","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46276.0,"ex":46178.0,"fee":128.0,"net":-9928.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-06","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46276.0,"ex":46178.0,"fee":128.0,"net":-5028.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-07","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46301.0,"ex":46178.0,"fee":128.0,"net":-12428.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-08","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46301.0,"ex":46178.0,"fee":128.0,"net":-12428.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-09","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46301.0,"ex":46178.0,"fee":128.0,"net":-6278.0,"entryTime":"","exitTime":""},{"date":"2026/09/02","tradeId":"2026-09-02-10","tpStage":1,"entryLots":4,"lots":4,"wave":"多","dir":"B","en":46152.0,"ex":46078.0,"fee":746.0,"net":-15546.0,"entryTime":"","exitTime":""},{"date":"2026/09/03","tradeId":"2026-09-03-01","tpStage":1,"entryLots":3,"lots":3,"wave":"多","dir":"S","en":46074.0,"ex":46205.0,"fee":390.0,"net":-20040.0,"entryTime":"","exitTime":""},{"date":"2026/09/03","tradeId":"2026-09-03-02","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46142.0,"ex":46110.0,"fee":480.0,"net":-3680.0,"entryTime":"","exitTime":""},{"date":"2026/09/03","tradeId":"2026-09-03-03","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46218.0,"ex":46133.0,"fee":128.0,"net":-8628.0,"entryTime":"","exitTime":""},{"date":"2026/09/04","tradeId":"2026-09-04-01","tpStage":1,"entryLots":4,"lots":4,"wave":"多","dir":"B","en":46547.0,"ex":46395.0,"fee":580.0,"net":-30980.0,"entryTime":"","exitTime":""},{"date":"2026/09/04","tradeId":"2026-09-04-02","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"S","en":46213.0,"ex":46298.0,"fee":260.0,"net":-8760.0,"entryTime":"","exitTime":""},{"date":"2026/09/04","tradeId":"2026-09-04-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46333.0,"ex":46511.0,"fee":302.0,"net":8598.0,"entryTime":"","exitTime":""},{"date":"2026/09/04","tradeId":"2026-09-04-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46763.0,"ex":46809.0,"fee":120.0,"net":2180.0,"entryTime":"","exitTime":""},{"date":"2026/09/07","tradeId":"2026-09-07-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47423.0,"ex":47260.0,"fee":120.0,"net":-8270.0,"entryTime":"","exitTime":""},{"date":"2026/09/07","tradeId":"2026-09-07-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47236.0,"ex":47130.0,"fee":120.0,"net":-5420.0,"entryTime":"","exitTime":""},{"date":"2026/09/07","tradeId":"2026-09-07-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47136.0,"ex":47327.0,"fee":120.0,"net":9430.0,"entryTime":"","exitTime":""},{"date":"2026/09/07","tradeId":"2026-09-07-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47136.0,"ex":47358.0,"fee":120.0,"net":10980.0,"entryTime":"","exitTime":""},{"date":"2026/09/07","tradeId":"2026-09-07-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47136.0,"ex":47402.0,"fee":120.0,"net":13180.0,"entryTime":"","exitTime":""},{"date":"2026/09/07","tradeId":"2026-09-07-06","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47330.0,"ex":47504.0,"fee":120.0,"net":8580.0,"entryTime":"","exitTime":""},{"date":"2026/09/08","tradeId":"2026-09-08-01","tpStage":1,"entryLots":3,"lots":3,"wave":"多","dir":"B","en":47460.0,"ex":47342.0,"fee":491.0,"net":-18191.0,"entryTime":"","exitTime":""},{"date":"2026/09/08","tradeId":"2026-09-08-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47483.0,"ex":47345.0,"fee":130.0,"net":-7030.0,"entryTime":"","exitTime":""},{"date":"2026/09/08","tradeId":"2026-09-08-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47483.0,"ex":47345.0,"fee":130.0,"net":-7030.0,"entryTime":"","exitTime":""},{"date":"2026/09/08","tradeId":"2026-09-08-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47483.0,"ex":47345.0,"fee":130.0,"net":-7030.0,"entryTime":"","exitTime":""},{"date":"2026/09/08","tradeId":"2026-09-08-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"S","en":47343.0,"ex":47483.0,"fee":130.0,"net":-7130.0,"entryTime":"","exitTime":""},{"date":"2026/09/09","tradeId":"2026-09-09-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47115.0,"ex":47389.0,"fee":130.0,"net":13570.0,"entryTime":"","exitTime":""},{"date":"2026/09/09","tradeId":"2026-09-09-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47115.0,"ex":47484.0,"fee":130.0,"net":18320.0,"entryTime":"","exitTime":""},{"date":"2026/09/09","tradeId":"2026-09-09-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47284.0,"ex":47587.0,"fee":130.0,"net":15020.0,"entryTime":"","exitTime":""},{"date":"2026/09/09","tradeId":"2026-09-09-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47464.0,"ex":47302.0,"fee":130.0,"net":-8230.0,"entryTime":"","exitTime":""},{"date":"2026/09/09","tradeId":"2026-09-09-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":47434.0,"ex":47302.0,"fee":103.0,"net":-6703.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46734.0,"ex":46640.0,"fee":130.0,"net":-4830.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46734.0,"ex":46640.0,"fee":130.0,"net":-4830.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-03","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46734.0,"ex":46640.0,"fee":130.0,"net":-4830.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-04","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46734.0,"ex":46640.0,"fee":130.0,"net":-4830.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"S","en":46680.0,"ex":46555.0,"fee":130.0,"net":6120.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-06","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46683.0,"ex":46833.0,"fee":130.0,"net":7370.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-07","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46683.0,"ex":46833.0,"fee":130.0,"net":7370.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-08","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46683.0,"ex":46838.0,"fee":70.0,"net":7680.0,"entryTime":"","exitTime":""},{"date":"2026/09/10","tradeId":"2026-09-10-09","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46683.0,"ex":46903.0,"fee":130.0,"net":10870.0,"entryTime":"","exitTime":""},{"date":"2026/09/11","tradeId":"2026-09-11-01","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45982.0,"ex":46182.0,"fee":130.0,"net":9870.0,"entryTime":"","exitTime":""},{"date":"2026/09/11","tradeId":"2026-09-11-02","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":46023.0,"ex":45920.0,"fee":130.0,"net":-5280.0,"entryTime":"","exitTime":""},{"date":"2026/09/11","tradeId":"2026-09-11-03","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":46017.0,"ex":45890.0,"fee":260.0,"net":-12960.0,"entryTime":"","exitTime":""},{"date":"2026/09/11","tradeId":"2026-09-11-04","tpStage":1,"entryLots":2,"lots":2,"wave":"多","dir":"B","en":45979.0,"ex":45805.0,"fee":272.0,"net":-17672.0,"entryTime":"","exitTime":""},{"date":"2026/09/11","tradeId":"2026-09-11-05","tpStage":1,"entryLots":1,"lots":1,"wave":"多","dir":"B","en":45975.0,"ex":46287.0,"fee":130.0,"net":15470.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-01","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45497.0,"ex":45626.0,"fee":130.0,"net":-6580.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-02","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45497.0,"ex":45626.0,"fee":130.0,"net":-6580.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-03","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45497.0,"ex":45626.0,"fee":130.0,"net":-6580.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-04","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45673.0,"ex":45800.0,"fee":130.0,"net":6220.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-05","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45673.0,"ex":45870.0,"fee":130.0,"net":9720.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-06","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45673.0,"ex":45870.0,"fee":130.0,"net":9720.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-07","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45763.0,"ex":45882.0,"fee":130.0,"net":5820.0,"entryTime":"","exitTime":""},{"date":"2026/09/14","tradeId":"2026-09-14-08","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45763.0,"ex":45900.0,"fee":112.0,"net":6738.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-01","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45755.0,"ex":45555.0,"fee":130.0,"net":9870.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-02","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45755.0,"ex":45555.0,"fee":130.0,"net":9870.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-03","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45791.0,"ex":45673.0,"fee":130.0,"net":-6030.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-04","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45791.0,"ex":45673.0,"fee":130.0,"net":-6030.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-05","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45668.0,"ex":45790.0,"fee":130.0,"net":-6230.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-06","tpStage":1,"entryLots":3,"lots":3,"wave":"空","dir":"S","en":45673.0,"ex":45790.0,"fee":130.0,"net":-17680.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-07","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45806.0,"ex":45747.0,"fee":130.0,"net":-3080.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-08","tpStage":1,"entryLots":2,"lots":2,"wave":"空","dir":"B","en":45806.0,"ex":45717.0,"fee":130.0,"net":-9030.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-09","tpStage":1,"entryLots":3,"lots":3,"wave":"空","dir":"B","en":45806.0,"ex":45717.0,"fee":568.0,"net":-13918.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-10","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45798.0,"ex":45530.0,"fee":130.0,"net":13270.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-11","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45798.0,"ex":45530.0,"fee":130.0,"net":13270.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-12","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45798.0,"ex":45590.0,"fee":130.0,"net":10270.0,"entryTime":"","exitTime":""},{"date":"2026/09/15","tradeId":"2026-09-15-13","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45798.0,"ex":45565.0,"fee":130.0,"net":11520.0,"entryTime":"","exitTime":""},{"date":"2026/09/16","tradeId":"2026-09-16-01","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45686.0,"ex":45418.0,"fee":130.0,"net":13270.0,"entryTime":"","exitTime":""},{"date":"2026/09/16","tradeId":"2026-09-16-02","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"S","en":45565.0,"ex":45673.0,"fee":125.0,"net":-5525.0,"entryTime":"","exitTime":""},{"date":"2026/09/16","tradeId":"2026-09-16-03","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45544.0,"ex":45693.0,"fee":128.0,"net":7322.0,"entryTime":"","exitTime":""},{"date":"2026/09/16","tradeId":"2026-09-16-04","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45544.0,"ex":45773.0,"fee":128.0,"net":11322.0,"entryTime":"","exitTime":""},{"date":"2026/09/16","tradeId":"2026-09-16-05","tpStage":1,"entryLots":1,"lots":1,"wave":"空","dir":"B","en":45664.0,"ex":45794.0,"fee":128.0,"net":6372.0,"entryTime":"","exitTime":""},{"date":"2026/09/17","tradeId":"2026-09-17-01","tpStage":1,"entryLots":2,"lots":1,"wave":"空","dir":"S","en":46404.0,"ex":46518.0,"fee":128.0,"net":-5828.0,"entryTime":"","exitTime":""},{"date":"2026/09/17","tradeId":"2026-09-17-01","tpStage":2,"entryLots":2,"lots":1,"wave":"空","dir":"S","en":46404.0,"ex":46518.0,"fee":130.0,"net":-5830.0,"entryTime":"","exitTime":""},{"date":"2026/09/17","tradeId":"2026-09-17-02","tpStage":1,"entryLots":3,"lots":1,"wave":"空","dir":"B","en":46549.0,"ex":46700.0,"fee":130.0,"net":7420.0,"entryTime":"","exitTime":""},{"date":"2026/09/17","tradeId":"2026-09-17-03","tpStage":1,"entryLots":3,"lots":1,"wave":"空","dir":"B","en":46548.0,"ex":46769.0,"fee":130.0,"net":10920.0,"entryTime":"","exitTime":""},{"date":"2026/09/17","tradeId":"2026-09-17-04","tpStage":1,"entryLots":3,"lots":1,"wave":"空","dir":"B","en":46548.0,"ex":46884.0,"fee":130.0,"net":16670.0,"entryTime":"","exitTime":""},{"date":"2026/09/17","tradeId":"2026-09-17-05","tpStage":1,"entryLots":2,"lots":1,"wave":"空","dir":"B","en":46674.0,"ex":46775.0,"fee":130.0,"net":4920.0,"entryTime":"","exitTime":""},{"date":"2026/09/17","tradeId":"2026-09-17-06","tpStage":1,"entryLots":2,"lots":1,"wave":"空","dir":"B","en":46674.0,"ex":46683.0,"fee":130.0,"net":320.0,"entryTime":"","exitTime":""}];
-let embedded0918Merged = false;
-
-function mergeEmbedded0918Trades() {
-  if (embedded0918Merged) return false;
-  embedded0918Merged = true;
-  if (!DATA.D) DATA.D = [];
-  var keys = {};
-  function addKey(r){
-    if (!r) return;
-    var k = String(r.tradeId||'')+'|'+String(r.tpStage||1)+'|'+String(r.en||'')+'|'+String(r.ex||'')+'|'+String(r.net||'');
-    keys[k]=true;
-  }
-  DATA.D.forEach(addKey);
-  (DATA.D_archive||[]).forEach(function(b){ (b.trades||[]).forEach(addKey); });
-  var added=0;
-  EMBEDDED_0918_TRADES.forEach(function(r){
-    var k=String(r.tradeId)+'|'+String(r.tpStage||1)+'|'+String(r.en)+'|'+String(r.ex)+'|'+String(r.net);
-    if(!keys[k]) { DATA.D.push(JSON.parse(JSON.stringify(r))); keys[k]=true; added++; }
-  });
-  if(added){
-    DATA.D.sort(function(a,b){ return String(a.date||'').localeCompare(String(b.date||'')) || String(a.entryTime||'').localeCompare(String(b.entryTime||'')) || String(a.tradeId||'').localeCompare(String(b.tradeId||'')) || Number(a.tpStage||1)-Number(b.tpStage||1); });
-  }
-  return added>0;
-}
-
-function updateEmbedded0918Status(){
-  var el=document.getElementById('D-embedded-status');
-  if(!el) return;
-  var ids={}; EMBEDDED_0918_TRADES.forEach(function(r){ids[r.tradeId]=true;});
-  var loadedKeys={};
-  (DATA.D||[]).forEach(function(r){ if(ids[r.tradeId]) loadedKeys[String(r.tradeId)+'|'+String(r.tpStage||1)+'|'+String(r.en||'')+'|'+String(r.ex||'')+'|'+String(r.net||'')]=true; });
-  (DATA.D_archive||[]).forEach(function(b){ (b.trades||[]).forEach(function(r){ if(ids[r.tradeId]) loadedKeys[String(r.tradeId)+'|'+String(r.tpStage||1)+'|'+String(r.en||'')+'|'+String(r.ex||'')+'|'+String(r.net||'')]=true; }); });
-  var loaded=Object.keys(loadedKeys).length;
-  var unique=Object.keys(ids).length;
-  el.textContent='0918 基準紀錄已掛載：'+loaded+'/'+EMBEDDED_0918_TRADES.length+' 筆（'+unique+' 個 Trade）';
-}
-
 
 let DATA = { G:[], Y:[], C:[], T:[], D:[], D_io:[], D_eq:[], D_premium:[], D_marketBias:[], PL:[], RC:{}, RB:null };
 let isSaving = false;
@@ -2351,12 +2473,14 @@ window.loadMtxQuote = async function(force){
     if(metaEl) metaEl.textContent='MTX／小型臺指　·　'+(_mtxQuote.source||'Worker')+(quoteStale?'　·　資料較舊':'');
     if(timeEl) timeEl.textContent=_mtxQuote.timestamp?displayDateTime(_mtxQuote.timestamp):'—';
     autoFillQuoteInputs();
+    try{ if(typeof renderHubHome==='function') renderHubHome(); }catch(e){}
     return _mtxQuote;
   }catch(e){
     _mtxQuote.stale=true;
     if(metaEl) metaEl.textContent='報價尚未同步：'+(e.message||'未知錯誤');
     if(priceEl && !_mtxQuote.price) priceEl.textContent='—';
     if(timeEl) timeEl.textContent='—';
+    try{ if(typeof renderHubHome==='function') renderHubHome(); }catch(e){}
     return null;
   }
 };
@@ -2609,6 +2733,7 @@ function renderDPanel() {
   renderDWaveAmplitude();
   
   setTimeout(renderDCharts, 50);
+  try{ renderHubHome(); }catch(e){ console.error('renderHubHome after renderDPanel',e); }
 }
 // ── 啟動 ──
 // ══ 統計圖表切換 ══
@@ -2995,6 +3120,8 @@ window.toggleTheme = function() {
 var _currentDTab = 'detail';
 window.switchDTab = function(tab) {
   _currentDTab = tab;
+  var panel=document.getElementById('panel-D');
+  if(panel) panel.classList.remove('hub-home-active');
   ['detail','daily','monthly','io'].forEach(function(t) {
     document.getElementById('dtab-'+t).classList.toggle('active', t===tab);
     document.getElementById('dpanel-'+t).classList.toggle('active', t===tab);
@@ -3345,8 +3472,6 @@ async function initData() {
       await setDoc(DOC_REF, DATA);
       _dLastRev = DATA._revD;
     }
-    var embeddedAdded = mergeEmbedded0918Trades();
-    updateEmbedded0918Status();
     setCloudStatus('connected', '已連線 · 即時同步中');
     renderDPanel();
 
@@ -3364,8 +3489,6 @@ async function initData() {
           DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
           _dLastRev = d._revD || null;
           normalizeDDates(DATA);
-          mergeEmbedded0918Trades();
-          updateEmbedded0918Status();
           renderDPanel();
         } else {
           // 自己這次寫入觸發的回調：也同步更新版本戳記，避免誤判為「被別人改過」
@@ -3385,8 +3508,6 @@ async function initData() {
       DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
       normalizeDDates(DATA);
     }
-    mergeEmbedded0918Trades();
-    updateEmbedded0918Status();
     renderDPanel();
   }
 }
@@ -3636,9 +3757,89 @@ function renderDWaveAmplitude(){
   el.innerHTML=html;
 }
 
+// ══ 首頁總覽：沿用 DATA.D / D_io / D_premium / D_marketBias / Apps Script 振幅資料 ══
+function hubEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function hubMoney(v){ v=Number(v)||0; return (v>=0?'+$':'-$')+Math.abs(Math.round(v)).toLocaleString('zh-TW'); }
+function hubSigned(v){ v=Number(v)||0; return (v>=0?'+':'')+Math.round(v).toLocaleString('zh-TW'); }
+function hubMinutes(ms){ if(!isFinite(ms)||ms<0)return '—'; var m=Math.floor(ms/60000), h=Math.floor(m/60); m%=60; return h? h+'小時 '+m+'分':m+' 分鐘'; }
+function hubTradeGroups(rows){
+  var map={}, order=[];
+  (rows||[]).forEach(function(r,i){
+    var key=r.tradeId ? 'id:'+r.tradeId : String(r.date||'')+'|'+String(r.dir||'')+'|'+String(r.en==null?'':r.en);
+    if(!map[key]){ map[key]={key:key,rows:[],firstIndex:i,tradeId:r.tradeId||'',date:r.date||'',dir:r.dir||'',wave:r.wave||'',en:r.en,entryLots:0,exitLots:0,net:0,fee:0,entryTime:null,exitTime:null,exits:[]}; order.push(key); }
+    var g=map[key]; g.rows.push(r); g.entryLots=Math.max(g.entryLots,Number(r.entryLots||r.lots||0)); g.exitLots+=Number(r.lots||0); g.net+=Number(r.net||0); g.fee+=Number(r.fee||0);
+    if(g.en==null && r.en!=null)g.en=r.en; if(!g.wave&&r.wave)g.wave=r.wave; if(!g.dir&&r.dir)g.dir=r.dir;
+    if(r.entryTime && (!g.entryTime || new Date(r.entryTime)<new Date(g.entryTime)))g.entryTime=r.entryTime;
+    if(r.exitTime && (!g.exitTime || new Date(r.exitTime)>new Date(g.exitTime)))g.exitTime=r.exitTime;
+    if(r.ex!=null)g.exits.push(Number(r.ex));
+  });
+  return order.map(function(k,n){var g=map[k];g.no=n+1;g.remaining=Math.max(0,g.entryLots-g.exitLots);g.closed=g.remaining<=0;g.ex=g.exits.length?g.exits[g.exits.length-1]:null;return g;});
+}
+function hubTodayRows(){ return (DATA.D||[]).filter(function(r){return String(r.date||'')===dTodayKey();}); }
+function hubSet(id,txt){var e=document.getElementById(id);if(e)e.textContent=txt;}
+function hubClassMoney(v){return Number(v)>=0?'var(--gain)':'var(--loss)';}
+function renderHubHome(){
+  var rows=hubTodayRows(), groups=hubTradeGroups(rows), target=15000;
+  var raw=rows.reduce(function(s,r){return s+(Number(r.net)||0);},0), premium=getDPremium(dTodayKey()), net=raw-premium;
+  var running=0, peak=0, low=0; rows.forEach(function(r){running+=Number(r.net)||0;peak=Math.max(peak,running);low=Math.min(low,running);});
+  var dd=peak-running; // 今日目前回撤
+  hubSet('hub-home-date',dTodayKey());
+  hubSet('hub-today-pnl',hubMoney(net));
+  hubSet('hub-today-high',hubMoney(Math.max(peak,0)));
+  hubSet('hub-today-dd',dd>0?'-$'+Math.round(dd).toLocaleString('zh-TW'):'$0');
+  var completed=groups.filter(function(g){return g.closed;}).length, current=groups.length, left=Math.max(0,5-current);
+  hubSet('hub-trade-no',current?current+'/5':'0/5'); hubSet('hub-trade-done',completed+' 筆'); hubSet('hub-trade-left',left+' 筆');
+  var open=groups.filter(function(g){return !g.closed;}).sort(function(a,b){return b.firstIndex-a.firstIndex;})[0]||null;
+  var latest=groups.length?groups[groups.length-1]:null;
+  var posLots=open?open.remaining:0;
+  hubSet('hub-position',posLots?posLots+' 口':'—'); hubSet('hub-position-price',open&&open.en!=null?Number(open.en).toLocaleString():'—');
+  hubSet('hub-position-time',open&&open.entryTime?hubMinutes(Date.now()-new Date(open.entryTime).getTime()):'—');
+  var pct=Math.max(0,Math.min(100,net/target*100)), remain=Math.max(0,target-net);
+  hubSet('hub-target-remain',net>=target?'已達標':('$'+Math.round(remain).toLocaleString('zh-TW'))); hubSet('hub-target-pct',pct.toFixed(0)+'%');
+  var bar=document.getElementById('hub-target-progress'); if(bar)bar.style.width=pct+'%';
+  var bias=(DATA.D_marketBias||[]).find(function(x){return x.date===dTodayKey();});
+  hubSet('hub-bias-month',bias?bias.bias:'未選'); hubSet('hub-bias-state',bias?(bias.bias==='多'?'多方':'空方'):'未選');
+  var rec=D_WAVE_AMPLITUDE&&Array.isArray(D_WAVE_AMPLITUDE.records)?D_WAVE_AMPLITUDE.records.slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date));}):[];
+  var amps=rec.map(function(x){return Number(x.amplitude);}).filter(isFinite), a5=amps.slice(0,5),p5=amps.slice(5,10),avg5=a5.length?a5.reduce(function(a,b){return a+b;},0)/a5.length:null,avgp=p5.length?p5.reduce(function(a,b){return a+b;},0)/p5.length:null,diff=avg5!=null&&avgp!=null?avg5-avgp:null;
+  hubSet('hub-bias-diff',diff==null?'—':(diff>=0?'+':'')+Math.round(diff)+' 點');
+  var note=diff==null?'5日振幅資料不足。':diff>0?'5日振幅差為正；方向仍由你確認。':diff<0?'5日振幅差為負；方向仍由你確認。':'5日振幅差接近 0；資料未提供明確偏向。';hubSet('hub-bias-note',note);
+  // 浪級績效
+  var waveEl=document.getElementById('hub-wave-grid'); if(waveEl){var levels=['小浪','中浪','大浪'];waveEl.innerHTML=levels.map(function(l){var arr=(DATA.D||[]).filter(function(r){return getDWaveLevel(r)===l;}), n=arr.length, w=arr.filter(function(r){return Number(r.net||0)>0;}).length, pn=arr.reduce(function(s,r){return s+Number(r.net||0);},0);return '<div class="hub-wave-box"><div class="hub-wave-name">'+l+'</div><div class="hub-wave-net" style="color:'+hubClassMoney(pn)+'">'+(n?hubMoney(pn):'—')+'</div><div class="hub-wave-meta">'+n+' 筆 · 勝率 '+(n?(w/n*100).toFixed(1):'—')+'%</div></div>';}).join('');}
+  // 最新振幅／區間
+  var q=_mtxQuote||{}; hubSet('hub-mtx-price',q.price!=null?Math.round(q.price).toLocaleString():'—'); hubSet('hub-mtx-hl',(q.todayHigh!=null&&q.todayLow!=null)?Math.round(q.todayHigh).toLocaleString()+' / '+Math.round(q.todayLow).toLocaleString():'—');
+  var amp=q.amplitude!=null?q.amplitude:null; if(amp==null&&rec.length)amp=Number(rec[0].amplitude); hubSet('hub-today-amplitude',isFinite(amp)?Math.round(amp).toLocaleString()+' 點':'—');
+  var avg20=(D_WAVE_AMPLITUDE&&Number(D_WAVE_AMPLITUDE.avg20))||null, ampPct=avg20&&isFinite(amp)?Math.max(0,Math.min(100,amp/avg20*100)):null; hubSet('hub-amplitude-pct',ampPct==null?'—':Math.round(ampPct)+'%');
+  var vs=D_WAVE_AMPLITUDE&&D_WAVE_AMPLITUDE.volatilityStructure, status=vs&&vs.status==='compressing'?'振幅收縮':vs&&vs.status==='expanding'?'振幅擴張':vs&&vs.status==='stable'?'穩定／混合':'—';hubSet('hub-wave-status',status);
+  var recentEl=document.getElementById('hub-recent-days');
+  if(recentEl){
+    recentEl.innerHTML=rec.slice(0,3).map(function(d){var av=Number(d.amplitude);return '<div class=\"hub-day-box\"><div class=\"hub-day-date\">'+hubEsc(d.date||'—')+'</div><div class=\"hub-day-amp\">'+(isFinite(av)?Math.round(av).toLocaleString():'—')+' 點</div><div class=\"hub-day-sub\">'+hubEsc(d.wave||classifyAmplitudeValue(av)||'—')+(d.close!=null?' · 收 '+Math.round(Number(d.close)).toLocaleString():'')+'</div></div>';}).join('')||'<div style=\"font-size:10px;color:var(--muted);padding:8px\">尚無最近3日振幅資料</div>';
+  }
+  var ranges=getDWaveRanges(), rangeEl=document.getElementById('hub-wave-ranges'); if(rangeEl){rangeEl.innerHTML=[['小浪',ranges.small],['中浪',ranges.middle],['大浪',ranges.large]].map(function(x){var lo=x[1]&&x[1].min!=null?Math.round(x[1].min).toLocaleString():'—',hi=x[1]&&x[1].max!=null?Math.round(x[1].max).toLocaleString():'—';return '<div class="hub-range-box"><b>'+x[0]+'</b><span>'+lo+' ～ '+hi+'</span></div>';}).join('');}
+  // 目前 Trade
+  var ct=document.getElementById('hub-current-trade'); if(ct){if(open){hubSet('hub-current-status','進行中');ct.innerHTML='<div class="hub-trade-grid"><div class="hub-trade-field"><span>進場時間</span><b>'+hubEsc(displayDateTime(open.entryTime))+'</b></div><div class="hub-trade-field"><span>進場價格</span><b>'+hubEsc(open.en==null?'—':Number(open.en).toLocaleString())+'</b></div><div class="hub-trade-field"><span>方向</span><b>'+hubEsc(open.dir==='B'?'多':'空')+'</b></div><div class="hub-trade-field"><span>口數</span><b>'+open.remaining+'</b></div><div class="hub-trade-field"><span>已出／初始</span><b>'+open.exitLots+' / '+open.entryLots+'</b></div><div class="hub-trade-field"><span>持倉時間</span><b>'+hubMinutes(Date.now()-new Date(open.entryTime).getTime())+'</b></div></div><button class="sbtn" style="width:100%;margin-top:8px" onclick="switchDTab(\'detail\')">前往交易明細／平倉</button>';}else{hubSet('hub-current-status','目前無持倉');ct.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:11px">今日目前沒有未平倉 Trade。'+(latest?'<br>最後 Trade #'+latest.no+' 已結束，淨額 '+hubMoney(latest.net):'')+'</div>';}}
+  // 今日概況
+  var sumEl=document.getElementById('hub-today-summary'); if(sumEl){var avgHold=groups.filter(function(g){return g.entryTime&&g.exitTime;}).map(function(g){return new Date(g.exitTime)-new Date(g.entryTime);});sumEl.innerHTML=[['進場次數',groups.length+' 次'],['平倉次數',completed+' 次'],['持倉中',posLots?posLots+' 口':'0 口'],['平均持倉',avgHold.length?hubMinutes(avgHold.reduce(function(a,b){return a+b;},0)/avgHold.length):'—']].map(function(x){return '<div class="hub-summary-item"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>';}).join('');}
+  hubSet('hub-raw-pnl',hubMoney(raw)); hubSet('hub-premium',premium?'-$'+Math.round(premium).toLocaleString():'$0'); hubSet('hub-net-pnl',hubMoney(net)); document.getElementById('hub-net-pnl').style.color=hubClassMoney(net);
+  // 週／月：沿用既有扣權利金公式
+  var all=DATA.D||[],dayRaw={},dayNet={};all.forEach(function(r){dayRaw[r.date]=(dayRaw[r.date]||0)+Number(r.net||0);});Object.keys(dayRaw).forEach(function(d){dayNet[d]=getDAdjustedNet(d,dayRaw[d]);});
+  var weekKey=getCurrentWeekKey(), wk=0,mo=0;Object.keys(dayNet).forEach(function(d){var dt=d.replace(/\//g,'-');if(d.slice(0,7)===dTodayKey().slice(0,7))mo+=dayNet[d];var dk=getWeekKeyForHub(d);if(dk===weekKey)wk+=dayNet[d];});
+  var pe=document.getElementById('hub-period-pnl');if(pe)pe.innerHTML='<div class="hub-period-item"><span>本週交易損益</span><b style="color:'+hubClassMoney(wk)+'">'+hubMoney(wk)+'</b></div><div class="hub-period-item"><span>本月交易損益</span><b style="color:'+hubClassMoney(mo)+'">'+hubMoney(mo)+'</b></div>';
+  // 出入金
+  var ioe=document.getElementById('hub-io-list'), io=(DATA.D_io||[]).slice().sort(function(a,b){return b.date.localeCompare(a.date);});if(ioe)ioe.innerHTML=io.slice(0,4).map(function(r){return '<div class="hub-io-row"><span>'+hubEsc(r.note|| (r.amt>=0?'入金':'出金'))+'</span><b style="color:'+hubClassMoney(r.amt)+'">'+hubMoney(r.amt)+'</b><small>'+hubEsc(r.date)+'</small></div>';}).join('')||'<div style="font-size:10px;color:var(--muted);padding:8px">尚無出入金紀錄</div>';
+  // Trade 1~5
+  var se=document.getElementById('hub-trade-seq');if(se){var seq=groups.slice(0,5);se.innerHTML=Array.from({length:5},function(_,i){var g=seq[i];return '<div class="hub-seq-row"><div class="hub-seq-no">'+(i+1)+'</div><div class="hub-seq-detail">'+(g?(g.dir==='B'?'多':'空')+' · '+(g.wave||'—')+' · '+g.entryLots+'口':'—')+'</div><div class="hub-seq-pnl" style="color:'+(g?hubClassMoney(g.net):'var(--muted)')+'">'+(g?hubMoney(g.net):'—')+'</div></div>';}).join('');}
+  // 今日表格
+  var tb=document.getElementById('hub-today-trades');if(tb){tb.innerHTML=groups.map(function(g){var hold=g.entryTime&&g.exitTime?hubMinutes(new Date(g.exitTime)-new Date(g.entryTime)):'—';return '<tr><td class="mono">#'+g.no+'</td><td class="mono">'+hubEsc(displayDateTime(g.entryTime))+'</td><td class="mono">'+(g.en==null?'—':Number(g.en).toLocaleString())+'</td><td>'+hubEsc(g.dir==='B'?'多':'空')+'</td><td>'+hubEsc(g.wave||'—')+'</td><td class="mono">'+g.entryLots+'／'+g.exitLots+'</td><td class="mono">'+(g.ex==null?'—':Number(g.ex).toLocaleString())+'</td><td>'+hold+'</td><td class="mono" style="color:'+hubClassMoney(g.net)+'">'+hubMoney(g.net)+'</td><td><span class="hub-status">'+(g.closed?'已結束':'進行中')+'</span></td></tr>';}).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:18px">今天尚無交易紀錄</td></tr>';}
+}
+window.renderHubHome=renderHubHome;
+function getWeekKeyForHub(dateStr){var p=dateStr.split('/');if(p.length!==3)return '';var d=new Date(+p[0],+p[1]-1,+p[2]);var thu=new Date(d);thu.setDate(d.getDate()-((d.getDay()+6)%7)+3);var firstThu=new Date(thu.getFullYear(),0,4);var week=1+Math.round(((thu-firstThu)/86400000-3+((firstThu.getDay()+6)%7))/7);return thu.getFullYear()+'-W'+String(week).padStart(2,'0');}
+
+// renderDPanel / loadMtxQuote 是本模組內的函式，直接在其流程中呼叫首頁更新；
+// 不覆寫 window.renderDPanel，避免模組作用域與全域作用域不同造成失效。
+
 updateLastBackupInfo();
 initData();
-loadAmplitude();
+loadAmplitude().finally(function(){ try{ renderHubHome(); }catch(e){} });
 loadMtxQuote(false);
 setInterval(function(){ loadMtxQuote(false); }, 10000);
 
@@ -3650,12 +3851,36 @@ setInterval(function(){ loadMtxQuote(false); }, 10000);
 window.hubNav=function(btn,tab){
   document.querySelectorAll('.hub-nav button').forEach(function(b){b.classList.remove('active')});
   if(btn) btn.classList.add('active');
-  if(typeof switchDTab==='function') switchDTab(tab);
-  var p=document.getElementById('panel-D'); if(p) p.scrollIntoView({behavior:'smooth',block:'start'});
+  else {
+    var map={home:0,detail:1,daily:2,monthly:3,stats:4,io:5};
+    var bs=document.querySelectorAll('.hub-nav button');
+    if(map[tab]!=null && bs[map[tab]]) bs[map[tab]].classList.add('active');
+  }
+  var panel=document.getElementById('panel-D');
+  var home=document.getElementById('hub-home');
+  if(tab==='home'){
+    if(panel) panel.classList.add('hub-home-active');
+    if(home) home.style.display='block';
+    if(typeof renderHubHome==='function') renderHubHome();
+  }else if(tab==='stats'){
+    if(panel) panel.classList.remove('hub-home-active');
+    if(typeof switchDTab==='function') switchDTab('detail');
+    setTimeout(function(){
+      var box=document.getElementById('d-stats-charts');
+      if(box && box.style.display==='none') window.toggleDStatsCharts();
+      var target=document.getElementById('D-stats-block');
+      if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+    },80);
+  }else{
+    if(panel) panel.classList.remove('hub-home-active');
+    if(typeof switchDTab==='function') switchDTab(tab);
+  }
+  if(panel) panel.scrollIntoView({behavior:'smooth',block:'start'});
 };
 (function(){
   try{ if(!localStorage.getItem('dashboard_theme')) localStorage.setItem('dashboard_theme','light'); }catch(e){}
 })();
+(function(){ var p=document.getElementById('panel-D'); if(p) p.classList.add('hub-home-active'); var h=document.getElementById('hub-home'); if(h) h.style.display='block'; })();
 </script>
 </body>
 </html>
