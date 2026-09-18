@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
 <title>每日衝浪板｜Wave Range Fixed 2026-09-18</title>
-<!-- V1：預覽模式不載入任何外部字型／網路資源 -->
+
 <style>
 :root {
   --bg:#0d0f14; --bg2:#141720; --bg3:#1c2030;
@@ -16,7 +16,7 @@
   --green:#34d399; --red:#f87171; --yellow:#f59e0b; --yellow2:#fbbf24;
   --gain:#d4a72c; --loss:#a855f7;
   --gray:#9ca3af; --blue:#60a5fa;
-  --font:'Noto Sans TC',sans-serif;
+  --font:'Noto Sans TC','Microsoft JhengHei',Arial,sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;}
@@ -524,6 +524,32 @@ canvas.d-chart { width:100%; display:block; }
 }
 
 
+
+/* ══ HUB V4：首頁儀表板，依參考介面重排 ══ */
+body.light{background:#f5f8fc;color:#1f2937;}
+.hub-sidebar{width:166px!important;background:#fff!important;color:#1f2937!important;border-right:1px solid #e4eaf1;box-shadow:none!important;padding:0!important;}
+.hub-brand{height:72px;padding:18px 16px 12px!important;border-bottom:1px solid #e8edf3!important;color:#172033!important;font-size:16px!important;white-space:nowrap;}
+.hub-brand small{color:#7b8798!important;font-size:9px!important;margin:3px 0 0 27px!important;}
+.hub-logo-mark,.brand-bars{color:#26384c;font-weight:900;letter-spacing:-4px;margin-right:7px;}
+.hub-nav{padding:16px 8px!important;gap:4px!important;}
+.hub-nav button{color:#536174!important;background:transparent!important;border-radius:7px!important;padding:11px 12px!important;font-size:12px!important;font-weight:600!important;}
+.hub-nav button:hover,.hub-nav button.active{background:#edf4fb!important;color:#15243a!important;box-shadow:inset 3px 0 0 #2d73b9!important;}
+.hub-side-bottom{border-top:1px solid #edf1f5;padding:14px 16px!important;color:#718096!important;margin-top:auto!important;}
+.hub-side-bottom span:first-child{color:#119d72;}
+.hub-side-bottom small{font-size:8.5px;color:#9aa5b4;line-height:1.7;}
+body.light .topbar{margin-left:166px!important;width:calc(100% - 166px)!important;height:58px!important;background:#fff!important;border-bottom:1px solid #e5ebf2!important;padding:0 20px!important;}
+body.light .topbar-logo{font-size:18px!important;color:#162235!important;}
+.topbar-logo>span:last-child{font-size:11px!important;color:#68768a!important;font-weight:500!important;margin-left:14px!important;}
+.hub-market-head{font-size:11px;color:#4b5a6d;gap:12px!important;}
+.head-label{font-size:10px;color:#637187;margin-right:4px}.head-up{color:#0b9871;font-weight:700}.head-divider{width:1px;height:22px;background:#e5eaf0;display:inline-block}.head-icon{font-size:17px;color:#526174}.head-user{font-size:11px;color:#334155;font-weight:700}.panel{margin-left:166px!important;padding:10px 18px 32px!important;max-width:none!important;}
+#hubHome{margin-left:166px;padding:10px 18px 32px;display:block;}
+#hubHome .hub-section-title{font-size:18px;font-weight:800;color:#18263a;margin:4px 0 10px;display:flex;align-items:center;gap:7px}
+#hubHome .hub-card{background:#fff;border:1px solid #dfe7ef;border-radius:7px;box-shadow:0 1px 2px rgba(31,45,61,.025);}
+#hubHome .hub-card-title{font-size:12px;font-weight:800;color:#24344a;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#hubHome .hub-muted{color:#718096;font-size:10px}.hub-kpi-grid{display:grid;grid-template-columns:1fr 1fr 1.05fr 1.15fr;gap:10px;margin-bottom:10px}.hub-kpi{padding:14px 15px;min-height:92px}.hub-kpi .big{font-size:25px;font-weight:800;letter-spacing:-.02em;color:#26364a}.hub-kpi .big.green{color:#07936e}.hub-kpi .sub{font-size:10px;color:#69778a;margin-top:9px}.hub-kpi .sub b{color:#334155}.hub-progress{height:8px;background:#e8edf2;border-radius:8px;overflow:hidden;margin-top:8px}.hub-progress i{display:block;height:100%;background:#263b50;border-radius:8px}.hub-main-grid{display:grid;grid-template-columns:minmax(330px,1.15fr) minmax(360px,1.25fr) minmax(220px,.72fr);gap:10px;align-items:start}.hub-col{display:flex;flex-direction:column;gap:10px}.hub-card.pad{padding:12px}.hub-rec-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid #e5ebf1;border-radius:6px;overflow:hidden}.hub-rec-grid>div{padding:11px 12px;border-right:1px solid #e5ebf1}.hub-rec-grid>div:last-child{border-right:0}.hub-rec-label{font-size:9px;color:#758398;margin-bottom:7px}.hub-rec-value{font-size:17px;font-weight:800;color:#24344a}.hub-rec-value.green{color:#0a936d}.hub-rec-value small{font-size:9px;font-weight:700;color:#0a936d}.hub-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hub-range-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.hub-range{padding:8px 10px;background:#fafbfd;border:1px solid #e5ebf1;border-radius:6px}.hub-range b{display:block;font-size:9px;color:#64748b;margin-bottom:4px}.hub-range span{font-size:12px;font-weight:800;color:#26364a}.hub-amplitude{display:grid;grid-template-columns:1fr 78px;gap:8px}.hub-amp-number{padding:12px;border:1px solid #e3e9ef;border-radius:6px}.hub-amp-number b{font-size:20px;color:#25364a}.hub-ring{width:58px;height:58px;border-radius:50%;border:5px solid #e5ebf0;border-top-color:#25364a;border-right-color:#25364a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin:auto}.hub-mini-state{padding:9px;border:1px solid #e4eaf0;border-radius:6px;background:#fbfcfe;font-size:9px;color:#718096}.hub-mini-state b{display:block;font-size:11px;color:#26364a;margin-top:3px}.hub-op-grid{display:grid;grid-template-columns:1fr 1fr 1fr 62px;gap:7px}.hub-select{border:1px solid #dce5ed;border-radius:6px;background:#fff;padding:8px 9px;color:#334155;font-size:11px;width:100%}.hub-entry-btn{margin-top:10px;width:100%;height:38px;border:0;border-radius:5px;background:#26333e;color:#fff;font-size:12px;font-weight:800}.hub-quote-strip{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #e3e9ef;border-radius:6px;margin-top:10px;overflow:hidden}.hub-quote-strip>div{padding:9px 10px;border-right:1px solid #e5ebf1}.hub-quote-strip>div:last-child{border-right:0}.hub-quote-strip b{display:block;font-size:9px;color:#748196;margin-bottom:3px}.hub-quote-strip span{font-size:12px;font-weight:800;color:#25364a}.hub-current-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.hub-current-cell{border:1px solid #e5ebf1;border-radius:6px;padding:8px 9px}.hub-current-cell b{display:block;font-size:9px;color:#7a8798;margin-bottom:3px}.hub-current-cell span{font-size:12px;font-weight:800;color:#24344a}.hub-flat{width:100%;margin-top:9px;height:29px;border:0;border-radius:4px;background:#26333e;color:#fff;font-size:10px;font-weight:800}.hub-right-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #edf1f4;font-size:10px;color:#718096}.hub-right-row:last-child{border-bottom:0}.hub-right-row b{color:#25364a;font-size:12px}.hub-green{color:#078e6b!important}.hub-status-pill{font-size:9px;padding:3px 7px;border-radius:10px;background:#edf8f4;color:#0b916e}.hub-table-wrap{margin-top:10px;overflow:hidden}.hub-table{width:100%;border-collapse:collapse;font-size:9px}.hub-table th{font-weight:600;color:#7b8798;background:#fafbfd;text-align:left;padding:7px 7px;border-bottom:1px solid #e5ebf1}.hub-table td{padding:7px;border-bottom:1px solid #edf1f4;color:#334155}.hub-table .pos{color:#07936e;font-weight:700}.hub-table .neg{color:#dc4b57}.hub-trade-status{background:#eaf4ff;color:#3279bb;padding:3px 7px;border-radius:9px}.hub-bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.hub-list{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #e5ebf1;border-radius:6px;overflow:hidden}.hub-list>div{padding:10px;border-right:1px solid #e5ebf1}.hub-list>div:last-child{border-right:0}.hub-list b{display:block;font-size:9px;color:#7a8798}.hub-list span{font-size:15px;font-weight:800;color:#24344a;display:block;margin-top:5px}.hub-alerts{font-size:10px;color:#5e6d80;line-height:1.8}.hub-alerts div{border-bottom:1px dashed #e5ebf1;padding:3px 0}.hub-alerts div:last-child{border:0}
+@media(max-width:1050px){.hub-main-grid{grid-template-columns:1fr 1fr}.hub-main-grid .hub-col:last-child{grid-column:1/-1}.hub-kpi-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.hub-sidebar{width:60px!important}.hub-brand{font-size:0!important;text-align:center;padding:18px 4px!important}.hub-brand small{display:none}.hub-logo-mark{font-size:20px}.hub-nav button{font-size:0!important;text-align:center;padding:12px 4px!important}.hub-nav button:first-letter{font-size:17px}.hub-side-bottom{display:none}body.light .topbar{margin-left:60px!important;width:calc(100% - 60px)!important}.panel,#hubHome{margin-left:60px!important;padding:8px!important}.hub-main-grid{grid-template-columns:1fr}.hub-kpi-grid{grid-template-columns:1fr 1fr}.hub-bottom-grid{grid-template-columns:1fr}.hub-market-head{display:none}}
+
 /* ══ HUB V3：企業白底儀表板介面覆蓋層 ══ */
 :root{--hub-side:#111827;--hub-side2:#1f2937;--hub-accent:#2563eb;--hub-bg:#f5f7fb;--hub-card:#fff;--hub-line:#e5e7eb;}
 body.light{--bg:var(--hub-bg);--bg2:var(--hub-card);--bg3:#f3f4f6;--border:var(--hub-line);--border2:#d1d5db;--text:#111827;--muted:#6b7280;--muted2:#4b5563;--green:#059669;--red:#dc2626;--yellow:#d97706;--yellow2:#b45309;--gain:#15803d;--loss:#7c3aed;--gray:#6b7280;--blue:#2563eb;}
@@ -552,34 +578,49 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 @media(max-width:899px){.hub-sidebar{width:68px;padding:16px 8px}.hub-brand{font-size:0;text-align:center;padding:4px 0 16px}.hub-brand:before{content:'🌊';font-size:22px}.hub-brand small{display:none}.hub-section,.hub-side-bottom{display:none}.hub-nav button{font-size:0;text-align:center;padding:11px 6px}.hub-nav button:before{font-size:17px}.hub-nav button:nth-child(1):before{content:'⌂'}.hub-nav button:nth-child(2):before{content:'▤'}.hub-nav button:nth-child(3):before{content:'◷'}.hub-nav button:nth-child(4):before{content:'▥'}.hub-nav button:nth-child(5):before{content:'↕'}.hub-nav button:nth-child(6):before{content:'⇩'}.hub-nav button:nth-child(7):before{content:'▣'}.hub-nav button:nth-child(8):before{content:'⚙'}.hub-dummy,body.light .topbar{margin-left:68px}body.light .topbar{width:calc(100% - 68px)}body.light .panel{margin-left:68px;padding-left:14px;padding-right:14px}body.light .quotes-wrap,body.light .signal-bar{margin-left:82px}body.light .tabs-wrap{margin-left:68px}}
 @media(max-width:699px){.hub-sidebar{display:none}body.light .cloud-bar,body.light .topbar,body.light .panel,body.light .tabs-wrap,body.light .quotes-wrap,body.light .signal-bar{margin-left:0;width:auto}.topbar{position:sticky}.panel{padding-left:12px!important;padding-right:12px!important}}
 
+</style>
+<style id="hub-v4-final-override">
+/* ══ HUB V4：首頁儀表板，依參考介面重排 ══ */
+body.light{background:#f5f8fc;color:#1f2937;}
+.hub-sidebar{width:166px!important;background:#fff!important;color:#1f2937!important;border-right:1px solid #e4eaf1;box-shadow:none!important;padding:0!important;}
+.hub-brand{height:72px;padding:18px 16px 12px!important;border-bottom:1px solid #e8edf3!important;color:#172033!important;font-size:16px!important;white-space:nowrap;}
+.hub-brand small{color:#7b8798!important;font-size:9px!important;margin:3px 0 0 27px!important;}
+.hub-logo-mark,.brand-bars{color:#26384c;font-weight:900;letter-spacing:-4px;margin-right:7px;}
+.hub-nav{padding:16px 8px!important;gap:4px!important;}
+.hub-nav button{color:#536174!important;background:transparent!important;border-radius:7px!important;padding:11px 12px!important;font-size:12px!important;font-weight:600!important;}
+.hub-nav button:hover,.hub-nav button.active{background:#edf4fb!important;color:#15243a!important;box-shadow:inset 3px 0 0 #2d73b9!important;}
+.hub-side-bottom{border-top:1px solid #edf1f5;padding:14px 16px!important;color:#718096!important;margin-top:auto!important;}
+.hub-side-bottom span:first-child{color:#119d72;}
+.hub-side-bottom small{font-size:8.5px;color:#9aa5b4;line-height:1.7;}
+body.light .topbar{margin-left:166px!important;width:calc(100% - 166px)!important;height:58px!important;background:#fff!important;border-bottom:1px solid #e5ebf2!important;padding:0 20px!important;}
+body.light .topbar-logo{font-size:18px!important;color:#162235!important;}
+.topbar-logo>span:last-child{font-size:11px!important;color:#68768a!important;font-weight:500!important;margin-left:14px!important;}
+.hub-market-head{font-size:11px;color:#4b5a6d;gap:12px!important;}
+.head-label{font-size:10px;color:#637187;margin-right:4px}.head-up{color:#0b9871;font-weight:700}.head-divider{width:1px;height:22px;background:#e5eaf0;display:inline-block}.head-icon{font-size:17px;color:#526174}.head-user{font-size:11px;color:#334155;font-weight:700}.panel{margin-left:166px!important;padding:10px 18px 32px!important;max-width:none!important;}
+#hubHome{margin-left:166px;padding:10px 18px 32px;display:block;}
+#hubHome .hub-section-title{font-size:18px;font-weight:800;color:#18263a;margin:4px 0 10px;display:flex;align-items:center;gap:7px}
+#hubHome .hub-card{background:#fff;border:1px solid #dfe7ef;border-radius:7px;box-shadow:0 1px 2px rgba(31,45,61,.025);}
+#hubHome .hub-card-title{font-size:12px;font-weight:800;color:#24344a;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#hubHome .hub-muted{color:#718096;font-size:10px}.hub-kpi-grid{display:grid;grid-template-columns:1fr 1fr 1.05fr 1.15fr;gap:10px;margin-bottom:10px}.hub-kpi{padding:14px 15px;min-height:92px}.hub-kpi .big{font-size:25px;font-weight:800;letter-spacing:-.02em;color:#26364a}.hub-kpi .big.green{color:#07936e}.hub-kpi .sub{font-size:10px;color:#69778a;margin-top:9px}.hub-kpi .sub b{color:#334155}.hub-progress{height:8px;background:#e8edf2;border-radius:8px;overflow:hidden;margin-top:8px}.hub-progress i{display:block;height:100%;background:#263b50;border-radius:8px}.hub-main-grid{display:grid;grid-template-columns:minmax(330px,1.15fr) minmax(360px,1.25fr) minmax(220px,.72fr);gap:10px;align-items:start}.hub-col{display:flex;flex-direction:column;gap:10px}.hub-card.pad{padding:12px}.hub-rec-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid #e5ebf1;border-radius:6px;overflow:hidden}.hub-rec-grid>div{padding:11px 12px;border-right:1px solid #e5ebf1}.hub-rec-grid>div:last-child{border-right:0}.hub-rec-label{font-size:9px;color:#758398;margin-bottom:7px}.hub-rec-value{font-size:17px;font-weight:800;color:#24344a}.hub-rec-value.green{color:#0a936d}.hub-rec-value small{font-size:9px;font-weight:700;color:#0a936d}.hub-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hub-range-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.hub-range{padding:8px 10px;background:#fafbfd;border:1px solid #e5ebf1;border-radius:6px}.hub-range b{display:block;font-size:9px;color:#64748b;margin-bottom:4px}.hub-range span{font-size:12px;font-weight:800;color:#26364a}.hub-amplitude{display:grid;grid-template-columns:1fr 78px;gap:8px}.hub-amp-number{padding:12px;border:1px solid #e3e9ef;border-radius:6px}.hub-amp-number b{font-size:20px;color:#25364a}.hub-ring{width:58px;height:58px;border-radius:50%;border:5px solid #e5ebf0;border-top-color:#25364a;border-right-color:#25364a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin:auto}.hub-mini-state{padding:9px;border:1px solid #e4eaf0;border-radius:6px;background:#fbfcfe;font-size:9px;color:#718096}.hub-mini-state b{display:block;font-size:11px;color:#26364a;margin-top:3px}.hub-op-grid{display:grid;grid-template-columns:1fr 1fr 1fr 62px;gap:7px}.hub-select{border:1px solid #dce5ed;border-radius:6px;background:#fff;padding:8px 9px;color:#334155;font-size:11px;width:100%}.hub-entry-btn{margin-top:10px;width:100%;height:38px;border:0;border-radius:5px;background:#26333e;color:#fff;font-size:12px;font-weight:800}.hub-quote-strip{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #e3e9ef;border-radius:6px;margin-top:10px;overflow:hidden}.hub-quote-strip>div{padding:9px 10px;border-right:1px solid #e5ebf1}.hub-quote-strip>div:last-child{border-right:0}.hub-quote-strip b{display:block;font-size:9px;color:#748196;margin-bottom:3px}.hub-quote-strip span{font-size:12px;font-weight:800;color:#25364a}.hub-current-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.hub-current-cell{border:1px solid #e5ebf1;border-radius:6px;padding:8px 9px}.hub-current-cell b{display:block;font-size:9px;color:#7a8798;margin-bottom:3px}.hub-current-cell span{font-size:12px;font-weight:800;color:#24344a}.hub-flat{width:100%;margin-top:9px;height:29px;border:0;border-radius:4px;background:#26333e;color:#fff;font-size:10px;font-weight:800}.hub-right-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #edf1f4;font-size:10px;color:#718096}.hub-right-row:last-child{border-bottom:0}.hub-right-row b{color:#25364a;font-size:12px}.hub-green{color:#078e6b!important}.hub-status-pill{font-size:9px;padding:3px 7px;border-radius:10px;background:#edf8f4;color:#0b916e}.hub-table-wrap{margin-top:10px;overflow:hidden}.hub-table{width:100%;border-collapse:collapse;font-size:9px}.hub-table th{font-weight:600;color:#7b8798;background:#fafbfd;text-align:left;padding:7px 7px;border-bottom:1px solid #e5ebf1}.hub-table td{padding:7px;border-bottom:1px solid #edf1f4;color:#334155}.hub-table .pos{color:#07936e;font-weight:700}.hub-table .neg{color:#dc4b57}.hub-trade-status{background:#eaf4ff;color:#3279bb;padding:3px 7px;border-radius:9px}.hub-bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.hub-list{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #e5ebf1;border-radius:6px;overflow:hidden}.hub-list>div{padding:10px;border-right:1px solid #e5ebf1}.hub-list>div:last-child{border-right:0}.hub-list b{display:block;font-size:9px;color:#7a8798}.hub-list span{font-size:15px;font-weight:800;color:#24344a;display:block;margin-top:5px}.hub-alerts{font-size:10px;color:#5e6d80;line-height:1.8}.hub-alerts div{border-bottom:1px dashed #e5ebf1;padding:3px 0}.hub-alerts div:last-child{border:0}
+@media(max-width:1050px){.hub-main-grid{grid-template-columns:1fr 1fr}.hub-main-grid .hub-col:last-child{grid-column:1/-1}.hub-kpi-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.hub-sidebar{width:60px!important}.hub-brand{font-size:0!important;text-align:center;padding:18px 4px!important}.hub-brand small{display:none}.hub-logo-mark{font-size:20px}.hub-nav button{font-size:0!important;text-align:center;padding:12px 4px!important}.hub-nav button:first-letter{font-size:17px}.hub-side-bottom{display:none}body.light .topbar{margin-left:60px!important;width:calc(100% - 60px)!important}.panel,#hubHome{margin-left:60px!important;padding:8px!important}.hub-main-grid{grid-template-columns:1fr}.hub-kpi-grid{grid-template-columns:1fr 1fr}.hub-bottom-grid{grid-template-columns:1fr}.hub-market-head{display:none}}
 
-.dboard-section-title{font-size:13px;font-weight:800;color:var(--text);margin:12px 0 7px}
-.dboard-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
-.dboard-kpi{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:12px 13px;min-height:78px}
-.dboard-kpi .k{font-size:10.5px;color:var(--muted);margin-bottom:6px}.dboard-kpi .v{font-size:21px;font-weight:800;font-family:monospace;color:var(--text)}
-.dboard-kpi .s{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.5}.dboard-progress{height:5px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-top:7px}.dboard-progress i{display:block;height:100%;width:0;background:var(--gain);border-radius:99px}
-@media(max-width:900px){.dboard-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+
 </style>
 </head>
 <body class="light">
 
 <div class="hub-sidebar" id="hubSidebar">
-  <div class="hub-brand">小台指當沖 HUB<small>交易儀表板 · 2026</small></div>
-  <div class="hub-section">工作區</div>
+  <div class="hub-brand"><span class="hub-logo-mark">▮▮</span> 每日衝浪板<small>讓紀律成為你的優勢</small></div>
   <div class="hub-nav">
-    <button class="active" onclick="hubNav(this,'detail')">總覽／交易明細</button>
-    <button onclick="hubNav(this,'daily')">每日損益</button>
-    <button onclick="hubNav(this,'monthly')">每月損益</button>
-    <button onclick="hubNav(this,'io')">出入金／權益</button>
+    <button class="active" onclick="hubNav(this,'home')">⌂　首頁</button>
+    <button onclick="hubNav(this,'detail')">▣　交易紀錄</button>
+    <button onclick="hubNav(this,'daily')">▤　每日損益</button>
+    <button onclick="hubNav(this,'monthly')">▥　統計分析</button>
+    <button onclick="hubNav(this,'settings')">⚙　策略設定</button>
+    <button onclick="hubNav(this,'system')">⚙　系統設定</button>
   </div>
-  <div class="hub-section">資料管理</div>
-  <div class="hub-nav">
-    <button onclick="showExportModal()">匯出／備份</button>
-    <button onclick="showArchiveList()">歷史封存</button>
-    <button onclick="showAllTimeOverview()">全期間總覽</button>
-    <button onclick="showArchiveConfirm()">封存重來</button>
-  </div>
-  <div class="hub-side-bottom">Firebase 雲端同步<br>Apps Script 20日振幅／三浪<br>MTX 即時報價</div>
+  <div class="hub-side-bottom"><span id="hubNetDot">●</span>　<span id="hubNetText">連線正常</span><br><small>台指期即時報價 · 資料來源：期交所</small></div>
 </div>
 
 
@@ -599,15 +640,11 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 </div>
 
 <div class="topbar">
-  <div class="topbar-logo">每日衝浪板</div>
-  <div class="topbar-right">
-    <span class="readonly-badge">👁 唯讀</span>
-    <button class="theme-btn" style="font-size:11px;color:#a78bfa" onclick="showBackups()" title="查看/還原本機備份">↩ 備份</button>
-    <button class="theme-btn" style="font-size:11px;color:#34d399" onclick="showExportModal()" title="匯出資料">⬇ 匯出</button>
-    <button class="theme-btn" style="font-size:11px;color:#fb923c" onclick="showArchiveList()" title="查看歷史封存">📜 歷史封存</button>
-    <button class="theme-btn" style="font-size:11px;color:#60a5fa" onclick="showAllTimeOverview()" title="目前+全部封存的總計統計">📊 全期間總覽</button>
-    <button class="theme-btn" style="font-size:11px;color:#f87171" onclick="showArchiveConfirm()" title="封存目前紀錄，重新開始">📦 封存重來</button>
-    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="切換亮/暗主題">🌙</button>
+  <div class="topbar-logo"><span class="brand-bars">▮▮</span> 每日衝浪板 <span>紀錄 · 分析 · 優化</span></div>
+  <div class="topbar-right hub-market-head">
+    <div><span class="head-label">台指期</span> <b id="hub-head-price">—</b> <span id="hub-head-change" class="head-up">—</span></div>
+    <span class="head-divider"></span><span id="hub-head-time" class="market-time">—</span>
+    <span class="head-icon">♧</span><span class="head-divider"></span><span class="head-user">●　pdww　⌄</span>
   </div>
 </div>
 <div id="allTimeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(5px);z-index:600;align-items:center;justify-content:center;padding:16px">
@@ -666,6 +703,69 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
     </div>
   </div>
 </div>
+
+<div id="hubHome">
+  <div class="hub-section-title">▣　今日狀態</div>
+  <div class="hub-kpi-grid">
+    <div class="hub-card hub-kpi"><div class="hub-card-title">◉　今日損益</div><div class="big" id="hh-today-net">+0 元</div><div class="sub">今日最高　<b id="hh-today-high">+0</b>　│　今日回撤　<b id="hh-today-dd">0</b></div></div>
+    <div class="hub-card hub-kpi"><div class="hub-card-title">◷　目前 Trade #</div><div class="big"><span id="hh-trade-no">0</span> <small>/ 5</small></div><div class="sub">已完成 <b id="hh-done-count">0</b> 筆　│　剩餘 <b id="hh-left-count">5</b> 筆</div></div>
+    <div class="hub-card hub-kpi"><div class="hub-card-title">◷　目前持倉</div><div class="big" id="hh-position">0 口</div><div class="sub">進場價　<b id="hh-entry-price">—</b>　│　持有 <b id="hh-hold-time">—</b></div></div>
+    <div class="hub-card hub-kpi"><div class="hub-card-title">▣　距離 +15,000 目標</div><div class="big" id="hh-target-left">15,000 元</div><div class="sub" style="text-align:right"><span id="hh-target-pct">達成 0%</span></div><div class="hub-progress"><i id="hh-target-bar" style="width:0%"></i></div></div>
+  </div>
+
+  <div class="hub-main-grid">
+    <div class="hub-col">
+      <div class="hub-card pad">
+        <div class="hub-card-title">▣　市場方向認知 <span class="hub-muted">（你判斷）</span></div>
+        <div class="hub-rec-grid">
+          <div><div class="hub-rec-label">月線方向</div><div class="hub-rec-value" id="hh-month-bias">—</div></div>
+          <div><div class="hub-rec-label">5日高低振幅</div><div class="hub-rec-value green" id="hh-5d-diff">— <small>（正數）</small></div></div>
+          <div><div class="hub-rec-label">整體認知</div><div class="hub-rec-value" id="hh-overall-bias">—</div><div class="hub-muted" style="margin-top:3px">建議：優先找多／空進場</div></div>
+        </div>
+      </div>
+      <div class="hub-card pad">
+        <div class="hub-card-title">♙　盤中操作 <span class="hub-muted">（自動讀取上次紀錄）</span></div>
+        <div class="hub-op-grid">
+          <select class="hub-select" id="hh-bias-select"><option>多方</option><option>空方</option></select>
+          <select class="hub-select" id="hh-wave-select"><option>中浪</option><option>小浪</option><option>大浪</option></select>
+          <select class="hub-select" id="hh-dir-select"><option>多</option><option>空</option></select>
+          <div style="display:flex;gap:3px"><button class="hub-select" onclick="hubAdjustLots(-1)">−</button><input id="hh-lots" class="hub-select" value="1" style="text-align:center"><button class="hub-select" onclick="hubAdjustLots(1)">＋</button></div>
+        </div>
+        <button class="hub-entry-btn" onclick="hubStartTrade()">進場</button>
+        <div class="hub-quote-strip"><div><b>即時台指</b><span id="hh-quote">—</span></div><div><b>進場時間</b><span id="hh-entry-time">—</span></div><div><b>進場價格</b><span id="hh-quick-entry">—</span></div><div><b>預估手續費</b><span>47 元</span></div></div>
+      </div>
+      <div class="hub-card pad">
+        <div class="hub-card-title">▣　今日交易概況</div>
+        <div class="hub-list"><div><b>進場次數</b><span id="hh-entry-count">0</span></div><div><b>平倉次數</b><span id="hh-close-count">0</span></div><div><b>持倉中</b><span id="hh-open-count">0</span></div><div><b>平均持倉時間</b><span id="hh-avg-hold">—</span></div></div>
+      </div>
+    </div>
+
+    <div class="hub-col">
+      <div class="hub-card pad">
+        <div class="hub-card-title">◷　今日風浪／振幅 <span class="hub-muted">（台指期）</span></div>
+        <div class="hub-amplitude"><div><div class="hub-amp-number"><div class="hub-muted">今日振幅</div><b id="hh-amplitude">— 點</b></div><div class="hub-muted" style="padding:8px 0 4px">風浪區間（20日市場振幅基準）</div><div class="hub-range-row"><div class="hub-range"><b>小浪</b><span id="hh-small-range">—</span></div><div class="hub-range"><b>中浪</b><span id="hh-mid-range">—</span></div><div class="hub-range"><b>大浪</b><span id="hh-large-range">—</span></div></div></div><div><div class="hub-ring" id="hh-ring">0%</div><div class="hub-muted" style="text-align:center;margin-top:6px">已進 20日均值</div></div></div>
+        <div class="hub-mini-state" style="margin-top:8px"><b>即時狀態</b><span id="hh-wave-state">目前位置　—　｜　距離估計 — 點</span></div>
+      </div>
+      <div class="hub-card pad">
+        <div class="hub-card-title">◷　目前 Trade #<span id="hh-current-status" class="hub-status-pill">進行中</span></div>
+        <div class="hub-current-grid"><div class="hub-current-cell"><b>進場時間</b><span id="hh-cur-time">—</span></div><div class="hub-current-cell"><b>進場價格</b><span id="hh-cur-price">—</span></div><div class="hub-current-cell"><b>方向</b><span id="hh-cur-dir">—</span></div><div class="hub-current-cell"><b>口數</b><span id="hh-cur-lots">0</span></div><div class="hub-current-cell"><b>已出⼝數</b><span id="hh-cur-exit-lots">0</span></div><div class="hub-current-cell"><b>持倉時間</b><span id="hh-cur-hold">—</span></div></div><button class="hub-flat" onclick="hubGoDetail()">平倉</button>
+      </div>
+      <div class="hub-card pad"><div class="hub-card-title">⚠　風險提示</div><div class="hub-alerts"><div>○　目前帳面已提領中浪上緣，請留意追高風險</div><div>○　月線偏多，個做多部位較佳</div><div>○　若振幅超過 900 點，建議暫停進場</div></div></div>
+    </div>
+
+    <div class="hub-col">
+      <div class="hub-card pad"><div class="hub-card-title">▣　每日損益 <button onclick="hubNav(null,'daily')" style="border:0;background:none;color:#718096;font-size:9px">編輯</button></div><div class="hub-right-row"><span>交易損益</span><b id="hh-gross">0</b></div><div class="hub-right-row"><span>權利金</span><b id="hh-premium">0</b></div><div class="hub-right-row"><span>每日淨損益</span><b id="hh-net">0</b></div><div class="hub-right-row"><span>權益金差異</span><b class="hub-green" id="hh-equity-diff">—</b><span class="hub-status-pill">正常</span></div></div>
+      <div class="hub-card pad"><div class="hub-card-title">▥　週／月獲利損益 <span class="hub-muted">查詢詳情 →</span></div><div class="hub-two"><div class="hub-range"><b>本週交易損益</b><span id="hh-week">0</span><div class="hub-muted" style="margin-top:5px">權益金差異 <b id="hh-week-eq">0</b></div></div><div class="hub-range"><b>本月交易損益</b><span id="hh-month">0</span><div class="hub-muted" style="margin-top:5px">權益金差異 <b id="hh-month-eq">0</b></div></div></div></div>
+      <div class="hub-card pad"><div class="hub-card-title">↕　出入金 <span class="hub-muted">查看全部 →</span></div><div id="hh-io-list"></div></div>
+    </div>
+  </div>
+
+  <div class="hub-bottom-grid">
+    <div class="hub-card pad"><div class="hub-card-title">▣　今日交易紀錄 <span class="hub-muted">（真正的 Trade：分批出場仍算一筆）</span></div><div class="hub-table-wrap"><table class="hub-table"><thead><tr><th>Trade #</th><th>進場時間</th><th>進場價格</th><th>方向</th><th>波段</th><th>口數</th><th>出場時間</th><th>出場價格</th><th>持倉時間</th><th>損益</th><th>權利金</th><th>淨損益</th><th>狀態</th></tr></thead><tbody id="hh-trade-table"></tbody></table></div></div>
+    <div class="hub-card pad"><div class="hub-card-title">◷　最近 3 個交易日</div><div id="hh-recent-days"></div></div>
+  </div>
+</div>
+
 <div class="panel active" id="panel-D">
   <div style="padding:12px 0 6px;font-size:12px;color:var(--muted)" id="dSubtitleBar">
     小台指當沖　｜　每點 $50　｜　原始保證金 <span id="dMarginDisplay">$175,250</span>/口 <button onclick="editMarginPerLot()" title="手動調整原始保證金" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0 2px;vertical-align:middle">✎</button>　｜　資金基礎（累計出入金）<span id="dCapitalBaseDisplay">$0</span>
@@ -673,14 +773,6 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 
    <!-- 指標卡 -->
   <div class="metrics" id="metrics-D"></div>
-  <div class="dboard-section-title">今日狀態</div>
-  <div class="dboard-kpi-grid" id="D-today-status">
-    <div class="dboard-kpi"><div class="k">今日損益</div><div class="v" id="D-today-pnl">$0</div><div class="s" id="D-today-dd">今日最高 $0　｜　回撤 $0</div></div>
-    <div class="dboard-kpi"><div class="k">目前 Trade #</div><div class="v" id="D-trade-count">0 / 5</div><div class="s" id="D-trade-progress">已完成 0　｜　剩餘 5</div></div>
-    <div class="dboard-kpi"><div class="k">目前 Trade</div><div class="v" id="D-current-trade">—</div><div class="s" id="D-current-trade-detail">今日尚無交易</div></div>
-    <div class="dboard-kpi"><div class="k">距離 +15,000 目標</div><div class="v" id="D-target-remain">$15,000</div><div class="dboard-progress"><i id="D-target-bar"></i></div><div class="s" id="D-target-pct">達標 0%</div></div>
-  </div>
-
 
   <!-- 今日操作狀態：小台指報價 + 市場方向認知 -->
   <div class="dboard-grid">
@@ -1004,25 +1096,26 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 
 const PREVIEW_MODE = new URLSearchParams(location.search).has('preview');
 let initializeApp, getFirestore, doc, getDoc, setDoc, onSnapshot;
-if (!PREVIEW_MODE) {
-  ({ initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'));
-  ({ getFirestore, doc, getDoc, setDoc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'));
-}
+let app = null, db = null, DOC_REF = null, SIGNAL_REF = null;
 
-// ── Firebase 設定（沿用主站同一個文件；本頁只負責 D / D_io / D_eq / D_archive / D_marginPerLot 這幾個欄位，
-//    絕不寫回 G/Y/C/T/MKT/PL/RC/RB 等主站欄位，避免蓋掉主站資料）──
-const firebaseConfig = {
-  apiKey: "AIzaSyDrcDKhuBo_yKLTLC3XIaKLSLYI2iq7gVI",
-  authDomain: "pudding-wu.firebaseapp.com",
-  projectId: "pudding-wu",
-  storageBucket: "pudding-wu.firebasestorage.app",
-  messagingSenderId: "100430453936",
-  appId: "1:100430453936:web:d77fe28e4b15e52fe22f75"
-};
-let app=null, db=null, DOC_REF=null, SIGNAL_REF=null;
+// 預覽模式完全不載入任何網路模組；正式／編輯模式才動態載入 Firebase。
 if (!PREVIEW_MODE) {
+  const firebaseAppMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+  const firebaseFsMod = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  ({ initializeApp } = firebaseAppMod);
+  ({ getFirestore, doc, getDoc, setDoc, onSnapshot } = firebaseFsMod);
+
+  // ── Firebase 設定（沿用主站同一個文件；本頁只負責 D 系列欄位）──
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrcDKhuBo_yKLTLC3XIaKLSLYI2iq7gVI",
+    authDomain: "pudding-wu.firebaseapp.com",
+    projectId: "pudding-wu",
+    storageBucket: "pudding-wu.firebasestorage.app",
+    messagingSenderId: "100430453936",
+    appId: "1:100430453936:web:d77fe28e4b15e52fe22f75"
+  };
   app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
+  db  = getFirestore(app);
   DOC_REF = doc(db, 'dashboard', '00631L');
   SIGNAL_REF = doc(db, 'dashboard', 'signals');
 }
@@ -2313,11 +2406,6 @@ function renderDSubtitle() {
 
 // ══ 小台指即時報價：讀取 K 線 Worker 寫入 Firebase 的 MTX 報價 ══
 window.loadMtxQuote = async function(force){
-  if (PREVIEW_MODE) {
-    var pe=document.getElementById('D-mtx-price'), me=document.getElementById('D-mtx-meta'), te=document.getElementById('D-mtx-time');
-    if(pe) pe.textContent='預覽'; if(me) me.textContent='預覽模式 · 未連線'; if(te) te.textContent='—';
-    return null;
-  }
   var priceEl=document.getElementById('D-mtx-price'), metaEl=document.getElementById('D-mtx-meta'),
       ampEl=document.getElementById('D-mtx-amplitude'), timeEl=document.getElementById('D-mtx-time');
   try{
@@ -2397,28 +2485,8 @@ window.editMarginPerLot = async function() {
   await saveData();
 };
 
-function renderDTodayStatus() {
-  var el=document.getElementById('D-today-status'); if(!el) return;
-  var today=dTodayKey(), rows=(DATA.D||[]).filter(function(r){return String(r.date||'')===today;});
-  var pnl=rows.reduce(function(s,r){return s+(Number(r.net)||0);},0);
-  var running=0, high=0; rows.forEach(function(r){running+=Number(r.net)||0; if(running>high) high=running;});
-  var dd=Math.max(0,high-running);
-  var ids=[]; rows.forEach(function(r){if(r.tradeId && ids.indexOf(r.tradeId)<0) ids.push(r.tradeId);});
-  var done=ids.length, remain=Math.max(0,5-done), current=done?ids[done-1]:'—';
-  var last=rows.length?rows[rows.length-1]:null;
-  var detail=last ? ((last.dir==='S'?'空':'多')+' · '+(last.entryPrice!=null?last.entryPrice:(last.en!=null?last.en:'—'))+' · '+(last.entryLots||last.lots||1)+'口') : '今日尚無交易';
-  var remainTarget=Math.max(0,15000-pnl), pct=Math.max(0,Math.min(100,pnl/15000*100));
-  var set=function(id,v){var x=document.getElementById(id);if(x)x.textContent=v;};
-  set('D-today-pnl',(pnl>=0?'+$':'-$')+Math.abs(Math.round(pnl)).toLocaleString());
-  set('D-today-dd','今日最高 '+(high>=0?'+$':'-$')+Math.abs(Math.round(high)).toLocaleString()+'　｜　回撤 $'+Math.round(dd).toLocaleString());
-  set('D-trade-count',done+' / 5'); set('D-trade-progress','已完成 '+done+'　｜　剩餘 '+remain); set('D-current-trade',current); set('D-current-trade-detail',detail);
-  set('D-target-remain',(remainTarget>0?'$':'目標已達成 +$')+Math.round(remainTarget>0?remainTarget:pnl).toLocaleString()); set('D-target-pct','達標 '+pct.toFixed(1)+'%');
-  var bar=document.getElementById('D-target-bar'); if(bar)bar.style.width=pct+'%';
-}
-
 function renderDPanel() {
   renderDSubtitle();
-  renderDTodayStatus();
   prefillDForm();
   // 預設日期欄為今天
   var deqDateEl = document.getElementById('D-equity-date');
@@ -3058,7 +3126,7 @@ function getThemeColors() {
 }
 
 function loadChartJS(cb) {
-  if (PREVIEW_MODE) { cb(); return; }
+  if (PREVIEW_MODE) return;
   if (window.Chart) { cb(); return; }
   var s = document.createElement('script');
   s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
@@ -3339,13 +3407,16 @@ window.toggleDGroup = function(uid) {
 async function initData() {
   if (PREVIEW_MODE) {
     try {
-      var savedPreview = localStorage.getItem('dashboard_00631L_data');
-      DATA = savedPreview ? JSON.parse(savedPreview) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+      setCloudStatus('connected', '預覽模式 · 網路停用');
+      const saved = localStorage.getItem('dashboard_00631L_data');
+      DATA = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
       normalizeDDates(DATA);
-    } catch (e) { DATA = JSON.parse(JSON.stringify(DEFAULT_DATA)); normalizeDDates(DATA); }
-    setCloudStatus('connected', '預覽模式 · 網路停用');
-    var dot=document.getElementById('cloudDot'); if(dot) dot.style.background='#60a5fa';
+    } catch (e) {
+      DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      normalizeDDates(DATA);
+    }
     renderDPanel();
+    if (window.renderHubHome) window.renderHubHome();
     return;
   }
   try {
@@ -3415,11 +3486,7 @@ var AMP_CACHE_KEY = 'daytrading_last_successful_amplitude_v8';
 const WAVE_API_URL = 'https://script.google.com/macros/s/AKfycbwcOoHVMfVIUlT9JbVhrZqwEkLwRyXgdg8CakKAnWHSN4y4UjfCqvlqKQF1O_r2H5vQ/exec';
 
 async function loadAmplitude() {
-  if (PREVIEW_MODE) {
-    _ampData = null;
-    renderDWaveAmplitude();
-    return null;
-  }
+  if (PREVIEW_MODE) return;
   try {
     const params = new URLSearchParams(window.location.search);
     const queryApi = params.get('waveApi');
@@ -3655,8 +3722,56 @@ function renderDWaveAmplitude(){
 
 updateLastBackupInfo();
 initData();
-if (!PREVIEW_MODE) { loadAmplitude(); loadMtxQuote(false); setInterval(function(){ loadMtxQuote(false); }, 10000); } else { loadMtxQuote(false); loadAmplitude(); }
+if (!PREVIEW_MODE) {
+  loadAmplitude();
+  loadMtxQuote(false);
+  setInterval(function(){ loadMtxQuote(false); }, 10000);
+}
 
+
+// ══ HUB V4 首頁資料渲染 ══
+function hubMoney(v){v=Number(v)||0;return (v>=0?'+':'')+Math.round(v).toLocaleString();}
+function hubDateKey(){var d=new Date();return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');}
+function hubFmtTime(v){if(!v)return '—';var d=new Date(v);if(isNaN(d))return String(v).slice(-8);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');}
+function hubMinutes(a,b){if(!a||!b)return null;var x=new Date(a),y=new Date(b);var n=Math.round((y-x)/60000);return isFinite(n)?n:null;}
+function hubDuration(n){if(n==null)return '—';return n<60?n+' 分鐘':Math.floor(n/60)+' 小時 '+(n%60)+' 分鐘';}
+function hubGroups(){
+  var rows=(DATA.D||[]).slice();var map={};
+  rows.forEach(function(r,i){var key=r.tradeId||((r.date||'')+'|'+(r.dir||'')+'|'+(r.en==null?'':r.en));if(!map[key])map[key]={id:r.tradeId||key,date:r.date,dir:r.dir,en:r.en,wave:r.wave,entryLots:Number(r.entryLots||r.lots||0),entryTime:r.entryTime,exitTime:r.exitTime,exitLots:0,net:0,exits:[],rows:[]};var g=map[key];g.rows.push(r);g.entryLots=Math.max(g.entryLots,Number(r.entryLots||0),Number(r.lots||0));g.exitLots+=Number(r.lots||0);g.net+=Number(r.net||0);if(r.en!=null&&g.en==null)g.en=r.en;if(r.entryTime&&(!g.entryTime||String(r.entryTime)<String(g.entryTime)))g.entryTime=r.entryTime;if(r.exitTime&&(!g.exitTime||String(r.exitTime)>String(g.exitTime)))g.exitTime=r.exitTime;g.exits.push(r);});
+  return Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return String(a.date).localeCompare(String(b.date))||String(a.entryTime||'').localeCompare(String(b.entryTime||''))||String(a.id).localeCompare(String(b.id));});
+}
+function hubTodayGroups(){var d=hubDateKey(),gs=hubGroups().filter(function(g){return String(g.date||'').replace(/-/g,'/')===d;});return gs;}
+function hubLatestOpen(gs){for(var i=gs.length-1;i>=0;i--){var g=gs[i];if(g.exitLots<g.entryLots || g.exits.some(function(r){return r.ex==null;}))return g;}return null;}
+function hubSet(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
+function hubRenderTrades(){
+  var gs=hubTodayGroups(), all=hubGroups(), open=hubLatestOpen(gs), done=gs.filter(function(g){return !(g.exitLots<g.entryLots||g.exits.some(function(r){return r.ex==null;}));});
+  var raw=gs.reduce(function(s,g){return s+g.net;},0), prem=(DATA.D_premium||[]).filter(function(x){return String(x.date||'').replace(/-/g,'/')===hubDateKey();}).reduce(function(s,x){return s+Number(x.amount||0);},0), net=raw-prem;
+  var run=0,high=0;gs.forEach(function(g){run+=g.net;high=Math.max(high,run);});var dd=run-high;
+  hubSet('hh-today-net',hubMoney(net)+' 元');hubSet('hh-gross',hubMoney(raw));hubSet('hh-premium',hubMoney(prem));hubSet('hh-net',hubMoney(net));hubSet('hh-today-high',hubMoney(high));hubSet('hh-today-dd',hubMoney(dd));
+  var no=gs.length, pct=Math.max(0,Math.min(100,net/15000*100)),left=Math.max(0,15000-net);hubSet('hh-trade-no',no||0);hubSet('hh-done-count',done.length);hubSet('hh-left-count',Math.max(0,5-no));hubSet('hh-target-left',Math.round(left).toLocaleString()+' 元');hubSet('hh-target-pct','達成 '+Math.round(pct)+'%');var bar=document.getElementById('hh-target-bar');if(bar)bar.style.width=pct+'%';
+  var pos=open?Math.max(0,open.entryLots-open.exitLots):0;hubSet('hh-position',pos+' 口');hubSet('hh-open-count',open?1:0);hubSet('hh-entry-count',gs.length);hubSet('hh-close-count',done.length);
+  if(open){hubSet('hh-entry-price',open.en!=null?Number(open.en).toLocaleString():'—');hubSet('hh-entry-time',hubFmtTime(open.entryTime));hubSet('hh-cur-time',hubFmtTime(open.entryTime));hubSet('hh-cur-price',open.en!=null?Number(open.en).toLocaleString():'—');hubSet('hh-cur-dir',open.dir==='B'?'多':'空');hubSet('hh-cur-lots',open.entryLots);hubSet('hh-cur-exit-lots',open.exitLots);hubSet('hh-cur-hold',hubDuration(hubMinutes(open.entryTime,new Date())));}
+  else {['hh-entry-price','hh-entry-time','hh-cur-time','hh-cur-price','hh-cur-dir'].forEach(function(id){hubSet(id,'—');});hubSet('hh-cur-lots',0);hubSet('hh-cur-exit-lots',0);hubSet('hh-cur-hold','—');}
+  var hold=gs.map(function(g){return hubMinutes(g.entryTime,g.exitTime);}).filter(function(n){return n!=null;});hubSet('hh-avg-hold',hold.length?hubDuration(Math.round(hold.reduce(function(a,b){return a+b;},0)/hold.length)):'—');
+  var tbody=document.getElementById('hh-trade-table');if(tbody){tbody.innerHTML=gs.slice(0,5).map(function(g,i){var ex=g.exits.length?g.exits[g.exits.length-1]:null;var pts=g.dir==='B'?((ex&&ex.ex!=null&&g.en!=null)?ex.ex-g.en:null):((ex&&ex.ex!=null&&g.en!=null)?g.en-ex.ex:null);var hold=hubMinutes(g.entryTime,g.exitTime);var done2=!(g.exitLots<g.entryLots||g.exits.some(function(r){return r.ex==null;}));return '<tr><td>'+(i+1)+'</td><td>'+hubFmtTime(g.entryTime)+'</td><td>'+(g.en!=null?Number(g.en).toLocaleString():'—')+'</td><td>'+(g.dir==='B'?'多':'空')+'</td><td>'+(g.wave||'—')+'</td><td>'+g.entryLots+'</td><td>'+hubFmtTime(g.exitTime)+'</td><td>'+(ex&&ex.ex!=null?Number(ex.ex).toLocaleString():'—')+'</td><td>'+hubDuration(hold)+'</td><td class="'+(g.net>=0?'pos':'neg')+'">'+hubMoney(g.net)+'</td><td>0</td><td class="'+(g.net>=0?'pos':'neg')+'">'+hubMoney(g.net)+'</td><td><span class="'+(done2?'':'hub-trade-status')+'">'+(done2?'已結束':'進行中')+'</span></td></tr>';}).join('')||'<tr><td colspan="13" style="text-align:center;color:#9aa5b4;padding:18px">今日尚無交易紀錄</td></tr>';}
+}
+function hubRenderMarket(){
+  var bias=(DATA.D_marketBias||[]).filter(function(x){return String(x.date||'').replace(/-/g,'/')===hubDateKey();})[0];var b=bias?bias.bias:'';hubSet('hh-month-bias',b||'—');hubSet('hh-overall-bias',b||'—');
+  var a=D_WAVE_AMPLITUDE||{}, rv=a.rankValues||{};var fmt=function(v){return v!=null&&isFinite(Number(v))?Math.round(Number(v)).toLocaleString():'—';};
+  var rec=a.recent3Days||[], today=rec.find(function(x){return String(x.date||'').replace(/-/g,'/')===hubDateKey();})||rec[0];hubSet('hh-amplitude',fmt(today&&today.amplitude)+' 點');var avg=Number(a.avg20);var ratio=avg>0&&today&&today.amplitude?Math.round(Number(today.amplitude)/avg*100):0;hubSet('hh-ring',ratio+'%');hubSet('hh-5d-diff',fmt(rv.rank1to7Average!=null?(Number(rv.rank1to7Average)-Number(rv.rank5to15Average)):null)+' （正數）');
+  function range(a,b){return fmt(a)+' ～ '+fmt(b);}hubSet('hh-small-range',range(rv.rank1,rv.rank1to7Average));hubSet('hh-mid-range',range(rv.rank5to10Average,rv.rank5to15Average));hubSet('hh-large-range',range(rv.rank15to20Average,rv.rank20));hubSet('hh-wave-state',(today&&today.wave)||'目前位置　—');
+}
+function hubRenderRight(){
+  var gs=hubGroups(), now=new Date(), weekStart=new Date(now);weekStart.setDate(now.getDate()-((now.getDay()+6)%7));var monthKey=hubDateKey().slice(0,7),week=0,month=0;gs.forEach(function(g){var d=new Date(String(g.date).replace(/\//g,'-'));if(d>=weekStart)week+=g.net;if(String(g.date).replace(/\//g,'-').slice(0,7)===monthKey)month+=g.net;});hubSet('hh-week',hubMoney(week));hubSet('hh-month',hubMoney(month));
+  var io=(DATA.D_io||[]).slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date));}).slice(0,3);var el=document.getElementById('hh-io-list');if(el)el.innerHTML=io.map(function(x){return '<div class="hub-right-row"><span>›　'+(Number(x.amt)>=0?'入金':'出金')+'</span><b>'+(Number(x.amt)>=0?'':'')+Number(x.amt).toLocaleString()+'</b><span>'+String(x.date||'').slice(5)+'</span></div>';}).join('')||'<div class="hub-muted" style="padding:8px 0">尚無出入金</div>';
+  var recent=document.getElementById('hh-recent-days'), map={};gs=hubGroups();gs.forEach(function(g){if(!map[g.date])map[g.date]=0;map[g.date]+=g.net;});var days=Object.keys(map).sort().reverse().slice(0,3);if(recent)recent.innerHTML=days.map(function(d){return '<div class="hub-right-row"><span>'+d+'</span><b class="'+(map[d]>=0?'hub-green':'neg')+'">'+hubMoney(map[d])+'</b></div>';}).join('')||'<div class="hub-muted">尚無歷史資料</div>';
+}
+function hubRenderQuote(){var p=document.getElementById('D-mtx-price'),m=document.getElementById('D-mtx-meta'),t=document.getElementById('D-mtx-time');hubSet('hh-quote',p?p.textContent:'—');hubSet('hh-quick-entry',p?p.textContent:'—');hubSet('hub-head-price',p?p.textContent:'—');hubSet('hub-head-time',t&&t.textContent?t.textContent:new Date().toLocaleTimeString('zh-TW',{hour12:false}));var c=document.getElementById('D-mtx-meta');hubSet('hub-head-change',c?c.textContent:'—');}
+function renderHubHome(){try{hubRenderTrades();hubRenderMarket();hubRenderRight();hubRenderQuote();}catch(e){console.warn('HUB首頁渲染失敗',e);}}
+window.renderHubHome=renderHubHome;
+window.hubAdjustLots=function(n){var e=document.getElementById('hh-lots');if(!e)return;e.value=Math.max(1,Math.min(5,(parseInt(e.value)||1)+n));};
+window.hubStartTrade=function(){var f=document.getElementById('D-en');var q=document.getElementById('D-mtx-price');if(f&&q){var n=parseFloat((q.textContent||'').replace(/,/g,''));if(isFinite(n))f.value=n;}var l=document.getElementById('D-entry-lots'),hl=document.getElementById('hh-lots');if(l&&hl)l.value=parseInt(hl.value)||1;var d=document.getElementById('D-dir'),hd=document.getElementById('hh-dir-select');if(d&&hd)d.value=hd.value==='多'?'B':'S';hubGoDetail();};
+window.hubGoDetail=function(){var btn=document.querySelector('.hub-nav button:nth-child(2)');hubNav(btn,'detail');setTimeout(function(){var el=document.getElementById('D-en');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},250);};
 </script>
 
 
@@ -3665,9 +3780,20 @@ if (!PREVIEW_MODE) { loadAmplitude(); loadMtxQuote(false); setInterval(function(
 window.hubNav=function(btn,tab){
   document.querySelectorAll('.hub-nav button').forEach(function(b){b.classList.remove('active')});
   if(btn) btn.classList.add('active');
+  var home=document.getElementById('hubHome'), panel=document.getElementById('panel-D');
+  if(tab==='home'){
+    if(home) home.style.display='block'; if(panel) panel.style.display='none'; document.body.classList.add('hub-home-active'); if(window.renderHubHome)window.renderHubHome(); window.scrollTo({top:0,behavior:'smooth'}); return;
+  }
+  if(home) home.style.display='none'; if(panel) panel.style.display='block'; document.body.classList.remove('hub-home-active');
+  if(tab==='settings'||tab==='system'){ if(typeof showAllTimeOverview==='function')showAllTimeOverview(); return; }
   if(typeof switchDTab==='function') switchDTab(tab);
-  var p=document.getElementById('panel-D'); if(p) p.scrollIntoView({behavior:'smooth',block:'start'});
+  if(panel) panel.scrollIntoView({behavior:'smooth',block:'start'});
 };
+(function(){
+  document.body.classList.add('hub-home-active');
+  var p=document.getElementById('panel-D'),h=document.getElementById('hubHome');if(p)p.style.display='none';if(h)h.style.display='block';
+  setInterval(function(){if(window.renderHubHome)window.renderHubHome();},1000);
+})();
 (function(){
   try{ if(!localStorage.getItem('dashboard_theme')) localStorage.setItem('dashboard_theme','light'); }catch(e){}
 })();
