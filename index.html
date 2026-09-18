@@ -549,7 +549,7 @@ body.light .dtab-wrap{box-shadow:0 1px 3px rgba(15,23,42,.04)}
 body.light .filter-bar{background:#fff;border-color:#e5e7eb}
 body.light .fg input,body.light .price-alert-input,body.light select{background:#fff;color:#111827}
 body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,body.light #archiveConfirmModal>div,body.light #backupModal>div,body.light #exportModal>div{background:#fff!important;color:#111827}
-@media(max-width:899px){.hub-sidebar{width:68px;padding:16px 8px}.hub-brand{font-size:0;text-align:center;padding:4px 0 16px}.hub-brand:before{content:'🌊';font-size:22px}.hub-brand small{display:none}.hub-section,.hub-side-bottom{display:none}.hub-nav button{font-size:0;text-align:center;padding:11px 6px}.hub-nav button:before{font-size:17px}.hub-nav button:nth-child(1):before{content:'⌂'}.hub-nav button:nth-child(2):before{content:'▤'}.hub-nav button:nth-child(3):before{content:'◷'}.hub-nav button:nth-child(4):before{content:'▥'}.hub-nav button:nth-child(5):before{content:'▥'}.hub-nav button:nth-child(6):before{content:'↕'}.hub-nav button:nth-child(7):before{content:'⇩'}.hub-nav button:nth-child(8):before{content:'▣'}.hub-nav button:nth-child(9):before{content:'⚙'}.hub-nav button:nth-child(10):before{content:'📦'}.hub-dummy,body.light .topbar{margin-left:68px}body.light .topbar{width:calc(100% - 68px)}body.light .panel{margin-left:68px;padding-left:14px;padding-right:14px}body.light .quotes-wrap,body.light .signal-bar{margin-left:82px}body.light .tabs-wrap{margin-left:68px}}
+@media(max-width:899px){.hub-sidebar{width:68px;padding:16px 8px}.hub-brand{font-size:0;text-align:center;padding:4px 0 16px}.hub-brand:before{content:'🌊';font-size:22px}.hub-brand small{display:none}.hub-section,.hub-side-bottom{display:none}.hub-nav button{font-size:0;text-align:center;padding:11px 6px}.hub-nav button .nav-ico{font-size:17px}.hub-dummy,body.light .topbar{margin-left:68px}body.light .topbar{width:calc(100% - 68px)}body.light .panel{margin-left:68px;padding-left:14px;padding-right:14px}body.light .quotes-wrap,body.light .signal-bar{margin-left:82px}body.light .tabs-wrap{margin-left:68px}}
 @media(max-width:699px){.hub-sidebar{display:none}body.light .cloud-bar,body.light .topbar,body.light .panel,body.light .tabs-wrap,body.light .quotes-wrap,body.light .signal-bar{margin-left:0;width:auto}.topbar{position:sticky}.panel{padding-left:12px!important;padding-right:12px!important}}
 
 
@@ -602,13 +602,42 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-trade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .hub-trade-field{background:var(--bg3);border-radius:7px;padding:8px}.hub-trade-field span{display:block;font-size:9px;color:var(--muted)}.hub-trade-field b{display:block;font-size:12px;color:var(--text);margin-top:3px;font-family:monospace}
 .hub-summary-grid,.hub-period-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.hub-bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.hub-risk-list{display:flex;flex-direction:column;gap:7px}
+.hub-risk-item{display:flex;gap:8px;align-items:flex-start;padding:8px 9px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)}
+.hub-risk-dot{font-size:12px;line-height:1.5}.hub-risk-text{font-size:10.5px;color:var(--muted);line-height:1.65}.hub-risk-text b{color:var(--text)}
+.hub-risk-level{font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;border:1px solid var(--border2)}
 .hub-summary-item,.hub-period-item{background:var(--bg3);border-radius:7px;padding:9px}.hub-summary-item span,.hub-period-item span{display:block;font-size:9px;color:var(--muted)}.hub-summary-item b,.hub-period-item b{display:block;font:700 15px monospace;margin-top:4px;color:var(--text)}
 .hub-pnl-list>div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px}.hub-pnl-list>div:last-child{border-bottom:0}.hub-pnl-list span{color:var(--muted)}.hub-pnl-list b{font:700 13px monospace;color:var(--text)}.hub-pnl-list .hub-total b{font-size:17px}
 .hub-io-list{display:flex;flex-direction:column;gap:5px}.hub-io-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;background:var(--bg3);border-radius:6px;padding:7px 8px;font-size:10px}.hub-io-row span:first-child{color:var(--muted)}.hub-io-row b{font-family:monospace;color:var(--text)}.hub-io-row small{color:var(--muted2)}
 .hub-seq-row{display:grid;grid-template-columns:35px 1fr auto;gap:7px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px}.hub-seq-row:last-child{border-bottom:0}.hub-seq-no{font:800 11px monospace;color:var(--muted)}.hub-seq-detail{color:var(--muted2)}.hub-seq-pnl{font:700 11px monospace}.hub-today-table-card{margin-top:10px}.hub-link-btn{margin-left:auto;border:1px solid var(--border2);background:var(--bg3);color:var(--muted2);border-radius:6px;padding:4px 8px;font-size:10px;cursor:pointer;font-family:var(--font)}.hub-table-wrap{overflow-x:auto}.hub-table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:10.5px}.hub-table th{padding:7px 8px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border2)}.hub-table td{padding:8px;border-bottom:1px solid var(--border);color:var(--text)}.hub-table td.mono{font-family:monospace}.hub-status{padding:2px 6px;border-radius:5px;font-size:9px;background:var(--bg3);color:var(--muted2)}
 .hub-home-active> :not(#hub-home){display:none!important}
 @media(max-width:1100px){.hub-kpi-grid{grid-template-columns:repeat(2,1fr)}.hub-main-grid{grid-template-columns:1fr 1fr}.hub-col-right{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,1fr)}}
-@media(max-width:699px){.hub-kpi-grid,.hub-main-grid{grid-template-columns:1fr}.hub-col-right{grid-column:auto;display:flex}.hub-bias-grid,.hub-wave-grid,.hub-range-grid{grid-template-columns:1fr}.hub-recent-days{grid-template-columns:1fr}.hub-table{font-size:10px}}
+@media(max-width:699px){.hub-kpi-grid,.hub-main-grid,.hub-bottom-grid{grid-template-columns:1fr}.hub-col-right{grid-column:auto;display:flex}.hub-bias-grid,.hub-wave-grid,.hub-range-grid{grid-template-columns:1fr}.hub-recent-days{grid-template-columns:1fr}.hub-table{font-size:10px}}
+
+
+/* ══ HUB 0918 簡化導覽：全站只保留一套全域操作列；子頁不重複顯示首頁資訊 ══ */
+.hub-sidebar .hub-nav button{display:flex;align-items:center;gap:9px;}
+.hub-sidebar .nav-ico{width:20px;min-width:20px;text-align:center;font-size:16px;line-height:1;}
+.hub-sidebar .hub-add-btn{margin:2px 0 5px;background:rgba(96,165,250,.14);color:#fff;border:1px solid rgba(96,165,250,.28);}
+.hub-sidebar .hub-add-btn:hover,.hub-sidebar .hub-add-btn.active{background:#2563eb;color:#fff;box-shadow:none;}
+.hub-sidebar .hub-nav-secondary button{font-size:11px;color:#9ca3af;}
+.hub-top-add{border:1px solid rgba(37,99,235,.35);background:#2563eb;color:#fff;border-radius:7px;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:var(--font);}
+.hub-top-add:hover{filter:brightness(1.05);}
+/* 非首頁只顯示該頁自己的內容；MTX／方向認知／振幅等首頁資訊不再每個頁籤重複 */
+#panel-D.hub-subpage-mode > .metrics,
+#panel-D.hub-subpage-mode > .dboard-grid,
+#panel-D.hub-subpage-mode > #amp-card{display:none!important;}
+#panel-D.hub-subpage-mode > .dtab-wrap{margin-top:0;}
+#panel-D.hub-subpage-mode .hub-entry-card{scroll-margin-top:86px;}
+.hub-entry-card .card-hd{position:sticky;top:0;z-index:4;background:var(--bg2);}
+@media(max-width:699px){.hub-top-add{padding:6px 9px}.hub-sidebar .hub-nav button{justify-content:center}.hub-sidebar .nav-ico{width:auto}.hub-sidebar .hub-add-btn{margin-bottom:4px;}}
+
+
+.hub-detail-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:9px;}
+.hub-detail-toolbar b{font-size:13px;color:var(--text);}.hub-detail-toolbar span{font-size:10px;color:var(--muted);margin-left:8px;}
+.hub-detail-toolbar button{border:1px solid rgba(37,99,235,.35);background:#2563eb;color:#fff;border-radius:7px;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:var(--font);white-space:nowrap;}
+@media(max-width:699px){.hub-detail-toolbar{align-items:flex-start}.hub-detail-toolbar div{display:flex;flex-direction:column;gap:3px}.hub-detail-toolbar span{margin-left:0;}}
 
 </style>
 </head>
@@ -616,23 +645,24 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
-  <div class="hub-section">工作區</div>
+  <div class="hub-section">主要功能</div>
   <div class="hub-nav">
-    <button class="active" onclick="hubNav(this,'home')">首頁</button>
-    <button onclick="hubNav(this,'detail')">交易紀錄</button>
-    <button onclick="hubNav(this,'daily')">每日損益</button>
-    <button onclick="hubNav(this,'monthly')">每月損益</button>
-    <button onclick="hubNav(this,'stats')">統計分析</button>
-    <button onclick="hubNav(this,'io')">出入金／權益</button>
+    <button class="active" onclick="hubNav(this,'home')"><span class="nav-ico">⌂</span>首頁</button>
+    <button class="hub-add-btn" onclick="hubNav(this,'entry')"><span class="nav-ico">＋</span>新增紀錄</button>
+    <button onclick="hubNav(this,'detail')"><span class="nav-ico">▤</span>交易紀錄</button>
+    <button onclick="hubNav(this,'daily')"><span class="nav-ico">◷</span>每日損益</button>
+    <button onclick="hubNav(this,'monthly')"><span class="nav-ico">▦</span>每月損益</button>
+    <button onclick="hubNav(this,'stats')"><span class="nav-ico">▥</span>統計分析</button>
+    <button onclick="hubNav(this,'io')"><span class="nav-ico">↕</span>資金／權益</button>
   </div>
   <div class="hub-section">資料管理</div>
-  <div class="hub-nav">
-    <button onclick="showExportModal()">匯出／備份</button>
-    <button onclick="showArchiveList()">歷史封存</button>
-    <button onclick="showAllTimeOverview()">全期間總覽</button>
-    <button onclick="showArchiveConfirm()">封存重來</button>
+  <div class="hub-nav hub-nav-secondary">
+    <button onclick="showExportModal()"><span class="nav-ico">⇩</span>匯出／備份</button>
+    <button onclick="showArchiveList()"><span class="nav-ico">▣</span>歷史封存</button>
+    <button onclick="showAllTimeOverview()"><span class="nav-ico">◫</span>全期間總覽</button>
+    <button onclick="showArchiveConfirm()"><span class="nav-ico">📦</span>封存重來</button>
   </div>
-  <div class="hub-side-bottom">Firebase 雲端同步<br>Apps Script 20日振幅／三浪<br>MTX 即時報價</div>
+  <div class="hub-side-bottom">☁ Firebase 雲端同步<br>🌊 20日振幅／三浪<br>📈 MTX 即時報價</div>
 </div>
 
 
@@ -654,13 +684,11 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 <div class="topbar">
   <div class="topbar-logo">每日衝浪板</div>
   <div class="topbar-right">
+    <button class="hub-top-add" onclick="hubNav(null,'entry')">＋ 新增紀錄</button>
     <span class="readonly-badge">👁 唯讀</span>
-    <button class="theme-btn" style="font-size:11px;color:#a78bfa" onclick="showBackups()" title="查看/還原本機備份">↩ 備份</button>
-    <button class="theme-btn" style="font-size:11px;color:#34d399" onclick="showExportModal()" title="匯出資料">⬇ 匯出</button>
-    <button class="theme-btn" style="font-size:11px;color:#fb923c" onclick="showArchiveList()" title="查看歷史封存">📜 歷史封存</button>
-    <button class="theme-btn" style="font-size:11px;color:#60a5fa" onclick="showAllTimeOverview()" title="目前+全部封存的總計統計">📊 全期間總覽</button>
-    <button class="theme-btn" style="font-size:11px;color:#f87171" onclick="showArchiveConfirm()" title="封存目前紀錄，重新開始">📦 封存重來</button>
-    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="切換亮/暗主題">🌙</button>
+    <button class="theme-btn" onclick="showBackups()" title="查看／還原本機備份">↩</button>
+    <button class="theme-btn" onclick="showExportModal()" title="匯出資料">⇩</button>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="切換亮／暗主題">🌙</button>
   </div>
 </div>
 <div id="allTimeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(5px);z-index:600;align-items:center;justify-content:center;padding:16px">
@@ -791,10 +819,6 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div id="hub-current-trade"></div>
         </div>
 
-        <div class="hub-card">
-          <div class="hub-card-title">📋 今日交易概況</div>
-          <div class="hub-summary-grid" id="hub-today-summary"></div>
-        </div>
       </div>
 
       <div class="hub-col-right">
@@ -818,6 +842,17 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="hub-card-title">📊 Trade 1～5</div>
           <div id="hub-trade-seq"></div>
         </div>
+      </div>
+    </div>
+
+    <div class="hub-bottom-grid">
+      <div class="hub-card">
+        <div class="hub-card-title">📊 今日交易概況</div>
+        <div class="hub-summary-grid" id="hub-today-summary-bottom"></div>
+      </div>
+      <div class="hub-card" id="hub-risk-card">
+        <div class="hub-card-title">⚠️ 風險評估 <span>（依目前持倉、回撤、振幅與目標進度）</span><span class="hub-card-right" id="hub-risk-level">—</span></div>
+        <div id="hub-risk-list" class="hub-risk-list"></div>
       </div>
     </div>
 
@@ -875,6 +910,10 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 
   <!-- ① 交易明細 -->
   <div class="dtab-panel active" id="dpanel-detail">
+    <div class="hub-detail-toolbar">
+      <div><b>交易紀錄</b><span>查詢、檢視與新增當沖 Trade</span></div>
+      <button onclick="document.getElementById('hub-entry-card').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(function(){var e=document.getElementById('D-entry-lots');if(e&&!document.body.classList.contains('readonly'))e.focus();},150)">＋ 新增紀錄</button>
+    </div>
     <!-- 篩選列 -->
     <div class="filter-bar">
       <label>日期</label>
@@ -914,9 +953,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="card-hd">📊 20日市場振幅｜Apps Script 自動更新</div>
       <div class="card-bd" id="D-wave-amplitude-body"></div>
     </div>
-    <!-- ★ 新增交易（置頂）-->
-    <div class="card">
-      <div class="card-hd">➕ 新增當沖交易</div>
+    <!-- ★ 新增交易：唯一入口，首頁／側欄／上方按鈕都導向這裡 -->
+    <div class="card hub-entry-card" id="hub-entry-card">
+      <div class="card-hd"><span>➕ 新增當沖交易</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">進場價＋進場時間必填</span></div>
       <div class="card-bd">
         <div class="form-grid">
           <div class="fg"><label>日期</label><input id="D-date" placeholder="2026/5/27" onblur="autoFormatDDate(this)"></div>
@@ -932,7 +971,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
               <option value="B">多 B</option><option value="S">空 S</option>
             </select>
           </div>
-          <div class="fg"><label>進場價 <span style="color:var(--muted2)">（自動）</span></label><input id="D-en" type="number" placeholder="由 MTX 報價帶入"></div>
+          <div class="fg"><label>進場點數 <span style="color:var(--muted2)">（可手動修正）</span></label><input id="D-en" type="number" placeholder="由 MTX 報價帶入"></div>
           <div class="fg"><label>出場價 <span style="color:var(--muted2)">（自動）</span></label><input id="D-ex" type="number" placeholder="由 MTX 報價帶入"></div>
           <div class="fg"><label>進場時間</label><input id="D-entry-time" type="datetime-local" class="readonly-input"></div>
           <div class="fg"><label>出場時間</label><input id="D-exit-time" type="datetime-local" class="readonly-input"></div>
@@ -3818,7 +3857,38 @@ function renderHubHome(){
   // 目前 Trade
   var ct=document.getElementById('hub-current-trade'); if(ct){if(open){hubSet('hub-current-status','進行中');ct.innerHTML='<div class="hub-trade-grid"><div class="hub-trade-field"><span>進場時間</span><b>'+hubEsc(displayDateTime(open.entryTime))+'</b></div><div class="hub-trade-field"><span>進場價格</span><b>'+hubEsc(open.en==null?'—':Number(open.en).toLocaleString())+'</b></div><div class="hub-trade-field"><span>方向</span><b>'+hubEsc(open.dir==='B'?'多':'空')+'</b></div><div class="hub-trade-field"><span>口數</span><b>'+open.remaining+'</b></div><div class="hub-trade-field"><span>已出／初始</span><b>'+open.exitLots+' / '+open.entryLots+'</b></div><div class="hub-trade-field"><span>持倉時間</span><b>'+hubMinutes(Date.now()-new Date(open.entryTime).getTime())+'</b></div></div><button class="sbtn" style="width:100%;margin-top:8px" onclick="switchDTab(\'detail\')">前往交易明細／平倉</button>';}else{hubSet('hub-current-status','目前無持倉');ct.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:11px">今日目前沒有未平倉 Trade。'+(latest?'<br>最後 Trade #'+latest.no+' 已結束，淨額 '+hubMoney(latest.net):'')+'</div>';}}
   // 今日概況
-  var sumEl=document.getElementById('hub-today-summary'); if(sumEl){var avgHold=groups.filter(function(g){return g.entryTime&&g.exitTime;}).map(function(g){return new Date(g.exitTime)-new Date(g.entryTime);});sumEl.innerHTML=[['進場次數',groups.length+' 次'],['平倉次數',completed+' 次'],['持倉中',posLots?posLots+' 口':'0 口'],['平均持倉',avgHold.length?hubMinutes(avgHold.reduce(function(a,b){return a+b;},0)/avgHold.length):'—']].map(function(x){return '<div class="hub-summary-item"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>';}).join('');}
+  var avgHold=groups.filter(function(g){return g.entryTime&&g.exitTime;}).map(function(g){return new Date(g.exitTime)-new Date(g.entryTime);});
+  var summaryHtml=[['進場次數',groups.length+' 次'],['平倉次數',completed+' 次'],['持倉中',posLots?posLots+' 口':'0 口'],['平均持倉',avgHold.length?hubMinutes(avgHold.reduce(function(a,b){return a+b;},0)/avgHold.length):'—']].map(function(x){return '<div class="hub-summary-item"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>';}).join('');
+  var sumEl=document.getElementById('hub-today-summary'); if(sumEl) sumEl.innerHTML=summaryHtml;
+  var sumBottom=document.getElementById('hub-today-summary-bottom'); if(sumBottom) sumBottom.innerHTML=summaryHtml;
+
+  // 風險評估：只使用目前頁面已有的客觀資料，不寫死市場數字。
+  var riskEl=document.getElementById('hub-risk-list'), riskLevelEl=document.getElementById('hub-risk-level');
+  if(riskEl){
+    var riskItems=[], riskScore=0;
+    var todayPeak=Math.max(0,peak), ddAbs=Math.max(0,dd);
+    var targetPct=target>0?Math.max(0,net/target*100):0;
+    var ampNow=isFinite(amp)?amp:null, middleMax=ranges&&ranges.middle&&isFinite(Number(ranges.middle.max))?Number(ranges.middle.max):null, largeMax=ranges&&ranges.large&&isFinite(Number(ranges.large.max))?Number(ranges.large.max):null;
+    var marginPer=_dMargin(), marginUsedNow=posLots*marginPer;
+    if(posLots>0){
+      riskScore+=1; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>持倉風險：</b>目前 '+posLots+' 口，保證金約 $'+Math.round(marginUsedNow).toLocaleString()+'；持倉尚未結束。</div>');
+    }else{ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>持倉風險：</b>目前無未平倉部位。</div>'); }
+    if(ampNow!=null && middleMax!=null && ampNow>middleMax){
+      riskScore+=2; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>振幅風險：</b>目前振幅 '+Math.round(ampNow).toLocaleString()+' 點，已高於中浪上緣 '+Math.round(middleMax).toLocaleString()+' 點。');
+      if(largeMax!=null) riskItems[riskItems.length-1]+='，進入較高波動區間。'; riskItems[riskItems.length-1]+='</div>';
+    }else if(ampNow!=null && middleMax!=null){
+      riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>振幅風險：</b>目前振幅 '+Math.round(ampNow).toLocaleString()+' 點，尚未超過中浪上緣 '+Math.round(middleMax).toLocaleString()+' 點。</div>');
+    }else{ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>振幅風險：</b>20日振幅區間資料尚未完整，暫不判定。</div>'); }
+    if(ddAbs>0){
+      riskScore+=1; var ddRatio=todayPeak>0?ddAbs/todayPeak*100:null; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>今日回撤：</b>目前回撤 '+hubMoney(ddAbs)+(ddRatio!=null?'，約為今日最高損益的 '+ddRatio.toFixed(1)+'%。':'。')+'</div>');
+    }else{ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>今日回撤：</b>目前沒有可計算的回撤。</div>'); }
+    if(net>=target){ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>目標狀態：</b>今日淨損益已達到 +$'+target.toLocaleString()+' 目標（'+Math.min(100,targetPct).toFixed(0)+'%）。</div>'); }
+    else if(net>0){ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>目標狀態：</b>目前完成 '+targetPct.toFixed(0)+'%，距離目標尚差 $'+Math.round(target-net).toLocaleString()+'。</div>'); }
+    else{ riskScore+=1; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>目標狀態：</b>目前尚未達標，淨損益為 '+hubMoney(net)+'。</div>'); }
+    riskEl.innerHTML=riskItems.join('');
+    var level=riskScore>=4?'高':riskScore>=2?'中':'低';
+    if(riskLevelEl){riskLevelEl.textContent='目前風險：'+level; riskLevelEl.className='hub-card-right hub-risk-level';}
+  }
   hubSet('hub-raw-pnl',hubMoney(raw)); hubSet('hub-premium',premium?'-$'+Math.round(premium).toLocaleString():'$0'); hubSet('hub-net-pnl',hubMoney(net)); document.getElementById('hub-net-pnl').style.color=hubClassMoney(net);
   // 週／月：沿用既有扣權利金公式
   var all=DATA.D||[],dayRaw={},dayNet={};all.forEach(function(r){dayRaw[r.date]=(dayRaw[r.date]||0)+Number(r.net||0);});Object.keys(dayRaw).forEach(function(d){dayNet[d]=getDAdjustedNet(d,dayRaw[d]);});
@@ -3849,19 +3919,31 @@ setInterval(function(){ loadMtxQuote(false); }, 10000);
 <script>
 // HUB V3 導覽：不改動原有交易資料與計算邏輯，只控制既有當沖子頁籤。
 window.hubNav=function(btn,tab){
-  document.querySelectorAll('.hub-nav button').forEach(function(b){b.classList.remove('active')});
-  if(btn) btn.classList.add('active');
-  else {
-    var map={home:0,detail:1,daily:2,monthly:3,stats:4,io:5};
-    var bs=document.querySelectorAll('.hub-nav button');
-    if(map[tab]!=null && bs[map[tab]]) bs[map[tab]].classList.add('active');
-  }
   var panel=document.getElementById('panel-D');
   var home=document.getElementById('hub-home');
+  var bs=document.querySelectorAll('.hub-nav button');
+  document.querySelectorAll('.hub-nav button').forEach(function(b){b.classList.remove('active')});
+  if(btn) btn.classList.add('active');
+  var map={home:0,entry:1,detail:2,daily:3,monthly:4,stats:5,io:6};
+  if(!btn && map[tab]!=null){
+    /* entry 與 detail 都由側欄的明確按鈕表示；資料管理按鈕不強制改工作區 active */
+    if(bs[map[tab]]) bs[map[tab]].classList.add('active');
+  }
+  var isHome=(tab==='home');
+  if(panel) panel.classList.toggle('hub-subpage-mode',!isHome);
   if(tab==='home'){
     if(panel) panel.classList.add('hub-home-active');
     if(home) home.style.display='block';
     if(typeof renderHubHome==='function') renderHubHome();
+  }else if(tab==='entry'){
+    if(panel) panel.classList.remove('hub-home-active');
+    if(typeof switchDTab==='function') switchDTab('detail');
+    setTimeout(function(){
+      var card=document.getElementById('hub-entry-card');
+      if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+      var first=document.getElementById('D-entry-lots');
+      if(first && document.body.classList.contains('readonly')===false) first.focus();
+    },100);
   }else if(tab==='stats'){
     if(panel) panel.classList.remove('hub-home-active');
     if(typeof switchDTab==='function') switchDTab('detail');
@@ -3870,17 +3952,17 @@ window.hubNav=function(btn,tab){
       if(box && box.style.display==='none') window.toggleDStatsCharts();
       var target=document.getElementById('D-stats-block');
       if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
-    },80);
+    },100);
   }else{
     if(panel) panel.classList.remove('hub-home-active');
     if(typeof switchDTab==='function') switchDTab(tab);
   }
-  if(panel) panel.scrollIntoView({behavior:'smooth',block:'start'});
+  if(panel && tab!=='entry' && tab!=='stats') panel.scrollIntoView({behavior:'smooth',block:'start'});
 };
 (function(){
   try{ if(!localStorage.getItem('dashboard_theme')) localStorage.setItem('dashboard_theme','light'); }catch(e){}
 })();
-(function(){ var p=document.getElementById('panel-D'); if(p) p.classList.add('hub-home-active'); var h=document.getElementById('hub-home'); if(h) h.style.display='block'; })();
+(function(){ var p=document.getElementById('panel-D'); if(p){p.classList.add('hub-home-active');p.classList.remove('hub-subpage-mode');} var h=document.getElementById('hub-home'); if(h) h.style.display='block'; })();
 </script>
 </body>
 </html>
