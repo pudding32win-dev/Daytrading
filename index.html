@@ -860,7 +860,7 @@ body.light .topbar-logo{font-size:18px!important;color:#162235!important;}
     </div>
     <!-- ★ 新增交易（置頂）-->
     <div class="card">
-      <div class="card-hd">➕ 新增當沖交易</div>
+      <div class="card-hd">➕ 新增交易紀錄</div>
       <div class="card-bd">
         <div class="form-grid">
           <div class="fg"><label>日期</label><input id="D-date" placeholder="2026/5/27" onblur="autoFormatDDate(this)"></div>
@@ -876,9 +876,9 @@ body.light .topbar-logo{font-size:18px!important;color:#162235!important;}
               <option value="B">多 B</option><option value="S">空 S</option>
             </select>
           </div>
-          <div class="fg"><label>進場價 <span style="color:var(--muted2)">（自動）</span></label><input id="D-en" type="number" placeholder="由 MTX 報價帶入"></div>
+          <div class="fg"><label>進場點數</label><input id="D-en" type="number" step="1" placeholder="例如：23428"></div>
           <div class="fg"><label>出場價 <span style="color:var(--muted2)">（自動）</span></label><input id="D-ex" type="number" placeholder="由 MTX 報價帶入"></div>
-          <div class="fg"><label>進場時間</label><input id="D-entry-time" type="datetime-local" class="readonly-input"></div>
+          <div class="fg"><label>進場時間</label><input id="D-entry-time" type="datetime-local"></div>
           <div class="fg"><label>出場時間</label><input id="D-exit-time" type="datetime-local" class="readonly-input"></div>
           <div class="fg"><label>手續費（元）</label><input id="D-fee" type="number" placeholder="0"></div>
           <div class="fg" style="grid-column:1/-1">
@@ -888,6 +888,10 @@ body.light .topbar-logo{font-size:18px!important;color:#162235!important;}
             </div>
             <div id="D-trade-mode-info" class="d-trade-mode-info">新交易：儲存後自動產生交易 ID</div>
           </div>
+        </div>
+        <div class="hub-entry-capture" style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3)"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">本次進場點數</div><div id="D-entry-point-display" style="font:700 18px monospace;color:var(--text)">—</div></div>
+          <div style="padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg3)"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">本次進場時間</div><div id="D-entry-time-display" style="font:700 15px monospace;color:var(--text)">—</div></div>
         </div>
         <div style="margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:7px;font-size:12px;color:var(--muted)" id="D-preview">輸入後自動計算淨額</div>
         <div id="D-inline-warn" style="display:none;margin-top:6px;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7"></div>
@@ -2337,12 +2341,24 @@ function renderDEquityKPI() {
       warnEl.innerHTML = html;
     }
   }
+  function updateDEntryCapture(){
+    var en=document.getElementById('D-en'), et=document.getElementById('D-entry-time');
+    var ep=document.getElementById('D-entry-point-display'), epTime=document.getElementById('D-entry-time-display');
+    if(ep) ep.textContent = en && en.value ? Number(en.value).toLocaleString() : '—';
+    if(epTime){
+      var v=et && et.value ? et.value : '';
+      epTime.textContent = v ? v.replace('T',' ') : '—';
+    }
+  }
+  window.updateDEntryCapture = updateDEntryCapture;
   window._updateDPreview = updatePreview;
   setTimeout(function() {
-    ['D-entry-lots','D-lots','D-en','D-ex','D-fee'].forEach(function(id) {
+    ['D-entry-lots','D-lots','D-en','D-ex','D-fee','D-entry-time'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) el.addEventListener('input', updatePreview);
+      if (el) el.addEventListener('input', function(){ updatePreview(); updateDEntryCapture(); });
+      if (el) el.addEventListener('change', function(){ updatePreview(); updateDEntryCapture(); });
     });
+    updateDEntryCapture();
     var ddir = document.getElementById('D-dir');
     if (ddir) ddir.addEventListener('change', updatePreview);
     var same = document.getElementById('D-same-trade');
