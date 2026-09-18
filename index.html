@@ -553,6 +553,30 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 @media(max-width:699px){.hub-sidebar{display:none}body.light .cloud-bar,body.light .topbar,body.light .panel,body.light .tabs-wrap,body.light .quotes-wrap,body.light .signal-bar{margin-left:0;width:auto}.topbar{position:sticky}.panel{padding-left:12px!important;padding-right:12px!important}}
 
 
+/* ══ 每日衝浪板：新版三區首頁 ══ */
+.hub-surfboard{display:block;margin-bottom:14px}
+.hub-surf-title{font-size:16px;font-weight:800;color:var(--text);padding:8px 0 10px}
+.hub-surf-section{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.hub-surf-section h3{margin:0 0 10px;font-size:12px;font-weight:800;color:var(--text)}
+.hub-surf-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.hub-surf-cell{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 11px;min-height:58px;box-sizing:border-box}
+.hub-surf-cell span{display:block;font-size:9px;color:var(--muted);margin-bottom:5px}
+.hub-surf-cell b{display:block;font:800 16px/1.2 monospace;color:var(--text)}
+.hub-surf-cell small{display:block;font-size:9px;color:var(--muted2);margin-top:4px}
+.hub-surf-status{font-size:20px!important}
+.hub-surf-progress{height:8px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin-top:7px}
+.hub-surf-progress i{display:block;height:100%;width:0;border-radius:99px;background:#334155;transition:width .25s ease}
+.hub-surf-risk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.hub-surf-risk-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 11px}
+.hub-surf-risk-label{font-size:9px;color:var(--muted);margin-bottom:5px}
+.hub-surf-risk-value{font:800 15px/1.2 monospace;color:var(--text)}
+.hub-surf-risk-note{font-size:9px;color:var(--muted2);margin-top:4px;line-height:1.5}
+.hub-surf-path{font:800 18px monospace;color:var(--text)}
+.hub-surf-action{margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:10.5px;line-height:1.7;color:var(--muted)}
+.hub-surf-action b{color:var(--text)}
+@media(max-width:900px){.hub-surf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.hub-surf-grid,.hub-surf-risk-grid{grid-template-columns:1fr 1fr}.hub-surf-section{padding:12px}.hub-surf-cell b{font-size:14px}}
+
 /* ══ HUB 完整首頁總覽：不取代原交易資料／統計模組 ══ */
 .hub-home{display:block;margin-bottom:14px}
 .hub-home-title{font-size:16px;font-weight:800;color:var(--text);padding:8px 0 10px}
@@ -753,113 +777,44 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   </div>
 
    <!-- ══ 首頁／每日衝浪板總覽：只做顯示，不取代原有交易／統計功能 ══ -->
-  <div id="hub-home" class="hub-home">
-    <div class="hub-home-title">📅 今日狀態 <span id="hub-home-date" style="font-size:11px;color:var(--muted);font-weight:500"></span></div>
+  <div id="hub-home" class="hub-surfboard">
+    <div class="hub-surf-title">🏄 每日衝浪板 <span id="hub-home-date" style="font-size:10px;color:var(--muted);font-weight:500"></span></div>
 
-    <div class="hub-kpi-grid">
-      <div class="hub-kpi-card">
-        <div class="hub-kpi-label">💰 今日損益</div>
-        <div class="hub-kpi-value" id="hub-today-pnl">—</div>
-        <div class="hub-kpi-sub"><span>今日最高</span><b id="hub-today-high">—</b><i></i><span>今日回撤</span><b id="hub-today-dd">—</b></div>
+    <section class="hub-surf-section">
+      <h3>① 今日狀態</h3>
+      <div class="hub-surf-grid">
+        <div class="hub-surf-cell"><span>今日損益</span><b id="surf-today-pnl">—</b></div>
+        <div class="hub-surf-cell"><span>目前 Trade</span><b id="surf-trade-count">—</b><small id="surf-path">今日路徑 —</small></div>
+        <div class="hub-surf-cell"><span>目前口數</span><b id="surf-lots">—</b></div>
+        <div class="hub-surf-cell"><span>今日狀態</span><b id="surf-status" class="hub-surf-status">—</b></div>
       </div>
-      <div class="hub-kpi-card">
-        <div class="hub-kpi-label">◷ 目前 Trade #</div>
-        <div class="hub-kpi-value" id="hub-trade-no">—</div>
-        <div class="hub-kpi-sub"><span>已完成</span><b id="hub-trade-done">—</b><i></i><span>剩餘</span><b id="hub-trade-left">—</b></div>
+    </section>
+
+    <section class="hub-surf-section">
+      <h3>② 🎯 30萬目標進度</h3>
+      <div class="hub-surf-grid">
+        <div class="hub-surf-cell"><span>本月累計</span><b id="surf-month-pnl">—</b><div class="hub-surf-progress"><i id="surf-month-bar"></i></div><small id="surf-month-pct">達成率 —</small></div>
+        <div class="hub-surf-cell"><span>本週累計</span><b id="surf-week-pnl">—</b></div>
+        <div class="hub-surf-cell"><span>週五結算</span><b id="surf-friday">—</b></div>
+        <div class="hub-surf-cell"><span>目前進度</span><b id="surf-progress-status" class="hub-surf-status">—</b><small id="surf-progress-note">—</small></div>
       </div>
-      <div class="hub-kpi-card">
-        <div class="hub-kpi-label">⏱ 目前持倉</div>
-        <div class="hub-kpi-value" id="hub-position">—</div>
-        <div class="hub-kpi-sub"><span>進場價</span><b id="hub-position-price">—</b><i></i><span>持倉時間</span><b id="hub-position-time">—</b></div>
+    </section>
+
+    <section class="hub-surf-section">
+      <h3>③ ⚠️ 風險評估 <span style="font-size:9px;color:var(--muted);font-weight:500">（只用歷史 Trade 操作路徑）</span></h3>
+      <div class="hub-surf-risk-box" style="margin-bottom:10px">
+        <div class="hub-surf-risk-label">歷史路徑</div><div class="hub-surf-path" id="surf-history-path">—</div>
       </div>
-      <div class="hub-kpi-card hub-target-card">
-        <div class="hub-kpi-label">🎯 距離 +15,000 目標</div>
-        <div class="hub-kpi-value" id="hub-target-remain">—</div>
-        <div class="hub-target-head"><span>目標進度</span><b id="hub-target-pct">0%</b></div>
-        <div class="hub-progress"><span id="hub-target-progress"></span></div>
+      <div class="hub-surf-risk-grid">
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">過去相同路徑 · Trade <span id="surf-next-trade-no">3</span></div><div class="hub-surf-risk-value" id="surf-path-winrate">—</div><div class="hub-surf-risk-note">勝率　平均損益　樣本 <span id="surf-path-stats">—</span></div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">2口結果</div><div class="hub-surf-risk-value" id="surf-2lot">—</div><div class="hub-surf-risk-note" id="surf-2lot-note">—</div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">3口結果</div><div class="hub-surf-risk-value" id="surf-3lot">—</div><div class="hub-surf-risk-note" id="surf-3lot-note">—</div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">敗率壓力</div><div class="hub-surf-risk-value" id="surf-loss-pressure">—</div><div class="hub-surf-risk-note">下一筆 Trade 歷史敗率</div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">連敗風險</div><div class="hub-surf-risk-value" id="surf-streak-risk">—</div><div class="hub-surf-risk-note">下一連續兩筆皆敗的歷史比例</div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">歷史樣本</div><div class="hub-surf-risk-value" id="surf-sample">—</div><div class="hub-surf-risk-note">排除今天，避免目前未完成 Trade 污染樣本</div></div>
       </div>
-    </div>
-
-    <div class="hub-main-grid">
-      <div class="hub-col-left">
-        <div class="hub-card">
-          <div class="hub-card-title">📊 市場方向認知 <span>（你判斷）</span></div>
-          <div class="hub-bias-grid">
-            <div><div class="hub-mini-label">月線方向</div><div class="hub-big" id="hub-bias-month">未選</div></div>
-            <div><div class="hub-mini-label">5日振幅差</div><div class="hub-big" id="hub-bias-diff">—</div></div>
-            <div><div class="hub-mini-label">整體認知</div><div class="hub-big" id="hub-bias-state">未選</div></div>
-          </div>
-          <div class="hub-card-note" id="hub-bias-note">資料會沿用你原本的「市場方向認知」，不由系統代判。</div>
-        </div>
-
-        <div class="hub-card">
-          <div class="hub-card-title">🌊 浪級績效</div>
-          <div class="hub-wave-grid" id="hub-wave-grid"></div>
-        </div>
-
-        <div class="hub-card">
-          <div class="hub-card-title">📅 最近 3 個交易日</div>
-          <div id="hub-recent-days" class="hub-recent-days"></div>
-        </div>
-      </div>
-
-      <div class="hub-col-mid">
-        <div class="hub-card">
-          <div class="hub-card-title">◷ 今日風浪／振幅 <span>（台指期）</span><span class="hub-card-right" id="hub-wave-status">—</span></div>
-          <div class="hub-wave-now">
-            <div><div class="hub-mini-label">今日振幅</div><div class="hub-wave-number" id="hub-today-amplitude">—</div></div>
-            <div class="hub-ring"><span id="hub-amplitude-pct">—</span></div>
-          </div>
-          <div class="hub-range-grid" id="hub-wave-ranges"></div>
-          <div class="hub-quote-strip"><span>目前 MTX</span><b id="hub-mtx-price">—</b><span>今日高／低</span><b id="hub-mtx-hl">—</b></div>
-        </div>
-
-        <div class="hub-card">
-          <div class="hub-card-title">📌 目前 Trade <span class="hub-card-right" id="hub-current-status">—</span></div>
-          <div id="hub-current-trade"></div>
-        </div>
-
-      </div>
-
-      <div class="hub-col-right">
-        <div class="hub-card">
-          <div class="hub-card-title">💹 每日損益</div>
-          <div class="hub-pnl-list">
-            <div><span>交易損益</span><b id="hub-raw-pnl">—</b></div>
-            <div><span>權利金</span><b id="hub-premium">—</b></div>
-            <div class="hub-total"><span>每日淨損益</span><b id="hub-net-pnl">—</b></div>
-          </div>
-        </div>
-        <div class="hub-card">
-          <div class="hub-card-title">📈 週／月獲利損益</div>
-          <div class="hub-period-grid" id="hub-period-pnl"></div>
-        </div>
-        <div class="hub-card">
-          <div class="hub-card-title">💳 出入金</div>
-          <div id="hub-io-list" class="hub-io-list"></div>
-        </div>
-        <div class="hub-card">
-          <div class="hub-card-title">📊 Trade 1～5</div>
-          <div id="hub-trade-seq"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="hub-bottom-grid">
-      <div class="hub-card">
-        <div class="hub-card-title">📊 今日交易概況</div>
-        <div class="hub-summary-grid" id="hub-today-summary-bottom"></div>
-      </div>
-      <div class="hub-card" id="hub-risk-card">
-        <div class="hub-card-title">⚠️ 風險評估 <span>（依目前持倉、回撤、振幅與目標進度）</span><span class="hub-card-right" id="hub-risk-level">—</span></div>
-        <div id="hub-risk-list" class="hub-risk-list"></div>
-      </div>
-    </div>
-
-    <div class="hub-card hub-today-table-card">
-      <div class="hub-card-title">📋 今日交易紀錄 <span>（真正以 Trade 分組；分批出場不重複計算）</span><button onclick="hubNav(null,'detail')" class="hub-link-btn">查看完整明細 →</button></div>
-      <div class="hub-table-wrap"><table class="hub-table"><thead><tr><th>Trade #</th><th>進場時間</th><th>進場價格</th><th>方向</th><th>波段</th><th>口數</th><th>出場</th><th>持倉時間</th><th>淨損益</th><th>狀態</th></tr></thead><tbody id="hub-today-trades"></tbody></table></div>
-    </div>
+      <div class="hub-surf-action"><b>歷史打法</b><span id="surf-history-style">—</span></div>
+    </section>
   </div>
 
   <!-- 指標卡（原功能保留；交易紀錄頁使用） -->
@@ -3818,88 +3773,76 @@ function hubTodayRows(){ return (DATA.D||[]).filter(function(r){return String(r.
 function hubSet(id,txt){var e=document.getElementById(id);if(e)e.textContent=txt;}
 function hubClassMoney(v){return Number(v)>=0?'var(--gain)':'var(--loss)';}
 function renderHubHome(){
-  var rows=hubTodayRows(), groups=hubTradeGroups(rows), target=15000;
-  var raw=rows.reduce(function(s,r){return s+(Number(r.net)||0);},0), premium=getDPremium(dTodayKey()), net=raw-premium;
-  var running=0, peak=0, low=0; rows.forEach(function(r){running+=Number(r.net)||0;peak=Math.max(peak,running);low=Math.min(low,running);});
-  var dd=peak-running; // 今日目前回撤
-  hubSet('hub-home-date',dTodayKey());
-  hubSet('hub-today-pnl',hubMoney(net));
-  hubSet('hub-today-high',hubMoney(Math.max(peak,0)));
-  hubSet('hub-today-dd',dd>0?'-$'+Math.round(dd).toLocaleString('zh-TW'):'$0');
-  var completed=groups.filter(function(g){return g.closed;}).length, current=groups.length, left=Math.max(0,5-current);
-  hubSet('hub-trade-no',current?current+'/5':'0/5'); hubSet('hub-trade-done',completed+' 筆'); hubSet('hub-trade-left',left+' 筆');
+  var rows=hubTodayRows(), groups=hubTradeGroups(rows), today=dTodayKey();
+  var completed=groups.filter(function(g){return g.closed;}).sort(function(a,b){return a.no-b.no;});
   var open=groups.filter(function(g){return !g.closed;}).sort(function(a,b){return b.firstIndex-a.firstIndex;})[0]||null;
-  var latest=groups.length?groups[groups.length-1]:null;
-  var posLots=open?open.remaining:0;
-  hubSet('hub-position',posLots?posLots+' 口':'—'); hubSet('hub-position-price',open&&open.en!=null?Number(open.en).toLocaleString():'—');
-  hubSet('hub-position-time',open&&open.entryTime?hubMinutes(Date.now()-new Date(open.entryTime).getTime()):'—');
-  var pct=Math.max(0,Math.min(100,net/target*100)), remain=Math.max(0,target-net);
-  hubSet('hub-target-remain',net>=target?'已達標':('$'+Math.round(remain).toLocaleString('zh-TW'))); hubSet('hub-target-pct',pct.toFixed(0)+'%');
-  var bar=document.getElementById('hub-target-progress'); if(bar)bar.style.width=pct+'%';
-  var bias=(DATA.D_marketBias||[]).find(function(x){return x.date===dTodayKey();});
-  hubSet('hub-bias-month',bias?bias.bias:'未選'); hubSet('hub-bias-state',bias?(bias.bias==='多'?'多方':'空方'):'未選');
-  var rec=D_WAVE_AMPLITUDE&&Array.isArray(D_WAVE_AMPLITUDE.records)?D_WAVE_AMPLITUDE.records.slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date));}):[];
-  var amps=rec.map(function(x){return Number(x.amplitude);}).filter(isFinite), a5=amps.slice(0,5),p5=amps.slice(5,10),avg5=a5.length?a5.reduce(function(a,b){return a+b;},0)/a5.length:null,avgp=p5.length?p5.reduce(function(a,b){return a+b;},0)/p5.length:null,diff=avg5!=null&&avgp!=null?avg5-avgp:null;
-  hubSet('hub-bias-diff',diff==null?'—':(diff>=0?'+':'')+Math.round(diff)+' 點');
-  var note=diff==null?'5日振幅資料不足。':diff>0?'5日振幅差為正；方向仍由你確認。':diff<0?'5日振幅差為負；方向仍由你確認。':'5日振幅差接近 0；資料未提供明確偏向。';hubSet('hub-bias-note',note);
-  // 浪級績效
-  var waveEl=document.getElementById('hub-wave-grid'); if(waveEl){var levels=['小浪','中浪','大浪'];waveEl.innerHTML=levels.map(function(l){var arr=(DATA.D||[]).filter(function(r){return getDWaveLevel(r)===l;}), n=arr.length, w=arr.filter(function(r){return Number(r.net||0)>0;}).length, pn=arr.reduce(function(s,r){return s+Number(r.net||0);},0);return '<div class="hub-wave-box"><div class="hub-wave-name">'+l+'</div><div class="hub-wave-net" style="color:'+hubClassMoney(pn)+'">'+(n?hubMoney(pn):'—')+'</div><div class="hub-wave-meta">'+n+' 筆 · 勝率 '+(n?(w/n*100).toFixed(1):'—')+'%</div></div>';}).join('');}
-  // 最新振幅／區間
-  var q=_mtxQuote||{}; hubSet('hub-mtx-price',q.price!=null?Math.round(q.price).toLocaleString():'—'); hubSet('hub-mtx-hl',(q.todayHigh!=null&&q.todayLow!=null)?Math.round(q.todayHigh).toLocaleString()+' / '+Math.round(q.todayLow).toLocaleString():'—');
-  var amp=q.amplitude!=null?q.amplitude:null; if(amp==null&&rec.length)amp=Number(rec[0].amplitude); hubSet('hub-today-amplitude',isFinite(amp)?Math.round(amp).toLocaleString()+' 點':'—');
-  var avg20=(D_WAVE_AMPLITUDE&&Number(D_WAVE_AMPLITUDE.avg20))||null, ampPct=avg20&&isFinite(amp)?Math.max(0,Math.min(100,amp/avg20*100)):null; hubSet('hub-amplitude-pct',ampPct==null?'—':Math.round(ampPct)+'%');
-  var vs=D_WAVE_AMPLITUDE&&D_WAVE_AMPLITUDE.volatilityStructure, status=vs&&vs.status==='compressing'?'振幅收縮':vs&&vs.status==='expanding'?'振幅擴張':vs&&vs.status==='stable'?'穩定／混合':'—';hubSet('hub-wave-status',status);
-  var recentEl=document.getElementById('hub-recent-days');
-  if(recentEl){
-    recentEl.innerHTML=rec.slice(0,3).map(function(d){var av=Number(d.amplitude);return '<div class=\"hub-day-box\"><div class=\"hub-day-date\">'+hubEsc(d.date||'—')+'</div><div class=\"hub-day-amp\">'+(isFinite(av)?Math.round(av).toLocaleString():'—')+' 點</div><div class=\"hub-day-sub\">'+hubEsc(d.wave||classifyAmplitudeValue(av)||'—')+(d.close!=null?' · 收 '+Math.round(Number(d.close)).toLocaleString():'')+'</div></div>';}).join('')||'<div style=\"font-size:10px;color:var(--muted);padding:8px\">尚無最近3日振幅資料</div>';
-  }
-  var ranges=getDWaveRanges(), rangeEl=document.getElementById('hub-wave-ranges'); if(rangeEl){rangeEl.innerHTML=[['小浪',ranges.small],['中浪',ranges.middle],['大浪',ranges.large]].map(function(x){var lo=x[1]&&x[1].min!=null?Math.round(x[1].min).toLocaleString():'—',hi=x[1]&&x[1].max!=null?Math.round(x[1].max).toLocaleString():'—';return '<div class="hub-range-box"><b>'+x[0]+'</b><span>'+lo+' ～ '+hi+'</span></div>';}).join('');}
-  // 目前 Trade
-  var ct=document.getElementById('hub-current-trade'); if(ct){if(open){hubSet('hub-current-status','進行中');ct.innerHTML='<div class="hub-trade-grid"><div class="hub-trade-field"><span>進場時間</span><b>'+hubEsc(displayDateTime(open.entryTime))+'</b></div><div class="hub-trade-field"><span>進場價格</span><b>'+hubEsc(open.en==null?'—':Number(open.en).toLocaleString())+'</b></div><div class="hub-trade-field"><span>方向</span><b>'+hubEsc(open.dir==='B'?'多':'空')+'</b></div><div class="hub-trade-field"><span>口數</span><b>'+open.remaining+'</b></div><div class="hub-trade-field"><span>已出／初始</span><b>'+open.exitLots+' / '+open.entryLots+'</b></div><div class="hub-trade-field"><span>持倉時間</span><b>'+hubMinutes(Date.now()-new Date(open.entryTime).getTime())+'</b></div></div><button class="sbtn" style="width:100%;margin-top:8px" onclick="switchDTab(\'detail\')">前往交易明細／平倉</button>';}else{hubSet('hub-current-status','目前無持倉');ct.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:11px">今日目前沒有未平倉 Trade。'+(latest?'<br>最後 Trade #'+latest.no+' 已結束，淨額 '+hubMoney(latest.net):'')+'</div>';}}
-  // 今日概況
-  var avgHold=groups.filter(function(g){return g.entryTime&&g.exitTime;}).map(function(g){return new Date(g.exitTime)-new Date(g.entryTime);});
-  var summaryHtml=[['進場次數',groups.length+' 次'],['平倉次數',completed+' 次'],['持倉中',posLots?posLots+' 口':'0 口'],['平均持倉',avgHold.length?hubMinutes(avgHold.reduce(function(a,b){return a+b;},0)/avgHold.length):'—']].map(function(x){return '<div class="hub-summary-item"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>';}).join('');
-  var sumEl=document.getElementById('hub-today-summary'); if(sumEl) sumEl.innerHTML=summaryHtml;
-  var sumBottom=document.getElementById('hub-today-summary-bottom'); if(sumBottom) sumBottom.innerHTML=summaryHtml;
+  var currentNet=rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)-getDPremium(today);
+  var currentLots=open?open.remaining:0;
+  var path=completed.map(function(g){return Number(g.net)>0?'W':'L';}).join('')||'—';
+  var nextNo=completed.length+1;
+  var fmtMoney=function(v){return (Number(v)>=0?'+$':'-$')+Math.abs(Math.round(Number(v)||0)).toLocaleString('zh-TW');};
+  var pct=function(n,d){return d?(n/d*100).toFixed(1)+'%':'—';};
+  var esc=hubEsc;
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
 
-  // 風險評估：只使用目前頁面已有的客觀資料，不寫死市場數字。
-  var riskEl=document.getElementById('hub-risk-list'), riskLevelEl=document.getElementById('hub-risk-level');
-  if(riskEl){
-    var riskItems=[], riskScore=0;
-    var todayPeak=Math.max(0,peak), ddAbs=Math.max(0,dd);
-    var targetPct=target>0?Math.max(0,net/target*100):0;
-    var ampNow=isFinite(amp)?amp:null, middleMax=ranges&&ranges.middle&&isFinite(Number(ranges.middle.max))?Number(ranges.middle.max):null, largeMax=ranges&&ranges.large&&isFinite(Number(ranges.large.max))?Number(ranges.large.max):null;
-    var marginPer=_dMargin(), marginUsedNow=posLots*marginPer;
-    if(posLots>0){
-      riskScore+=1; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>持倉風險：</b>目前 '+posLots+' 口，保證金約 $'+Math.round(marginUsedNow).toLocaleString()+'；持倉尚未結束。</div>');
-    }else{ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>持倉風險：</b>目前無未平倉部位。</div>'); }
-    if(ampNow!=null && middleMax!=null && ampNow>middleMax){
-      riskScore+=2; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>振幅風險：</b>目前振幅 '+Math.round(ampNow).toLocaleString()+' 點，已高於中浪上緣 '+Math.round(middleMax).toLocaleString()+' 點。');
-      if(largeMax!=null) riskItems[riskItems.length-1]+='，進入較高波動區間。'; riskItems[riskItems.length-1]+='</div>';
-    }else if(ampNow!=null && middleMax!=null){
-      riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>振幅風險：</b>目前振幅 '+Math.round(ampNow).toLocaleString()+' 點，尚未超過中浪上緣 '+Math.round(middleMax).toLocaleString()+' 點。</div>');
-    }else{ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>振幅風險：</b>20日振幅區間資料尚未完整，暫不判定。</div>'); }
-    if(ddAbs>0){
-      riskScore+=1; var ddRatio=todayPeak>0?ddAbs/todayPeak*100:null; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>今日回撤：</b>目前回撤 '+hubMoney(ddAbs)+(ddRatio!=null?'，約為今日最高損益的 '+ddRatio.toFixed(1)+'%。':'。')+'</div>');
-    }else{ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>今日回撤：</b>目前沒有可計算的回撤。</div>'); }
-    if(net>=target){ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>目標狀態：</b>今日淨損益已達到 +$'+target.toLocaleString()+' 目標（'+Math.min(100,targetPct).toFixed(0)+'%）。</div>'); }
-    else if(net>0){ riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>目標狀態：</b>目前完成 '+targetPct.toFixed(0)+'%，距離目標尚差 $'+Math.round(target-net).toLocaleString()+'。</div>'); }
-    else{ riskScore+=1; riskItems.push('<span class="hub-risk-dot">●</span><div class="hub-risk-text"><b>目標狀態：</b>目前尚未達標，淨損益為 '+hubMoney(net)+'。</div>'); }
-    riskEl.innerHTML=riskItems.join('');
-    var level=riskScore>=4?'高':riskScore>=2?'中':'低';
-    if(riskLevelEl){riskLevelEl.textContent='目前風險：'+level; riskLevelEl.className='hub-card-right hub-risk-level';}
-  }
-  hubSet('hub-raw-pnl',hubMoney(raw)); hubSet('hub-premium',premium?'-$'+Math.round(premium).toLocaleString():'$0'); hubSet('hub-net-pnl',hubMoney(net)); document.getElementById('hub-net-pnl').style.color=hubClassMoney(net);
-  // 週／月：沿用既有扣權利金公式
-  var all=DATA.D||[],dayRaw={},dayNet={};all.forEach(function(r){dayRaw[r.date]=(dayRaw[r.date]||0)+Number(r.net||0);});Object.keys(dayRaw).forEach(function(d){dayNet[d]=getDAdjustedNet(d,dayRaw[d]);});
-  var weekKey=getCurrentWeekKey(), wk=0,mo=0;Object.keys(dayNet).forEach(function(d){var dt=d.replace(/\//g,'-');if(d.slice(0,7)===dTodayKey().slice(0,7))mo+=dayNet[d];var dk=getWeekKeyForHub(d);if(dk===weekKey)wk+=dayNet[d];});
-  var pe=document.getElementById('hub-period-pnl');if(pe)pe.innerHTML='<div class="hub-period-item"><span>本週交易損益</span><b style="color:'+hubClassMoney(wk)+'">'+hubMoney(wk)+'</b></div><div class="hub-period-item"><span>本月交易損益</span><b style="color:'+hubClassMoney(mo)+'">'+hubMoney(mo)+'</b></div>';
-  // 出入金
-  var ioe=document.getElementById('hub-io-list'), io=(DATA.D_io||[]).slice().sort(function(a,b){return b.date.localeCompare(a.date);});if(ioe)ioe.innerHTML=io.slice(0,4).map(function(r){return '<div class="hub-io-row"><span>'+hubEsc(r.note|| (r.amt>=0?'入金':'出金'))+'</span><b style="color:'+hubClassMoney(r.amt)+'">'+hubMoney(r.amt)+'</b><small>'+hubEsc(r.date)+'</small></div>';}).join('')||'<div style="font-size:10px;color:var(--muted);padding:8px">尚無出入金紀錄</div>';
-  // Trade 1~5
-  var se=document.getElementById('hub-trade-seq');if(se){var seq=groups.slice(0,5);se.innerHTML=Array.from({length:5},function(_,i){var g=seq[i];return '<div class="hub-seq-row"><div class="hub-seq-no">'+(i+1)+'</div><div class="hub-seq-detail">'+(g?(g.dir==='B'?'多':'空')+' · '+(g.wave||'—')+' · '+g.entryLots+'口':'—')+'</div><div class="hub-seq-pnl" style="color:'+(g?hubClassMoney(g.net):'var(--muted)')+'">'+(g?hubMoney(g.net):'—')+'</div></div>';}).join('');}
-  // 今日表格
-  var tb=document.getElementById('hub-today-trades');if(tb){tb.innerHTML=groups.map(function(g){var hold=g.entryTime&&g.exitTime?hubMinutes(new Date(g.exitTime)-new Date(g.entryTime)):'—';return '<tr><td class="mono">#'+g.no+'</td><td class="mono">'+hubEsc(displayDateTime(g.entryTime))+'</td><td class="mono">'+(g.en==null?'—':Number(g.en).toLocaleString())+'</td><td>'+hubEsc(g.dir==='B'?'多':'空')+'</td><td>'+hubEsc(g.wave||'—')+'</td><td class="mono">'+g.entryLots+'／'+g.exitLots+'</td><td class="mono">'+(g.ex==null?'—':Number(g.ex).toLocaleString())+'</td><td>'+hold+'</td><td class="mono" style="color:'+hubClassMoney(g.net)+'">'+hubMoney(g.net)+'</td><td><span class="hub-status">'+(g.closed?'已結束':'進行中')+'</span></td></tr>';}).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:18px">今天尚無交易紀錄</td></tr>';}
+  set('hub-home-date',today);
+  set('surf-today-pnl',fmtMoney(currentNet));
+  set('surf-trade-count',groups.length+' / 5');
+  set('surf-path','今日路徑 '+path);
+  set('surf-lots',currentLots?currentLots+'口':'0口');
+  var status=currentNet>=15000?'🟢':(path.indexOf('LL')>=0?'🔴':(currentNet<0||open?'🟡':'🟢'));
+  set('surf-status',status);
+
+  // 本月／本週：以目前資料＋歷史封存的 Trade 為基礎，並扣除對應權利金。
+  var all=_dAllTimeTrades().slice(), dayRaw={}, dayNet={};
+  all.forEach(function(r){var d=String(r.date||'');if(d)dayRaw[d]=(dayRaw[d]||0)+(Number(r.net)||0);});
+  Object.keys(dayRaw).forEach(function(d){dayNet[d]=getDAdjustedNet(d,dayRaw[d]);});
+  var monthKey=today.slice(0,7), weekKey=getWeekKeyForHub(today), monthNet=0,weekNet=0;
+  Object.keys(dayNet).forEach(function(d){if(d.slice(0,7)===monthKey)monthNet+=dayNet[d];if(getWeekKeyForHub(d)===weekKey)weekNet+=dayNet[d];});
+  var target=300000, monthPct=Math.max(0,Math.min(100,monthNet/target*100));
+  set('surf-month-pnl',fmtMoney(monthNet)); set('surf-month-pct','達成率 '+monthPct.toFixed(1)+'%');
+  var bar=document.getElementById('surf-month-bar');if(bar)bar.style.width=monthPct+'%';
+  set('surf-week-pnl',fmtMoney(weekNet));
+  var td=new Date(today.replace(/\//g,'-')+'T12:00:00'); var friday=new Date(td); friday.setDate(td.getDate()+(5-td.getDay()+7)%7);
+  set('surf-friday',String(friday.getMonth()+1).padStart(2,'0')+'/'+String(friday.getDate()).padStart(2,'0'));
+  // 以當月工作日進度估算「目前進度」，不把它混進風險模型。
+  var y=td.getFullYear(),m=td.getMonth(),daysInMonth=new Date(y,m+1,0).getDate(),elapsed=0,totalBiz=0;
+  for(var di=1;di<=daysInMonth;di++){var wd=new Date(y,m,di).getDay();if(wd!==0&&wd!==6){totalBiz++;if(di<=td.getDate())elapsed++;}}
+  var expected=target*(elapsed/Math.max(1,totalBiz)), pace=expected>0?monthNet/expected:0;
+  var progressStatus=monthNet>=target?'🟢':(pace>=0.8?'🟢':(pace>=0.5?'🟡':'🔴'));
+  set('surf-progress-status',progressStatus);set('surf-progress-note',monthNet>=target?'已達月目標':('工作日進度 '+elapsed+'/'+totalBiz));
+
+  // 歷史路徑：以 Trade 為核心；分批出場先由 hubTradeGroups 合併。
+  var daysBy={};
+  all.forEach(function(r){var d=String(r.date||'');if(!d||d===today)return;(daysBy[d]||(daysBy[d]=[])).push(r);});
+  var hist=Object.keys(daysBy).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
+  var prefix=completed.map(function(g){return Number(g.net)>0?'W':'L';}).join('');
+  set('surf-history-path',prefix||'尚無路徑');
+  var same=prefix?hist.filter(function(day){var p=day.trades.slice(0,prefix.length).map(function(g){return Number(g.net)>0?'W':'L';}).join('');return day.trades.length>prefix.length&&p===prefix;}):[];
+  var nextTrade=prefix?prefix.length+1:1; set('surf-next-trade-no',nextTrade);set('surf-sample',same.length+' 天');
+  var next=same.map(function(d){return d.trades[nextTrade-1];}).filter(Boolean);
+  var wins=next.filter(function(g){return Number(g.net)>0;}).length, avg=next.length?next.reduce(function(s,g){return s+Number(g.net||0);},0)/next.length:0;
+  set('surf-path-winrate',pct(wins,next.length));
+  set('surf-path-stats',next.length?(fmtMoney(avg)+'　'+next.length+' 天'):'無足夠樣本');
+  set('surf-loss-pressure',next.length?pct(next.length-wins,next.length):'—');
+  var streakPairs=0,streakN=0;
+  same.forEach(function(d){var a=d.trades[nextTrade-1],b=d.trades[nextTrade];if(a&&b){streakN++;if(Number(a.net)<=0&&Number(b.net)<=0)streakPairs++;}});
+  set('surf-streak-risk',streakN?pct(streakPairs,streakN):'—');
+
+  function lotStats(lots){var arr=next.filter(function(g){return Number(g.entryLots||g.rows&&g.rows[0]&&g.rows[0].entryLots||0)===lots;});var w=arr.filter(function(g){return Number(g.net)>0;}).length;return {n:arr.length,w:w};}
+  var l2=lotStats(2),l3=lotStats(3);
+  set('surf-2lot',l2.n?pct(l2.w,l2.n):'—');set('surf-2lot-note',l2.n?'樣本 '+l2.n+' 天':'無相同路徑的2口樣本');
+  set('surf-3lot',l3.n?pct(l3.w,l3.n):'—');set('surf-3lot-note',l3.n?'樣本 '+l3.n+' 天':'無相同路徑的3口樣本');
+
+  // 歷史打法：只描述同一路徑下 Trade N 實際出現的方向／浪級，不做保證式預測。
+  var combos={}; next.forEach(function(g){var key=(g.dir==='B'?'多':'空')+'／'+(g.wave||'未標記');if(!combos[key])combos[key]={n:0,w:0};combos[key].n++;if(Number(g.net)>0)combos[key].w++;});
+  var comboKeys=Object.keys(combos).sort(function(a,b){return combos[b].n-combos[a].n;});
+  if(comboKeys.length){var top=comboKeys[0],c=combos[top];set('surf-history-style',' '+esc(top)+'，出現 '+c.n+' 次；其中獲利 '+pct(c.w,c.n)+'。');}else set('surf-history-style',' 尚無足夠相同路徑的 Trade '+nextTrade+' 歷史資料。');
+
+  // 保留原頁其他模組需要的 DOM 更新；首頁新版不再顯示這些舊卡片。
+  set('hub-raw-pnl',fmtMoney(rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)));
+  set('hub-premium',getDPremium(today)?'-$'+Math.round(getDPremium(today)).toLocaleString('zh-TW'):'$0');
+  set('hub-net-pnl',fmtMoney(currentNet));
 }
 window.renderHubHome=renderHubHome;
 function getWeekKeyForHub(dateStr){var p=dateStr.split('/');if(p.length!==3)return '';var d=new Date(+p[0],+p[1]-1,+p[2]);var thu=new Date(d);thu.setDate(d.getDate()-((d.getDay()+6)%7)+3);var firstThu=new Date(thu.getFullYear(),0,4);var week=1+Math.round(((thu-firstThu)/86400000-3+((firstThu.getDay()+6)%7))/7);return thu.getFullYear()+'-W'+String(week).padStart(2,'0');}
