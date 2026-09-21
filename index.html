@@ -975,16 +975,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   <div class="hub-winrate-note">以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日資料不併入歷史勝率。</div>
 </div>
 
-<div id="hub-winrate-summary" style="margin:12px 0;padding:14px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2)">
-  <div style="font-weight:800;font-size:14px;margin-bottom:10px">勝率統計（以 Trade 為單位）</div>
-  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
-    <div><small style="color:var(--muted)">總 Trade</small><b id="hub-wr-total">—</b></div>
-    <div><small style="color:var(--muted)">獲利 Trade</small><b id="hub-wr-win">—</b></div>
-    <div><small style="color:var(--muted)">虧損 Trade</small><b id="hub-wr-loss">—</b></div>
-    <div><small style="color:var(--muted)">勝率</small><b id="hub-wr-rate">—</b></div>
-  </div>
-  <div style="margin-top:8px;color:var(--muted);font-size:11px">今日與歷史資料分開統計；分批出場不重複計算。</div>
-</div>
+
 
 <div id="d-stats-charts" style="display:none;padding:0 14px 14px">
 
@@ -2734,7 +2725,7 @@ function renderDPanel() {
   renderDWaveAmplitude();
   
   setTimeout(renderDCharts, 50);
-  try{ renderHubHome(); }catch(e){ console.error('renderHubHome after renderDPanel',e); }
+  try{ renderHubHome(); renderHubWinrateStats(); }catch(e){ console.error('renderHubHome/renderHubWinrateStats after renderDPanel',e); }
 }
 // ── 啟動 ──
 // ══ 統計圖表切換 ══
@@ -3822,7 +3813,7 @@ function renderHubHome(){
 
   // 歷史路徑：以 Trade 為核心；分批出場先由 hubTradeGroups 合併。
   var daysBy={};
-  all.forEach(function(r){var d=String(r.date||'');if(!d||d===today)return;(daysBy[d]||(daysBy[d]=[])).push(r);});
+  all.forEach(function(r){var d=String(r.date||'');var dt=d?new Date(d+'T00:00:00'):null;if(!d||d===today||(dt&&((dt.getDay()===0)||(dt.getDay()===6))))return;(daysBy[d]||(daysBy[d]=[])).push(r);});
   var hist=Object.keys(daysBy).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
   var prefixCodes=completed.map(pathCode);
   var prefix=prefixCodes.join('');
@@ -3915,6 +3906,7 @@ window.hubNav=function(btn,tab){
   }else if(tab==='stats'){
     if(panel) panel.classList.remove('hub-home-active');
     if(typeof switchDTab==='function') switchDTab('detail');
+    try{ renderHubWinrateStats(); }catch(e){}
     setTimeout(function(){
       var box=document.getElementById('d-stats-charts');
       if(box && box.style.display==='none') window.toggleDStatsCharts();
@@ -3934,20 +3926,29 @@ window.hubNav=function(btn,tab){
 
 function renderHubWinrateStats(){
   try{
-    var all=Array.isArray(window.allTrades)?window.allTrades:(Array.isArray(window.tradeData)?window.tradeData:[]);
-    if(!all.length)return;
-    var groups=typeof hubTradeGroups==='function'?hubTradeGroups(all):[];
-    if(!groups.length)return;
-    var wins=groups.filter(function(g){return Number(g.net)>0}),loss=groups.filter(function(g){return Number(g.net)<=0});
-    var sumW=wins.reduce(function(s,g){return s+Number(g.net||0)},0),sumL=Math.abs(loss.reduce(function(s,g){return s+Number(g.net||0)},0));
-    var avgW=wins.length?sumW/wins.length:0,avgL=loss.length?-(sumL/loss.length):0,pf=sumL?sumW/sumL:0;
+    // 勝率統計只看「已完成的歷史 Trade」；分批出場由 hubTradeGroups 合併。
+    var today=(typeof dTodayKey==='function')?dTodayKey():'';
+    var rows=(window.DATA&&Array.isArray(DATA.D))?DATA.D:[];
+    var historical=rows.filter(function(r){return String(r.date||'')!==String(today);});
+    var groups=typeof hubTradeGroups==='function'?hubTradeGroups(historical):[];
+    groups=groups.filter(function(g){return g.closed!==false;});
+    var wins=groups.filter(function(g){return Number(g.net)>0;});
+    var losses=groups.filter(function(g){return Number(g.net)<=0;});
+    var grossWin=wins.reduce(function(s,g){return s+Math.max(0,Number(g.net||0));},0);
+    var grossLoss=Math.abs(losses.reduce(function(s,g){return s+Math.min(0,Number(g.net||0));},0));
+    var avgWin=wins.length?grossWin/wins.length:0;
+    var avgLoss=losses.length?-(grossLoss/losses.length):0;
+    var pf=grossLoss?grossWin/grossLoss:0;
     function put(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-    put('hub-wr-total',groups.length);put('hub-wr-win',wins.length);put('hub-wr-loss',loss.length);put('hub-wr-rate',(groups.length?(wins.length/groups.length*100).toFixed(1):'0.0')+'%');
-    put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgW):Math.round(avgW).toLocaleString());put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgL):Math.round(avgL).toLocaleString());put('hub-wr-pf',sumL?pf.toFixed(2):'—');
-  }catch(e){}
+    put('hub-wr-total',groups.length);
+    put('hub-wr-win',wins.length);
+    put('hub-wr-loss',losses.length);
+    put('hub-wr-rate',(groups.length?(wins.length/groups.length*100).toFixed(1):'0.0')+'%');
+    put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgWin):Math.round(avgWin).toLocaleString());
+    put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString());
+    put('hub-wr-pf',grossLoss?pf.toFixed(2):'—');
+  }catch(e){ console.error('renderHubWinrateStats',e); }
 }
-
-  try{setTimeout(renderHubWinrateStats,300)}catch(e){}
 </script>
 </body>
 </html>
