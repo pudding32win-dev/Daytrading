@@ -3944,6 +3944,10 @@ function renderHubWinrateStats(){
     var source='Firebase';
     if(!rows.length){ rows=HUB_WINRATE_FALLBACK.slice(); source='0918 CSV 備份'; }
     rows=rows.filter(function(r){ var d=String(r&&r.date||'').replace(/-/g,'/'); return d!==today; });
+    if(!rows.length && HUB_WINRATE_FALLBACK && HUB_WINRATE_FALLBACK.length){
+      rows=HUB_WINRATE_FALLBACK.slice().filter(function(r){ var d=String(r&&r.date||'').replace(/-/g,'/'); return d!==today; });
+      source='0918 CSV 備份';
+    }
     var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(rows):[];
     groups=groups.filter(function(g){return g && g.closed===true;});
     var wins=groups.filter(function(g){return Number(g.net||0)>0;});
@@ -3966,6 +3970,12 @@ function renderHubWinrateStats(){
     console.error('renderHubWinrateStats',e);
     ['hub-wr-total','hub-wr-win','hub-wr-loss','hub-wr-rate','hub-wr-avgwin','hub-wr-avgloss','hub-wr-pf'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='資料錯誤';});
   }
+}
+// 預覽／離線時先用內嵌歷史資料，不等待 Firebase。
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',function(){ try{ renderHubWinrateStats(); }catch(e){} });
+}else{
+  try{ renderHubWinrateStats(); }catch(e){}
 }
 </script>
 </body>
