@@ -806,14 +806,15 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         <div class="hub-surf-risk-label">歷史路徑</div><div class="hub-surf-path" id="surf-history-path">—</div>
       </div>
       <div class="hub-surf-risk-grid">
-        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">過去相同路徑 · Trade <span id="surf-next-trade-no">3</span></div><div class="hub-surf-risk-value" id="surf-path-winrate">—</div><div class="hub-surf-risk-note">勝率　平均損益　樣本 <span id="surf-path-stats">—</span></div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">🔎 下一筆分析 · Trade <span id="surf-next-trade-no">1</span></div><div class="hub-surf-risk-value" id="surf-path-winrate">—</div><div class="hub-surf-risk-note">勝率　平均損益　樣本 <span id="surf-path-stats">—</span></div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">2口結果</div><div class="hub-surf-risk-value" id="surf-2lot">—</div><div class="hub-surf-risk-note" id="surf-2lot-note">—</div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">3口結果</div><div class="hub-surf-risk-value" id="surf-3lot">—</div><div class="hub-surf-risk-note" id="surf-3lot-note">—</div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">敗率壓力</div><div class="hub-surf-risk-value" id="surf-loss-pressure">—</div><div class="hub-surf-risk-note">下一筆 Trade 歷史敗率</div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">連敗風險</div><div class="hub-surf-risk-value" id="surf-streak-risk">—</div><div class="hub-surf-risk-note">下一連續兩筆皆敗的歷史比例</div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">歷史樣本</div><div class="hub-surf-risk-value" id="surf-sample">—</div><div class="hub-surf-risk-note">排除今天，避免目前未完成 Trade 污染樣本</div></div>
       </div>
-      <div class="hub-surf-action"><b>歷史打法</b><span id="surf-history-style">—</span></div>
+      <div class="hub-surf-action"><b>🔎 下一筆 Trade 分析</b><span id="surf-history-style">—</span></div>
+      <div class="hub-surf-action" style="display:block"><b>符合相同路徑的歷史日期</b><div id="surf-history-dates" style="margin-top:6px;font:11px monospace;color:var(--muted2)">—</div></div>
     </section>
   </div>
 
@@ -3794,7 +3795,7 @@ function renderHubHome(){
   // 歷史路徑：以 Trade 為核心；分批出場先由 hubTradeGroups 合併。
   var daysBy={};
   all.forEach(function(r){var d=String(r.date||'');if(!d||d===today)return;(daysBy[d]||(daysBy[d]=[])).push(r);});
-  var hist=Object.keys(daysBy).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
+  var hist=Object.keys(daysBy).filter(function(d){var dt=new Date(d+'T00:00:00');var wd=dt.getDay();return wd!==0&&wd!==6;}).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
   var prefixCodes=completed.map(pathCode);
   var prefix=prefixCodes.join('');
   set('surf-history-path',prefixCodes.length?prefixCodes.join(' → '):'尚無路徑');
@@ -3823,6 +3824,20 @@ function renderHubHome(){
   if(comboKeys.length){var top=comboKeys[0],c=combos[top];set('surf-history-style',' '+esc(top)+'，出現 '+c.n+' 次；其中獲利 '+pct(c.w,c.n)+'。');}else set('surf-history-style',' 尚無足夠相同路徑的 Trade '+nextTrade+' 歷史資料。');
 
   // 保留原頁其他模組需要的 DOM 更新；首頁新版不再顯示這些舊卡片。
+  // 歷史相同打法日期：只列出前 N 筆路徑完全相同的歷史日期；今天永遠排除。
+  var histDatesEl=document.getElementById('surf-history-dates');
+  if(histDatesEl){
+    if(same.length){
+      histDatesEl.innerHTML=same.map(function(d){
+        var g=d.trades[nextTrade-1];
+        var dir=g?(g.dir==='B'?'多':'空'):'—';
+        var wave=g?(g.wave||'未標記'):'未標記';
+        var result=g?(Number(g.net)>0?'W':'L'):'—';
+        return '<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)"><span>'+esc(d.date)+'</span><span>'+esc(dir)+'／'+esc(wave)+'／'+result+'</span></div>';
+      }).join('');
+    }else{ histDatesEl.textContent='無'; }
+  }
+
   set('hub-raw-pnl',fmtMoney(rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)));
   set('hub-net-pnl',fmtMoney(currentNet));
 }
