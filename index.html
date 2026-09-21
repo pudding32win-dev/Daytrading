@@ -1001,18 +1001,6 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div style="font-size:11px;color:var(--muted);white-space:nowrap">元</div>
           <button onclick="saveDeq()" style="padding:7px 12px;border-radius:7px;background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);color:#f87171;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">💾 儲存</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:5px">當日權利金／其他日成本</div>
-            <div style="display:flex;gap:6px">
-              <input id="D-premium-date" type="date" style="flex:0 0 132px;background:var(--bg2);border:1px solid var(--border2);border-radius:7px;padding:7px;color:var(--text);font-size:11px">
-              <input id="D-premium-input" type="number" placeholder="輸入金額（支出填正數）" style="min-width:0;flex:1;background:var(--bg2);border:1px solid var(--border2);border-radius:7px;padding:7px 9px;color:var(--text);font-family:monospace;font-size:12px">
-              <button onclick="saveDPremium()" style="padding:7px 10px;border-radius:7px;background:rgba(156,163,175,.12);border:1px solid var(--border2);color:var(--text);font-size:11px;cursor:pointer;white-space:nowrap">儲存</button>
-            </div>
-            <div style="font-size:9px;color:var(--muted);margin-top:5px">每日淨損益 = 當沖損益 − 權利金。若是收入請輸入負數。</div>
-          </div>
-          <div id="D-premium-list" style="background:var(--bg3);border-radius:8px;padding:10px 12px"></div>
-        </div>
         <div id="D-equity-diff"></div>
         <div id="D-equity-kpi" style="margin-top:8px"></div>
         <div id="D-eq-list" style="margin-top:8px"></div>
@@ -1025,7 +1013,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>日期</th><th>筆數</th><th>當沖損益</th><th>權利金</th><th>當日淨損益</th><th>出入金</th><th>累計淨損益</th><th>手動權益金</th><th>差異</th>
+            <th>日期</th><th>筆數</th><th>當沖損益</th><th>當日淨損益</th><th>出入金</th><th>累計淨損益</th><th>手動權益金</th><th>差異</th>
           </tr></thead>
           <tbody id="tbody-D-daily"></tbody>
         </table>
@@ -1909,18 +1897,11 @@ function dTodayKey(){
   var d=new Date();
   return d.getFullYear()+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0');
 }
-function getDPremium(date){
-  var arr=DATA.D_premium||[];
-  var r=arr.find(function(x){return x.date===date;});
-  return r ? (Number(r.amount)||0) : 0;
-}
-function getDAdjustedNet(date, rawNet){
-  return (Number(rawNet)||0) - getDPremium(date);
-}
+function getDPremium(date){ return 0; }
+function getDAdjustedNet(date, rawNet){ return Number(rawNet)||0; }
 function getDAdjustedTotals(){
   var raw=(DATA.D||[]).reduce(function(s,r){return s+(Number(r.net)||0);},0);
-  var premium=(DATA.D_premium||[]).reduce(function(s,r){return s+(Number(r.amount)||0);},0);
-  return {raw:raw,premium:premium,net:raw-premium};
+  return {raw:raw,premium:0,net:raw};
 }
 function formatLocalDateTimeInput(d){
   d=d||new Date();
@@ -2602,7 +2583,6 @@ function renderDPanel() {
     cum = 0; cumIo = 0;
     days.forEach(function(d) {
       var rawDayNet = dayMap[d].rawNet || 0;
-      var premium = getDPremium(d);
       var dayNet = dayMap[d].net;
       var dayIo  = ioMap[d] || 0;
       cum += dayNet;
@@ -2616,13 +2596,11 @@ function renderDPanel() {
         diffCell = '<span style="color:'+diffColor+'">' + (diff>=0?'+':'')+Math.round(diff).toLocaleString()+'</span>';
       }
       var netCls = dayNet>=0?'pp':'nn';
-      var premCls = premium===0?'': 'nn';
       var ioCls  = dayIo===0?'':dayIo>0?'pp':'nn';
       rows += '<tr>'
         + '<td>'+d+'</td>'
         + '<td>'+dayMap[d].cnt+'</td>'
         + '<td class="'+(rawDayNet>=0?'pp':'nn')+'">'+(rawDayNet>=0?'+':'')+Math.round(rawDayNet).toLocaleString()+'</td>'
-        + '<td class="'+premCls+'">'+(premium?'-'+Math.round(premium).toLocaleString():'—')+'</td>'
         + '<td class="'+netCls+'">'+(dayNet>=0?'+':'')+Math.round(dayNet).toLocaleString()+'</td>'
         + '<td class="'+ioCls+'">'+(dayIo!==0?(dayIo>0?'+':'')+Math.round(dayIo).toLocaleString():'—')+'</td>'
         + '<td class="pp">'+Math.round(cum).toLocaleString()+'</td>'
@@ -2630,7 +2608,7 @@ function renderDPanel() {
         + '<td>'+(diffCell||'—')+'</td>'
         + '</tr>';
     });
-    dtbody.innerHTML = rows || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">尚無資料</td></tr>';
+    dtbody.innerHTML = rows || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">尚無資料</td></tr>';
   }
 
   // ── 交易明細表（交由子頁籤渲染）──
@@ -3751,7 +3729,7 @@ function renderDWaveAmplitude(){
   el.innerHTML=html;
 }
 
-// ══ 首頁總覽：沿用 DATA.D / D_io / D_premium / D_marketBias / Apps Script 振幅資料 ══
+// ══ 首頁總覽：沿用 DATA.D / D_io / D_marketBias / Apps Script 振幅資料 ══
 function hubEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function hubMoney(v){ v=Number(v)||0; return (v>=0?'+$':'-$')+Math.abs(Math.round(v)).toLocaleString('zh-TW'); }
 function hubSigned(v){ v=Number(v)||0; return (v>=0?'+':'')+Math.round(v).toLocaleString('zh-TW'); }
@@ -3778,7 +3756,8 @@ function renderHubHome(){
   var open=groups.filter(function(g){return !g.closed;}).sort(function(a,b){return b.firstIndex-a.firstIndex;})[0]||null;
   var currentNet=rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)-getDPremium(today);
   var currentLots=open?open.remaining:0;
-  var path=completed.map(function(g){return Number(g.net)>0?'W':'L';}).join('')||'—';
+  function pathCode(g){ return (g.dir==='B'?'B':'S') + (Number(g.net)>0?'W':'L'); }
+  var path=completed.map(pathCode).join(' → ')||'—';
   var nextNo=completed.length+1;
   var fmtMoney=function(v){return (Number(v)>=0?'+$':'-$')+Math.abs(Math.round(Number(v)||0)).toLocaleString('zh-TW');};
   var pct=function(n,d){return d?(n/d*100).toFixed(1)+'%':'—';};
@@ -3790,10 +3769,10 @@ function renderHubHome(){
   set('surf-trade-count',groups.length+' / 5');
   set('surf-path','今日路徑 '+path);
   set('surf-lots',currentLots?currentLots+'口':'0口');
-  var status=currentNet>=15000?'🟢':(path.indexOf('LL')>=0?'🔴':(currentNet<0||open?'🟡':'🟢'));
+  var status=currentNet>=15000?'🟢':(completed.length>=2 && completed.slice(-2).every(function(g){return Number(g.net)<0})?'🔴':(currentNet<0||open?'🟡':'🟢'));
   set('surf-status',status);
 
-  // 本月／本週：以目前資料＋歷史封存的 Trade 為基礎，並扣除對應權利金。
+  // 本月／本週：以目前資料＋歷史封存的 Trade 為基礎，只計算當沖 Trade 淨損益。
   var all=_dAllTimeTrades().slice(), dayRaw={}, dayNet={};
   all.forEach(function(r){var d=String(r.date||'');if(d)dayRaw[d]=(dayRaw[d]||0)+(Number(r.net)||0);});
   Object.keys(dayRaw).forEach(function(d){dayNet[d]=getDAdjustedNet(d,dayRaw[d]);});
@@ -3816,10 +3795,14 @@ function renderHubHome(){
   var daysBy={};
   all.forEach(function(r){var d=String(r.date||'');if(!d||d===today)return;(daysBy[d]||(daysBy[d]=[])).push(r);});
   var hist=Object.keys(daysBy).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
-  var prefix=completed.map(function(g){return Number(g.net)>0?'W':'L';}).join('');
-  set('surf-history-path',prefix||'尚無路徑');
-  var same=prefix?hist.filter(function(day){var p=day.trades.slice(0,prefix.length).map(function(g){return Number(g.net)>0?'W':'L';}).join('');return day.trades.length>prefix.length&&p===prefix;}):[];
-  var nextTrade=prefix?prefix.length+1:1; set('surf-next-trade-no',nextTrade);set('surf-sample',same.length+' 天');
+  var prefixCodes=completed.map(pathCode);
+  var prefix=prefixCodes.join('');
+  set('surf-history-path',prefixCodes.length?prefixCodes.join(' → '):'尚無路徑');
+  var same=prefixCodes.length?hist.filter(function(day){
+    var p=day.trades.slice(0,prefixCodes.length).map(pathCode);
+    return day.trades.length>prefixCodes.length && p.join('')===prefix;
+  }):[];
+  var nextTrade=prefixCodes.length+1; set('surf-next-trade-no',nextTrade);set('surf-sample',same.length+' 天');
   var next=same.map(function(d){return d.trades[nextTrade-1];}).filter(Boolean);
   var wins=next.filter(function(g){return Number(g.net)>0;}).length, avg=next.length?next.reduce(function(s,g){return s+Number(g.net||0);},0)/next.length:0;
   set('surf-path-winrate',pct(wins,next.length));
@@ -3841,7 +3824,6 @@ function renderHubHome(){
 
   // 保留原頁其他模組需要的 DOM 更新；首頁新版不再顯示這些舊卡片。
   set('hub-raw-pnl',fmtMoney(rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)));
-  set('hub-premium',getDPremium(today)?'-$'+Math.round(getDPremium(today)).toLocaleString('zh-TW'):'$0');
   set('hub-net-pnl',fmtMoney(currentNet));
 }
 window.renderHubHome=renderHubHome;
