@@ -553,6 +553,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 @media(max-width:699px){.hub-sidebar{display:none}body.light .cloud-bar,body.light .topbar,body.light .panel,body.light .tabs-wrap,body.light .quotes-wrap,body.light .signal-bar{margin-left:0;width:auto}.topbar{position:sticky}.panel{padding-left:12px!important;padding-right:12px!important}}
 
 
+
+/* 勝率統計區塊 */
+.hub-winrate-box{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin:10px 0}.hub-winrate-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.hub-winrate-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px}.hub-winrate-item span{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}.hub-winrate-item b{font:800 16px/1.2 monospace;color:var(--text)}.hub-winrate-main b{font-size:22px}.hub-winrate-note{font-size:10px;color:var(--muted);margin-top:8px}@media(max-width:699px){.hub-winrate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* ══ 每日衝浪板：新版三區首頁 ══ */
 .hub-surfboard{display:block;margin-bottom:14px}
 .hub-surf-title{font-size:16px;font-weight:800;color:var(--text);padding:8px 0 10px}
@@ -958,7 +961,32 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
       <div class="card-bd" id="D-stats-block"></div>
       <!-- 可展開圖表區 -->
-      <div id="d-stats-charts" style="display:none;padding:0 14px 14px">
+      <div class="hub-winrate-box" id="hub-winrate-box">
+  <h3 style="margin:0 0 10px;font-size:13px">勝率統計</h3>
+  <div class="hub-winrate-grid">
+    <div class="hub-winrate-item"><span>總 Trade</span><b id="hub-wr-total">—</b></div>
+    <div class="hub-winrate-item"><span>獲利 Trade</span><b id="hub-wr-win">—</b></div>
+    <div class="hub-winrate-item"><span>虧損 Trade</span><b id="hub-wr-loss">—</b></div>
+    <div class="hub-winrate-item hub-winrate-main"><span>歷史勝率</span><b id="hub-wr-rate">—</b></div>
+    <div class="hub-winrate-item"><span>平均獲利</span><b id="hub-wr-avgwin">—</b></div>
+    <div class="hub-winrate-item"><span>平均虧損</span><b id="hub-wr-avgloss">—</b></div>
+    <div class="hub-winrate-item"><span>Profit Factor</span><b id="hub-wr-pf">—</b></div>
+  </div>
+  <div class="hub-winrate-note">以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日資料不併入歷史勝率。</div>
+</div>
+
+<div id="hub-winrate-summary" style="margin:12px 0;padding:14px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2)">
+  <div style="font-weight:800;font-size:14px;margin-bottom:10px">勝率統計（以 Trade 為單位）</div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+    <div><small style="color:var(--muted)">總 Trade</small><b id="hub-wr-total">—</b></div>
+    <div><small style="color:var(--muted)">獲利 Trade</small><b id="hub-wr-win">—</b></div>
+    <div><small style="color:var(--muted)">虧損 Trade</small><b id="hub-wr-loss">—</b></div>
+    <div><small style="color:var(--muted)">勝率</small><b id="hub-wr-rate">—</b></div>
+  </div>
+  <div style="margin-top:8px;color:var(--muted);font-size:11px">今日與歷史資料分開統計；分批出場不重複計算。</div>
+</div>
+
+<div id="d-stats-charts" style="display:none;padding:0 14px 14px">
 
         <!-- 風報比 &amp; 期望值 KPI -->
         <div id="d-rr-block" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px"></div>
@@ -3795,7 +3823,7 @@ function renderHubHome(){
   // 歷史路徑：以 Trade 為核心；分批出場先由 hubTradeGroups 合併。
   var daysBy={};
   all.forEach(function(r){var d=String(r.date||'');if(!d||d===today)return;(daysBy[d]||(daysBy[d]=[])).push(r);});
-  var hist=Object.keys(daysBy).filter(function(d){var dt=new Date(d+'T00:00:00');var wd=dt.getDay();return wd!==0&&wd!==6;}).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
+  var hist=Object.keys(daysBy).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
   var prefixCodes=completed.map(pathCode);
   var prefix=prefixCodes.join('');
   set('surf-history-path',prefixCodes.length?prefixCodes.join(' → '):'尚無路徑');
@@ -3903,6 +3931,23 @@ window.hubNav=function(btn,tab){
   try{ if(!localStorage.getItem('dashboard_theme')) localStorage.setItem('dashboard_theme','light'); }catch(e){}
 })();
 (function(){ var p=document.getElementById('panel-D'); if(p){p.classList.add('hub-home-active');p.classList.remove('hub-subpage-mode');} var h=document.getElementById('hub-home'); if(h) h.style.display='block'; })();
+
+function renderHubWinrateStats(){
+  try{
+    var all=Array.isArray(window.allTrades)?window.allTrades:(Array.isArray(window.tradeData)?window.tradeData:[]);
+    if(!all.length)return;
+    var groups=typeof hubTradeGroups==='function'?hubTradeGroups(all):[];
+    if(!groups.length)return;
+    var wins=groups.filter(function(g){return Number(g.net)>0}),loss=groups.filter(function(g){return Number(g.net)<=0});
+    var sumW=wins.reduce(function(s,g){return s+Number(g.net||0)},0),sumL=Math.abs(loss.reduce(function(s,g){return s+Number(g.net||0)},0));
+    var avgW=wins.length?sumW/wins.length:0,avgL=loss.length?-(sumL/loss.length):0,pf=sumL?sumW/sumL:0;
+    function put(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+    put('hub-wr-total',groups.length);put('hub-wr-win',wins.length);put('hub-wr-loss',loss.length);put('hub-wr-rate',(groups.length?(wins.length/groups.length*100).toFixed(1):'0.0')+'%');
+    put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgW):Math.round(avgW).toLocaleString());put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgL):Math.round(avgL).toLocaleString());put('hub-wr-pf',sumL?pf.toFixed(2):'—');
+  }catch(e){}
+}
+
+  try{setTimeout(renderHubWinrateStats,300)}catch(e){}
 </script>
 </body>
 </html>
