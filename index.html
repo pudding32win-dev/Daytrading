@@ -3466,6 +3466,7 @@ async function initData() {
     }
     setCloudStatus('connected', '已連線 · 即時同步中');
     renderDPanel();
+    try{ renderHubWinrateStats(); }catch(e){ console.error('initial winrate render',e); }
 
     // 若本機有上次存檔失敗、還沒同步上去的資料，提示使用者
     var unsynced = getUnsyncedBackup();
@@ -3487,6 +3488,7 @@ async function initData() {
           _dLastRev = d._revD || _dLastRev;
         }
         setCloudStatus('connected', '已連線 · 即時同步中');
+        try{ renderHubWinrateStats(); }catch(e){ console.error('snapshot winrate render',e); }
       }
     });
   } catch (err) {
@@ -3925,29 +3927,40 @@ window.hubNav=function(btn,tab){
 (function(){ var p=document.getElementById('panel-D'); if(p){p.classList.add('hub-home-active');p.classList.remove('hub-subpage-mode');} var h=document.getElementById('hub-home'); if(h) h.style.display='block'; })();
 
 function renderHubWinrateStats(){
+  // 歷史勝率：使用「目前 + 全部封存」資料，先排除今天，再以 Trade 合併分批出場。
   try{
-    // 勝率統計只看「已完成的歷史 Trade」；分批出場由 hubTradeGroups 合併。
-    var today=(typeof dTodayKey==='function')?dTodayKey():'';
-    var rows=(window.DATA&&Array.isArray(DATA.D))?DATA.D:[];
-    var historical=rows.filter(function(r){return String(r.date||'')!==String(today);});
-    var groups=typeof hubTradeGroups==='function'?hubTradeGroups(historical):[];
-    groups=groups.filter(function(g){return g.closed!==false;});
-    var wins=groups.filter(function(g){return Number(g.net)>0;});
-    var losses=groups.filter(function(g){return Number(g.net)<=0;});
-    var grossWin=wins.reduce(function(s,g){return s+Math.max(0,Number(g.net||0));},0);
-    var grossLoss=Math.abs(losses.reduce(function(s,g){return s+Math.min(0,Number(g.net||0));},0));
+    var today=(typeof dTodayKey==='function')?String(dTodayKey()):'';
+    var rows=[];
+    if(typeof _dAllTimeTrades==='function') rows=_dAllTimeTrades();
+    else if(typeof DATA!=='undefined' && DATA) rows=(DATA.D||[]);
+    rows=(rows||[]).filter(function(r){ return String(r.date||'')!==today; });
+
+    var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(rows):[];
+    // 同一 Trade 只算一次；未完成的開倉不列入勝率。
+    groups=groups.filter(function(g){ return g && g.closed===true; });
+    var wins=groups.filter(function(g){ return Number(g.net||0)>0; });
+    var losses=groups.filter(function(g){ return Number(g.net||0)<0; });
+    var breakeven=groups.filter(function(g){ return Number(g.net||0)===0; });
+    var grossWin=wins.reduce(function(s,g){return s+Number(g.net||0);},0);
+    var grossLoss=Math.abs(losses.reduce(function(s,g){return s+Number(g.net||0);},0));
     var avgWin=wins.length?grossWin/wins.length:0;
-    var avgLoss=losses.length?-(grossLoss/losses.length):0;
+    var avgLoss=losses.length?losses.reduce(function(s,g){return s+Number(g.net||0);},0)/losses.length:0;
     var pf=grossLoss?grossWin/grossLoss:0;
-    function put(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+    function put(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
     put('hub-wr-total',groups.length);
     put('hub-wr-win',wins.length);
     put('hub-wr-loss',losses.length);
-    put('hub-wr-rate',(groups.length?(wins.length/groups.length*100).toFixed(1):'0.0')+'%');
-    put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgWin):Math.round(avgWin).toLocaleString());
-    put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString());
+    put('hub-wr-rate',groups.length?((wins.length/groups.length)*100).toFixed(1)+'%':'0.0%');
+    put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgWin):Math.round(avgWin).toLocaleString('zh-TW'));
+    put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString('zh-TW'));
     put('hub-wr-pf',grossLoss?pf.toFixed(2):'—');
-  }catch(e){ console.error('renderHubWinrateStats',e); }
+    var note=document.querySelector('#hub-winrate-box .hub-winrate-note');
+    if(note) note.textContent='以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日不列入歷史勝率。'+(breakeven.length?'　持平 Trade：'+breakeven.length+' 筆。':'');
+  }catch(e){
+    console.error('renderHubWinrateStats',e);
+    var ids=['hub-wr-total','hub-wr-win','hub-wr-loss','hub-wr-rate','hub-wr-avgwin','hub-wr-avgloss','hub-wr-pf'];
+    ids.forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='資料錯誤';});
+  }
 }
 </script>
 </body>
