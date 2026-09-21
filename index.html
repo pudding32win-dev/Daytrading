@@ -571,6 +571,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-surf-progress i{display:block;height:100%;width:0;border-radius:99px;background:#334155;transition:width .25s ease}
 .hub-surf-risk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .hub-surf-risk-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 11px}
+.hub-surf-method{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 12px;margin-top:10px}.hub-surf-method-title{font-size:12px;font-weight:800;color:var(--text);margin-bottom:7px}.hub-surf-method-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.hub-surf-method-item{font-size:10.5px;line-height:1.55;color:var(--muted2);padding:8px;border:1px solid var(--border);border-radius:7px}.hub-surf-method-item b{display:block;color:var(--text);font-size:11px;margin-bottom:3px}@media(max-width:699px){.hub-surf-method-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .hub-surf-risk-label{font-size:12px;color:var(--muted);margin-bottom:5px}
 .hub-surf-risk-value{font:800 15px/1.2 monospace;color:var(--text)}
 .hub-surf-risk-note{font-size:12px;color:var(--muted2);margin-top:4px;line-height:1.5}
@@ -810,8 +811,8 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
       <div class="hub-surf-risk-grid">
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">🔎 下一筆分析 · Trade <span id="surf-next-trade-no">1</span></div><div class="hub-surf-risk-value" id="surf-path-winrate">—</div><div class="hub-surf-risk-note">勝率　平均損益　樣本 <span id="surf-path-stats">—</span></div></div>
-        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">2口結果</div><div class="hub-surf-risk-value" id="surf-2lot">—</div><div class="hub-surf-risk-note" id="surf-2lot-note">—</div></div>
-        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">3口結果</div><div class="hub-surf-risk-value" id="surf-3lot">—</div><div class="hub-surf-risk-note" id="surf-3lot-note">—</div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">2口實際歷史</div><div class="hub-surf-risk-value" id="surf-2lot">—</div><div class="hub-surf-risk-note" id="surf-2lot-note">只統計歷史上實際以2口進場的 Trade</div></div>
+        <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">3口實際歷史</div><div class="hub-surf-risk-value" id="surf-3lot">—</div><div class="hub-surf-risk-note" id="surf-3lot-note">只統計歷史上實際以3口進場的 Trade</div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">敗率壓力</div><div class="hub-surf-risk-value" id="surf-loss-pressure">—</div><div class="hub-surf-risk-note">下一筆 Trade 歷史敗率</div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">連敗風險</div><div class="hub-surf-risk-value" id="surf-streak-risk">—</div><div class="hub-surf-risk-note">下一連續兩筆皆敗的歷史比例</div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">歷史樣本</div><div class="hub-surf-risk-value" id="surf-sample">—</div><div class="hub-surf-risk-note">排除今天，避免目前未完成 Trade 污染樣本</div></div>
@@ -819,6 +820,16 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="hub-surf-action"><b>🔎 下一筆 Trade 分析</b><span id="surf-history-style">—</span></div>
       <div class="hub-surf-action" style="display:block"><b>符合相同路徑的歷史日期</b><div id="surf-history-dates" style="margin-top:6px;font:11px monospace;color:var(--muted2)">—</div></div>
     </section>
+  </div>
+
+  <div class="hub-surf-method">
+    <div class="hub-surf-method-title">你的實際打法校正</div>
+    <div class="hub-surf-method-grid">
+      <div class="hub-surf-method-item"><b>Trade 怎麼算</b>一次進場部位算 1 Trade；分批出場不拆成多筆。</div>
+      <div class="hub-surf-method-item"><b>獲利怎麼算</b>同一 Trade 的所有分批平倉合併後，最後淨損益 &gt; 0 才算 W。</div>
+      <div class="hub-surf-method-item"><b>虧損怎麼算</b>即使 2～3口一次全部停損，也只算 1 個 L；不會因口數增加而多算幾筆。</div>
+      <div class="hub-surf-method-item"><b>2／3口回測</b>只拿歷史上實際 2口／3口進場的 Trade 比較，不把單口獲利直接乘倍數。</div>
+    </div>
   </div>
 
   <!-- 指標卡（原功能保留；交易紀錄頁使用） -->
@@ -972,7 +983,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
     <div class="hub-winrate-item"><span>平均虧損</span><b id="hub-wr-avgloss">-9,189</b></div>
     <div class="hub-winrate-item"><span>Profit Factor</span><b id="hub-wr-pf">1.25</b></div>
   </div>
-  <div class="hub-winrate-note">以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日資料不併入歷史勝率。</div>
+  <div class="hub-winrate-note">以 Trade 為統計單位；同一進場的分批出場合併計算。獲利／虧損不因出場口數而重複計算；今日資料不併入歷史統計。</div>
 </div>
 
 
@@ -1147,6 +1158,26 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   </div>
 </div>
 
+
+<!-- TP 批次整理 Modal -->
+<div id="D-tp-batch-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(5px);z-index:510;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#1c2030;border:1px solid rgba(96,165,250,0.35);border-radius:16px;padding:20px;width:min(520px,100%);box-shadow:0 8px 40px rgba(0,0,0,.7)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span style="font-size:15px;font-weight:700;color:#93c5fd">⚙️ TP 批次整理</span>
+      <button onclick="closeTPBatchModal()" style="background:none;border:none;color:#6b7280;font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div id="D-tp-batch-date" style="font-size:12px;color:#9ca3af;margin-bottom:12px"></div>
+    <div style="padding:11px 12px;border:1px solid rgba(96,165,250,.2);background:rgba(96,165,250,.06);border-radius:9px;font-size:12px;line-height:1.7;color:#cbd5e1">
+      <b style="color:#e5e7eb">建議用這個：</b>同一個交易 ID 的分批出場，依「出場時間」自動編成 TP1、TP2、TP3……<br>
+      不用逐筆打開修改；一次整理整天資料。沒有出場時間的資料則沿用原始順序。
+    </div>
+    <div id="D-tp-batch-preview" style="margin-top:12px;max-height:240px;overflow:auto;border:1px solid var(--border);border-radius:8px"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button onclick="closeTPBatchModal()" style="flex:1;padding:10px;border-radius:8px;background:rgba(107,114,128,.15);border:1px solid rgba(107,114,128,.3);color:#9ca3af;cursor:pointer">取消</button>
+      <button onclick="applyTPBatch()" style="flex:1;padding:10px;border-radius:8px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.35);color:#93c5fd;font-weight:700;cursor:pointer">✓ 自動整理 TP</button>
+    </div>
+  </div>
+</div>
 
 <div class="footer">每日衝浪板 · Firebase 雲端同步 · 僅供參考</div>
 
@@ -3382,6 +3413,7 @@ window.renderDDetailTab = function() {
       + '<span style="font-size:12px;font-weight:700;color:'+dayNetCls+'">'+(dayNet>=0?'+':'')+Math.round(dayNet).toLocaleString()+'</span>'
       + '<div style="display:flex;gap:5px;margin-left:auto;align-items:center">'
       + wkBadge + moBadge
+      + (canEdit ? '<button type="button" onclick="event.stopPropagation();openTPBatchModal(\''+date+'\')" style="font-size:10px;padding:3px 8px;border-radius:7px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25);color:#93c5fd;cursor:pointer">TP批次</button>' : '')
       + '<span id="'+uid+'-arrow" style="font-size:12px;color:var(--muted);transition:transform 0.2s;margin-left:4px">▼</span>'
       + '</div>'
       + '</div>'
@@ -3434,6 +3466,66 @@ window.renderDDetailTab = function() {
   });
 
   container.innerHTML = html;
+};
+
+// ══ TP 批次整理：同一 Trade 的分批出場依出場時間自動編號 ══
+var _tpBatchDate = '';
+window.closeTPBatchModal = function(){
+  var m=document.getElementById('D-tp-batch-modal'); if(m) m.style.display='none';
+};
+window.openTPBatchModal = function(date){
+  if(!canEdit){ alert('⛔ 唯讀模式，請用含編輯金鑰的網址開啟'); return; }
+  _tpBatchDate = date || '';
+  var rows=(DATA.D||[]).filter(function(r){return r.date===_tpBatchDate;});
+  var box=document.getElementById('D-tp-batch-preview');
+  var title=document.getElementById('D-tp-batch-date');
+  if(title) title.textContent='日期：'+_tpBatchDate+'　共 '+rows.length+' 筆出場紀錄';
+  var groups={};
+  rows.forEach(function(r,i){
+    var k=(r.en!=null && r.en!=='') ? String(r.date||'')+'|'+String(r.dir||'')+'|'+String(r.en) : (r.tradeId||('無ID-'+i));
+    if(!groups[k]) groups[k]=[];
+    groups[k].push({r:r,i:i});
+  });
+  var h='<div style="padding:7px 9px;background:var(--bg2);color:var(--muted);font-size:10px">交易ID　→　目前 TP　→　整理後 TP</div>';
+  Object.keys(groups).forEach(function(k){
+    var arr=groups[k].slice().sort(function(a,b){
+      var ta=a.r.exitTime?new Date(a.r.exitTime).getTime():Infinity;
+      var tb=b.r.exitTime?new Date(b.r.exitTime).getTime():Infinity;
+      if(isFinite(ta)&&isFinite(tb)&&ta!==tb) return ta-tb;
+      if(isFinite(ta)!==isFinite(tb)) return isFinite(ta)?-1:1;
+      return a.i-b.i;
+    });
+    h+='<div style="padding:7px 9px;border-top:1px solid var(--border);font-size:11px">'
+      +'<b style="font-family:monospace">'+k+'</b>'
+      +'<span style="color:var(--muted);margin-left:8px">'+arr.map(function(x,n){return 'TP'+(x.r.tpStage||1)+'→TP'+(n+1);}).join('　')+'</span>'
+      +'</div>';
+  });
+  if(!rows.length) h='<div style="padding:16px;text-align:center;color:var(--muted)">這一天沒有交易資料</div>';
+  if(box) box.innerHTML=h;
+  var m=document.getElementById('D-tp-batch-modal'); if(m) m.style.display='flex';
+};
+window.applyTPBatch = async function(){
+  if(!canEdit){ alert('⛔ 唯讀模式'); return; }
+  var date=_tpBatchDate;
+  if(!date) return;
+  var rows=(DATA.D||[]).map(function(r,i){return {r:r,i:i};}).filter(function(x){return x.r.date===date;});
+  if(!rows.length){ alert('這一天沒有交易資料'); return; }
+  var groups={};
+  rows.forEach(function(x){var k=(x.r.en!=null && x.r.en!=='') ? String(x.r.date||'')+'|'+String(x.r.dir||'')+'|'+String(x.r.en) : (x.r.tradeId||('__NO_ID__'+x.i));if(!groups[k])groups[k]=[];groups[k].push(x);});
+  Object.keys(groups).forEach(function(k){
+    groups[k].sort(function(a,b){
+      var ta=a.r.exitTime?new Date(a.r.exitTime).getTime():Infinity;
+      var tb=b.r.exitTime?new Date(b.r.exitTime).getTime():Infinity;
+      if(isFinite(ta)&&isFinite(tb)&&ta!==tb) return ta-tb;
+      if(isFinite(ta)!==isFinite(tb)) return isFinite(ta)?-1:1;
+      return a.i-b.i;
+    });
+    groups[k].forEach(function(x,n){ x.r.tpStage=n+1; });
+  });
+  await saveData();
+  closeTPBatchModal();
+  renderDPanel();
+  alert('✓ '+date+' TP 已依出場時間重新整理完成');
 };
 
 // 折疊/展開日期分組
@@ -3759,7 +3851,7 @@ function hubMinutes(ms){ if(!isFinite(ms)||ms<0)return '—'; var m=Math.floor(m
 function hubTradeGroups(rows){
   var map={}, order=[];
   (rows||[]).forEach(function(r,i){
-    var key=r.tradeId ? 'id:'+r.tradeId : String(r.date||'')+'|'+String(r.dir||'')+'|'+String(r.en==null?'':r.en);
+    var key=(r.date!=null && r.dir!=null && r.en!=null && r.en!=='') ? String(r.date||'')+'|'+String(r.dir||'')+'|'+String(r.en) : (r.tradeId ? 'id:'+r.tradeId : String(r.date||'')+'|'+String(r.dir||'')+'|');
     if(!map[key]){ map[key]={key:key,rows:[],firstIndex:i,tradeId:r.tradeId||'',date:r.date||'',dir:r.dir||'',wave:r.wave||'',en:r.en,entryLots:0,exitLots:0,net:0,fee:0,entryTime:null,exitTime:null,exits:[]}; order.push(key); }
     var g=map[key]; g.rows.push(r); g.entryLots=Math.max(g.entryLots,Number(r.entryLots||r.lots||0)); g.exitLots+=Number(r.lots||0); g.net+=Number(r.net||0); g.fee+=Number(r.fee||0);
     if(g.en==null && r.en!=null)g.en=r.en; if(!g.wave&&r.wave)g.wave=r.wave; if(!g.dir&&r.dir)g.dir=r.dir;
@@ -3769,13 +3861,23 @@ function hubTradeGroups(rows){
   });
   return order.map(function(k,n){var g=map[k];g.no=n+1;g.remaining=Math.max(0,g.entryLots-g.exitLots);g.closed=g.remaining<=0;g.ex=g.exits.length?g.exits[g.exits.length-1]:null;return g;});
 }
+function hubTradeSort(a,b){
+  var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity;
+  var tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;
+  if(isFinite(ta)&&isFinite(tb)&&ta!==tb) return ta-tb;
+  if(isFinite(ta)!==isFinite(tb)) return isFinite(ta)?-1:1;
+  var xa=a.exitTime?new Date(a.exitTime).getTime():Infinity;
+  var xb=b.exitTime?new Date(b.exitTime).getTime():Infinity;
+  if(isFinite(xa)&&isFinite(xb)&&xa!==xb) return xa-xb;
+  return (a.firstIndex||0)-(b.firstIndex||0);
+}
 function hubTodayRows(){ return (DATA.D||[]).filter(function(r){return String(r.date||'')===dTodayKey();}); }
 function hubSet(id,txt){var e=document.getElementById(id);if(e)e.textContent=txt;}
 function hubClassMoney(v){return Number(v)>=0?'var(--gain)':'var(--loss)';}
 function renderHubHome(){
   var rows=hubTodayRows(), groups=hubTradeGroups(rows), today=dTodayKey();
-  var completed=groups.filter(function(g){return g.closed;}).sort(function(a,b){return a.no-b.no;});
-  var open=groups.filter(function(g){return !g.closed;}).sort(function(a,b){return b.firstIndex-a.firstIndex;})[0]||null;
+  var completed=groups.filter(function(g){return g.closed;}).sort(hubTradeSort);
+  var open=groups.filter(function(g){return !g.closed;}).sort(function(a,b){return hubTradeSort(b,a);})[0]||null;
   var currentNet=rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)-getDPremium(today);
   var currentLots=open?open.remaining:0;
   function pathCode(g){ return (g.dir==='B'?'B':'S') + (Number(g.net)>0?'W':'L'); }
@@ -3836,8 +3938,8 @@ function renderHubHome(){
 
   function lotStats(lots){var arr=next.filter(function(g){return Number(g.entryLots||g.rows&&g.rows[0]&&g.rows[0].entryLots||0)===lots;});var w=arr.filter(function(g){return Number(g.net)>0;}).length;return {n:arr.length,w:w};}
   var l2=lotStats(2),l3=lotStats(3);
-  set('surf-2lot',l2.n?pct(l2.w,l2.n):'—');set('surf-2lot-note',l2.n?'樣本 '+l2.n+' 天':'無相同路徑的2口樣本');
-  set('surf-3lot',l3.n?pct(l3.w,l3.n):'—');set('surf-3lot-note',l3.n?'樣本 '+l3.n+' 天':'無相同路徑的3口樣本');
+  set('surf-2lot',l2.n?pct(l2.w,l2.n):'—');set('surf-2lot-note',l2.n?'實際2口 Trade：'+l2.n+' 筆':'無相同路徑的2口 Trade');
+  set('surf-3lot',l3.n?pct(l3.w,l3.n):'—');set('surf-3lot-note',l3.n?'實際3口 Trade：'+l3.n+' 筆':'無相同路徑的3口 Trade');
 
   // 歷史打法：只描述同一路徑下 Trade N 實際出現的方向／浪級，不做保證式預測。
   var combos={}; next.forEach(function(g){var key=(g.dir==='B'?'多':'空')+'／'+(g.wave||'未標記');if(!combos[key])combos[key]={n:0,w:0};combos[key].n++;if(Number(g.net)>0)combos[key].w++;});
