@@ -1044,7 +1044,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>日期</th><th>筆數</th><th>當沖損益</th><th>當日淨損益</th><th>出入金</th><th>累計淨損益</th><th>手動權益金</th><th>差異</th>
+            <th>日期</th><th>筆數</th><th>當沖損益</th><th>當日淨損益</th><th>出入金</th><th>累計淨損益</th><th>手動權益金</th><th>權益金差異</th>
           </tr></thead>
           <tbody id="tbody-D-daily"></tbody>
         </table>
@@ -2358,12 +2358,9 @@ function renderDEquityKPI() {
   var abs = diff == null ? null : Math.abs(diff);
   var color = diff == null ? 'var(--muted)' : abs < 500 ? '#34d399' : abs < 5000 ? '#f59e0b' : '#f87171';
   var status = diff == null ? '尚未輸入手動權益金' : abs < 500 ? '✅ 吻合' : '⚠️ 有差異';
-  el.innerHTML = '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px">'
-    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;color:var(--muted)">📌 權益金差異確認</span><span style="font-size:11px;font-weight:700;color:'+color+'">'+status+'</span></div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-    + '<div><div style="font-size:9px;color:var(--muted)">系統</div><div style="font-size:14px;font-weight:700;font-family:monospace">$'+Math.round(sysEquity).toLocaleString()+'</div></div>'
-    + '<div><div style="font-size:9px;color:var(--muted)">最近手動</div><div style="font-size:14px;font-weight:700;font-family:monospace">'+(latest?'$'+Math.round(latest.equity).toLocaleString():'—')+'</div></div>'
-    + '<div style="border-left:1px solid var(--border2);padding-left:16px"><div style="font-size:10px;color:var(--muted)">權益金差異</div><div style="font-size:20px;font-weight:800;font-family:monospace;color:'+color+';margin-top:3px">'+(diff==null?'—':(diff>=0?'+':'')+Math.round(diff).toLocaleString())+'</div><div style="font-size:9px;color:'+color+';margin-top:2px">實際權益－系統權益</div></div></div></div>';
+  el.innerHTML = '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--muted)">📌 權益金核對</span><span style="font-size:11px;font-weight:700;color:'+color+'">'+status+'</span></div>'
+    + '<div style="text-align:center;padding:8px 0 2px"><div style="font-size:10px;color:var(--muted)">差異</div><div style="font-size:24px;font-weight:800;font-family:monospace;color:'+color+';margin-top:2px">'+(diff==null?'—':(diff>=0?'+':'')+Math.round(diff).toLocaleString())+'</div><div style="font-size:9px;color:'+color+';margin-top:2px">實際權益 − 系統權益</div></div></div>';
 }
 
 // 動態預覽淨額
@@ -2594,7 +2591,7 @@ function renderDPanel() {
   // 每日出入金 map
   var ioMap = {};
   io.forEach(function(r) { if (!ioMap[r.date]) ioMap[r.date] = 0; ioMap[r.date] += r.amt; });
-  // 每日手動輸入權益金 map
+  // 每日手動輸入權益金 map：只在「每日彙總」層級核對，不套到單筆 Trade
   var eqMap = {};
   (DATA.D_eq || []).forEach(function(r){ eqMap[r.date] = r.equity; });
 
@@ -2627,7 +2624,7 @@ function renderDPanel() {
     return '<div class="mc"><div class="mc-l">'+x[0]+'</div><div class="mc-v '+x[2]+'">'+x[1]+'</div></div>';
   }).join('');
 
-  // ── 每日彙總表 ──
+  // ── 每日彙總表：權益金差異以「整天」核對，不計入單筆 Trade 明細 ──
   var dtbody = document.getElementById('tbody-D-daily');
   if (dtbody) {
     var rows = '';
