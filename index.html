@@ -807,7 +807,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
     <section class="hub-surf-section">
       <h3>③ ⚠️ 風險評估 <span style="font-size:9px;color:var(--muted);font-weight:500">（只用歷史 Trade 操作路徑）</span></h3>
       <div class="hub-surf-risk-box" style="margin-bottom:10px">
-        <div class="hub-surf-risk-label">歷史路徑</div><div class="hub-surf-path" id="surf-history-path">—</div>
+        <div class="hub-surf-risk-label">歷史路徑 <span id="surf-history-data-count" style="margin-left:10px;font-size:11px;color:var(--muted);font-weight:500">歷史資料：—</span></div><div class="hub-surf-path" id="surf-history-path">—</div>
       </div>
       <div class="hub-surf-risk-grid">
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">🔎 下一筆分析 · Trade <span id="surf-next-trade-no">1</span></div><div class="hub-surf-risk-value" id="surf-path-winrate">—</div><div class="hub-surf-risk-note">勝率　平均損益　樣本 <span id="surf-path-stats">—</span></div></div>
@@ -1044,7 +1044,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>日期</th><th>筆數</th><th>當沖損益</th><th>當日淨損益</th><th>出入金</th><th>累計淨損益</th><th>手動權益金</th><th>權益金差異</th>
+            <th>日期</th><th>筆數</th><th>當沖損益</th><th>當日淨損益</th><th>出入金</th><th>累計淨損益</th>
           </tr></thead>
           <tbody id="tbody-D-daily"></tbody>
         </table>
@@ -1060,7 +1060,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   <!-- ③ 每月損益 -->
   <div class="dtab-panel" id="dpanel-monthly">
     <div class="card" id="D-period-equity-card">
-    <div class="card-hd">📊 週／月損益與實際權益差異</div>
+    <div class="card-hd" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>📊 週／月損益與實際權益差異</span><span id="D-month-equity-diff-badge" style="font-size:11px;font-weight:700;color:var(--gain);font-family:monospace;white-space:nowrap">權益金差異 +0</span></div>
     <div class="card-bd" id="D-period-equity-body"></div>
   </div>
   <div class="d-chart-wrap">
@@ -1073,7 +1073,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>月份</th><th>交易日</th><th>獲利日</th><th>日勝率</th><th>月損益</th><th>累計</th><th>權益金差異</th>
+            <th>月份</th><th>交易日</th><th>獲利日</th><th>日勝率</th><th>月損益</th><th>累計</th>
           </tr></thead>
           <tbody id="tbody-D-monthly"></tbody>
         </table>
@@ -2358,9 +2358,22 @@ function renderDEquityKPI() {
   var abs = diff == null ? null : Math.abs(diff);
   var color = diff == null ? 'var(--muted)' : abs < 500 ? '#34d399' : abs < 5000 ? '#f59e0b' : '#f87171';
   var status = diff == null ? '尚未輸入手動權益金' : abs < 500 ? '✅ 吻合' : '⚠️ 有差異';
+  // 日損益：只顯示「整天」的權益金核對，不在 Trade 明細逐筆顯示。
+  var selected = (document.getElementById('D-equity-date')||{}).value || '';
+  var targetDate = selected ? selected.replace(/-/g,'/') : (latest ? latest.date : '');
+  var dayEq = targetDate ? eqList.filter(function(r){return r.date===targetDate;}).sort(function(a,b){return String(a.date).localeCompare(String(b.date));}).pop() : null;
+  var dayNet=0, dayIo=0;
+  trades.forEach(function(r){ if(r.date===targetDate) dayNet += (r.net||0); });
+  io.forEach(function(r){ if(r.date===targetDate) dayIo += (r.amt||0); });
+  var priorNet=0, priorIo=0;
+  trades.forEach(function(r){ if(r.date && r.date<=targetDate) priorNet += (r.net||0); });
+  io.forEach(function(r){ if(r.date && r.date<=targetDate) priorIo += (r.amt||0); });
+  var dayDiff = dayEq ? dayEq.equity - (priorNet + priorIo) : diff;
+  var dayColor = dayDiff==null ? 'var(--muted)' : Math.abs(dayDiff)<500 ? '#34d399' : Math.abs(dayDiff)<5000 ? '#f59e0b' : '#f87171';
+  var dayStatus = dayDiff==null ? '尚未輸入手動權益金' : Math.abs(dayDiff)<500 ? '✅ 吻合' : '⚠️ 有差異';
   el.innerHTML = '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px">'
-    + '<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--muted)">📌 權益金核對</span><span style="font-size:11px;font-weight:700;color:'+color+'">'+status+'</span></div>'
-    + '<div style="text-align:center;padding:8px 0 2px"><div style="font-size:10px;color:var(--muted)">差異</div><div style="font-size:24px;font-weight:800;font-family:monospace;color:'+color+';margin-top:2px">'+(diff==null?'—':(diff>=0?'+':'')+Math.round(diff).toLocaleString())+'</div><div style="font-size:9px;color:'+color+';margin-top:2px">實際權益 − 系統權益</div></div></div>';
+    + '<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:var(--muted)">📌 當日權益金核對</span><span style="font-size:11px;font-weight:700;color:'+dayColor+'">'+dayStatus+'</span></div>'
+    + '<div style="text-align:center;padding:8px 0 2px"><div style="font-size:10px;color:var(--muted)">權益金差異</div><div style="font-size:24px;font-weight:800;font-family:monospace;color:'+dayColor+';margin-top:2px">'+(dayDiff==null?'—':(dayDiff>=0?'+':'')+Math.round(dayDiff).toLocaleString())+'</div><div style="font-size:9px;color:'+dayColor+';margin-top:2px">'+(targetDate||'')+'｜實際權益 − 系統權益</div></div></div>';
 }
 
 // 動態預覽淨額
@@ -2652,11 +2665,9 @@ function renderDPanel() {
         + '<td class="'+netCls+'">'+(dayNet>=0?'+':'')+Math.round(dayNet).toLocaleString()+'</td>'
         + '<td class="'+ioCls+'">'+(dayIo!==0?(dayIo>0?'+':'')+Math.round(dayIo).toLocaleString():'—')+'</td>'
         + '<td class="pp">'+Math.round(cum).toLocaleString()+'</td>'
-        + '<td style="font-size:11px;color:var(--muted2)">'+(manualEq?'$'+Math.round(manualEq).toLocaleString():'—')+'</td>'
-        + '<td>'+(diffCell||'—')+'</td>'
         + '</tr>';
     });
-    dtbody.innerHTML = rows || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">尚無資料</td></tr>';
+    dtbody.innerHTML = rows || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">尚無資料</td></tr>';
   }
 
   // ── 交易明細表（交由子頁籤渲染）──
@@ -3009,28 +3020,16 @@ function renderDMonthlyTable() {
   });
   var months=Object.keys(mMap).sort(), tbody=document.getElementById('tbody-D-monthly');
   if(!tbody)return;
-  var eqMap={}; (DATA.D_eq||[]).forEach(function(r){eqMap[r.date]=r.equity;});
   var ioMap={}; (DATA.D_io||[]).forEach(function(r){ioMap[r.date]=(ioMap[r.date]||0)+(r.amt||0);});
   var cum=0, rows='';
   months.forEach(function(m){
     var obj=mMap[m], allD=obj.allDays.size, winD=obj.winDays, rate=allD?(winD/allD*100).toFixed(1):'-';
     cum+=obj.net;
-    var monthEnd=m+'/' + new Date(Number(m.slice(0,4)),Number(m.slice(5,7)),0).getDate().toString().padStart(2,'0');
-    var eqDate=Object.keys(eqMap).filter(function(d){return d.slice(0,7)===m;}).sort().pop();
-    var eqDiff='—';
-    if(eqDate){
-      var beforeDates=Object.keys(dayNets).filter(function(d){return d<=eqDate;}).sort();
-      var c=0,cio=0;
-      beforeDates.forEach(function(d){c+=dayNets[d];cio+=ioMap[d]||0;});
-      var diff=(eqMap[eqDate]||0)-(c+cio);
-      eqDiff=(diff>=0?'+':'')+Math.round(diff).toLocaleString();
-    }
     rows+='<tr><td>'+m+'</td><td>'+allD+'</td><td>'+winD+'</td><td class="'+(parseFloat(rate)>=50?'pp':'nn')+'">'+rate+'%</td>'
       +'<td class="'+(obj.net>=0?'pp':'nn')+'">'+(obj.net>=0?'+':'')+Math.round(obj.net).toLocaleString()+'</td>'
-      +'<td class="'+(cum>=0?'pp':'nn')+'">'+Math.round(cum).toLocaleString()+'</td>'
-      +'<td style="font-family:monospace;color:var(--muted2)">'+eqDiff+'</td></tr>';
+      +'<td class="'+(cum>=0?'pp':'nn')+'">'+Math.round(cum).toLocaleString()+'</td></tr>';
   });
-  tbody.innerHTML=rows||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">尚無資料</td></tr>';
+  tbody.innerHTML=rows||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">尚無資料</td></tr>';
 }
 function renderPeriodEquityCard(){
   var el=document.getElementById('D-period-equity-body'); if(!el)return;
@@ -3048,14 +3047,18 @@ function renderPeriodEquityCard(){
     weeks[wkKey]=(weeks[wkKey]||0)+dayNet[d]; months[mo]=(months[mo]||0)+dayNet[d];
   });
   var latestEqDate=Object.keys(eqMap).sort().pop(), latestEq=latestEqDate?eqMap[latestEqDate]:null;
-  var totalAdj=getDAdjustedTotals().net, totalIo=(DATA.D_io||[]).reduce(function(a,r){return a+(r.amt||0);},0);
-  var overallDiff=latestEq!=null?latestEq-(totalAdj+totalIo):null;
+  var latestMonth=Object.keys(months).sort().pop();
+  var monthEndDate=latestMonth ? Object.keys(eqMap).filter(function(d){return d.slice(0,7)===latestMonth;}).sort().pop() : null;
+  var monthCumNet=0, monthCumIo=0;
+  if(monthEndDate){ days.forEach(function(d){ if(d<=monthEndDate){ monthCumNet+=dayNet[d]; monthCumIo+=ioMap[d]||0; } }); }
+  var monthDiff=(monthEndDate!=null && eqMap[monthEndDate]!=null) ? eqMap[monthEndDate]-(monthCumNet+monthCumIo) : null;
+  var monthBadge=document.getElementById('D-month-equity-diff-badge');
+  if(monthBadge){ monthBadge.innerHTML='權益金差異 '+(monthDiff==null?'—':(monthDiff>=0?'+':'')+Math.round(monthDiff).toLocaleString()); monthBadge.style.color=monthDiff==null?'var(--muted)':(Math.abs(monthDiff)<500?'var(--gain)':Math.abs(monthDiff)<5000?'#f59e0b':'var(--loss)'); }
   var rows='<div class="dboard-mini-grid">';
   rows+='<div class="dboard-mini"><div class="k">本週淨損益</div><div class="v">'+fmtSignedMoney(weeks[getCurrentWeekKey()]||0)+'</div></div>';
-  var latestMonth=Object.keys(months).sort().pop();
   rows+='<div class="dboard-mini"><div class="k">本月淨損益</div><div class="v">'+fmtSignedMoney(latestMonth?months[latestMonth]:0)+'</div></div>';
   rows+='<div class="dboard-mini"><div class="k">最新實際權益</div><div class="v">'+(latestEq!=null?'$'+Math.round(latestEq).toLocaleString():'—')+'</div></div>';
-  rows+='<div class="dboard-mini"><div class="k">權益金差異</div><div class="v">'+(overallDiff==null?'—':fmtSignedMoney(overallDiff))+'</div></div></div>';
+  rows+='<div class="dboard-mini"><div class="k">本月權益金差異</div><div class="v">'+(monthDiff==null?'—':fmtSignedMoney(monthDiff))+'</div></div></div>';
   rows+='<div style="margin-top:8px;font-size:10px;color:var(--muted)">週／月損益均已扣除當日權利金；權益差異＝實際權益－（累計淨損益＋累計出入金）。</div>';
   el.innerHTML=rows;
 }
@@ -3301,6 +3304,36 @@ function renderIOChart() {
  
 }
 
+// ── 權益金差異：只在「整天／整月」統計層級顯示，不進入單筆 Trade ──
+function _normEqDate(d){
+  return String(d||'').replace(/-/g,'/').slice(0,10);
+}
+function _calcEquityDiffForDate(targetDate){
+  var target=_normEqDate(targetDate), trades=DATA.D||[], io=DATA.D_io||[], eqs=DATA.D_eq||[];
+  var eqMap={};
+  eqs.forEach(function(x){ if(x && x.date!=null) eqMap[_normEqDate(x.date)]=Number(x.equity); });
+  if(eqMap[target]==null || !isFinite(eqMap[target])) return null;
+  var dayRaw={}, dayNet={}, ioMap={};
+  trades.forEach(function(r){ var d=_normEqDate(r.date); if(d) dayRaw[d]=(dayRaw[d]||0)+(Number(r.net)||0); });
+  Object.keys(dayRaw).forEach(function(d){ dayNet[d]=getDAdjustedNet(d.replace(/\//g,'/'),dayRaw[d]); });
+  io.forEach(function(r){ var d=_normEqDate(r.date); if(d) ioMap[d]=(ioMap[d]||0)+(Number(r.amt)||0); });
+  var dates=Object.keys(dayNet).concat(Object.keys(ioMap)).filter(function(d){return d<=target;});
+  dates=Array.from(new Set(dates)).sort();
+  var cumNet=0,cumIo=0;
+  dates.forEach(function(d){ cumNet+=Number(dayNet[d]||0); cumIo+=Number(ioMap[d]||0); });
+  return eqMap[target]-(cumNet+cumIo);
+}
+function _calcLatestMonthEquityDiff(monthKey){
+  var eqs=DATA.D_eq||[], best=null;
+  eqs.forEach(function(x){ var d=_normEqDate(x.date); if(d && d.slice(0,7)===monthKey && (best==null || d>best)) best=d; });
+  return best ? _calcEquityDiffForDate(best) : null;
+}
+function _eqDiffBadgeHtml(diff){
+  if(diff==null) return '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(156,163,175,.10);border:1px solid rgba(156,163,175,.22);color:var(--muted)">權益金差異 —</span>';
+  var color=Math.abs(diff)<500?'var(--gain)':Math.abs(diff)<5000?'#f59e0b':'var(--loss)';
+  return '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.22);color:'+color+'">權益金差異 '+(diff>=0?'+':'')+Math.round(diff).toLocaleString()+'</span>';
+}
+
 // ══ 當沖明細 Tab 渲染（日期分組手風琴 + 週/月累計不受篩選影響）══
 window.renderDDetailTab = function() {
   var trades = DATA.D || [];
@@ -3400,6 +3433,7 @@ window.renderDDetailTab = function() {
     // 週/月累計 badges（從全部資料，不受篩選）
     var wkBadge = '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.25);color:'+wkNetCls+'">週'+(wkNet>=0?'+':'')+Math.round(wkNet).toLocaleString()+'</span>';
     var moBadge  = '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:'+moNetCls+'">月'+(moNet>=0?'+':'')+Math.round(moNet).toLocaleString()+'</span>';
+    var eqDiffBadge = _eqDiffBadgeHtml(_calcEquityDiffForDate(date));
 
     var uid = 'dgrp-' + date.split('/').join('-');
 
@@ -3409,7 +3443,7 @@ window.renderDDetailTab = function() {
       + '<span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;font-size:10px;padding:2px 7px;color:var(--muted)">'+dayCount+'筆</span>'
       + '<span style="font-size:12px;font-weight:700;color:'+dayNetCls+'">'+(dayNet>=0?'+':'')+Math.round(dayNet).toLocaleString()+'</span>'
       + '<div style="display:flex;gap:5px;margin-left:auto;align-items:center">'
-      + wkBadge + moBadge
+      + wkBadge + moBadge + eqDiffBadge
       + (canEdit ? '<button type="button" onclick="event.stopPropagation();openTPBatchModal(\''+date+'\')" style="font-size:10px;padding:3px 8px;border-radius:7px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25);color:#93c5fd;cursor:pointer">TP批次</button>' : '')
       + '<span id="'+uid+'-arrow" style="font-size:12px;color:var(--muted);transition:transform 0.2s;margin-left:4px">▼</span>'
       + '</div>'
@@ -3948,6 +3982,8 @@ function renderHubHome(){
   var daysBy={};
   all.forEach(function(r){var d=String(r.date||'');var dt=d?new Date(d+'T00:00:00'):null;if(!d||d===today||(dt&&((dt.getDay()===0)||(dt.getDay()===6))))return;(daysBy[d]||(daysBy[d]=[])).push(r);});
   var hist=Object.keys(daysBy).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
+  var histTradeCount=hist.reduce(function(sum,day){return sum+day.trades.length;},0);
+  set('surf-history-data-count','歷史資料：'+hist.length+' 天 / '+histTradeCount+' Trade');
   var prefixCodes=completed.map(pathCode);
   var prefix=prefixCodes.join('');
   set('surf-history-path',prefixCodes.length?prefixCodes.join(' → '):'尚無路徑');
