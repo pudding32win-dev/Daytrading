@@ -2725,7 +2725,7 @@ function renderDPanel() {
   renderDWaveAmplitude();
   
   setTimeout(renderDCharts, 50);
-  try{ renderHubHome(); renderHubWinrateStats(); }catch(e){ console.error('renderHubHome/renderHubWinrateStats after renderDPanel',e); }
+  try{ renderHubHome(); }catch(e){ console.error('renderHubHome/renderHubWinrateStats after renderDPanel',e); }
 }
 // ── 啟動 ──
 // ══ 統計圖表切換 ══
@@ -3466,7 +3466,7 @@ async function initData() {
     }
     setCloudStatus('connected', '已連線 · 即時同步中');
     renderDPanel();
-    try{ renderHubWinrateStats(); }catch(e){ console.error('initial winrate render',e); }
+    /* static winrate */
 
     // 若本機有上次存檔失敗、還沒同步上去的資料，提示使用者
     var unsynced = getUnsyncedBackup();
@@ -3488,7 +3488,7 @@ async function initData() {
           _dLastRev = d._revD || _dLastRev;
         }
         setCloudStatus('connected', '已連線 · 即時同步中');
-        try{ renderHubWinrateStats(); }catch(e){ console.error('snapshot winrate render',e); }
+        /* static winrate */
       }
     });
   } catch (err) {
@@ -3908,7 +3908,7 @@ window.hubNav=function(btn,tab){
   }else if(tab==='stats'){
     if(panel) panel.classList.remove('hub-home-active');
     if(typeof switchDTab==='function') switchDTab('detail');
-    try{ renderHubWinrateStats(); }catch(e){}
+    /* static winrate */
     setTimeout(function(){
       var box=document.getElementById('d-stats-charts');
       if(box && box.style.display==='none') window.toggleDStatsCharts();
@@ -3972,11 +3972,8 @@ function renderHubWinrateStats(){
   }
 }
 // 預覽／離線時先用內嵌歷史資料，不等待 Firebase。
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',function(){ try{ renderHubWinrateStats(); }catch(e){} });
-}else{
-  try{ renderHubWinrateStats(); }catch(e){}
-}
+/* 勝率統計：本區採用 HTML 靜態歷史驗證值，不由 Firebase/JS 覆蓋。 */
+
 </script>
 </body>
 </html>
