@@ -581,6 +581,33 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 @media(max-width:900px){.hub-surf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.hub-surf-grid,.hub-surf-risk-grid{grid-template-columns:1fr 1fr}.hub-surf-section{padding:12px}.hub-surf-cell b{font-size:14px}}
 
+
+/* ══ 下一筆預測卡：白話版／高可讀性 ══ */
+.next-predict-card{background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:16px;margin:0 0 12px;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.next-predict-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.next-predict-title{font-size:17px;font-weight:800;color:var(--text);letter-spacing:.01em}
+.next-predict-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+.next-predict-badge{font-size:11px;font-weight:700;padding:5px 9px;border-radius:999px;border:1px solid var(--border2);color:var(--muted2);background:rgba(255,255,255,.03);white-space:nowrap}
+.next-predict-main{display:grid;grid-template-columns:1.35fr .8fr .8fr;gap:9px}
+.next-predict-hero{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:13px 14px;min-height:92px}
+.next-predict-label{font-size:10px;color:var(--muted);margin-bottom:6px}
+.next-predict-big{font-size:28px;line-height:1.1;font-weight:900;color:var(--text);font-family:var(--font)}
+.next-predict-big small{font-size:13px;font-weight:600;color:var(--muted2);margin-left:5px}
+.next-predict-note{font-size:12px;line-height:1.6;color:var(--muted2);margin-top:6px}
+.next-predict-stat{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:13px 12px;min-height:92px}
+.next-predict-stat b{display:block;font:800 21px/1.2 monospace;color:var(--text);margin-top:4px}
+.next-predict-stat span{font-size:10px;color:var(--muted)}
+.next-predict-path{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.next-predict-chip{font:800 13px monospace;padding:5px 9px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--text)}
+.next-predict-arrow{color:var(--muted);font-size:12px}
+.next-predict-detail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:9px}
+.next-predict-detail div{padding:9px 10px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:8px}
+.next-predict-detail span{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}
+.next-predict-detail b{font:700 13px monospace;color:var(--text)}
+.next-predict-warning{margin-top:9px;padding:9px 11px;border-radius:8px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);font-size:11px;line-height:1.6;color:var(--muted2)}
+@media(max-width:700px){.next-predict-main{grid-template-columns:1fr 1fr}.next-predict-hero{grid-column:1/-1}.next-predict-detail{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.next-predict-main{grid-template-columns:1fr}.next-predict-hero{grid-column:auto}.next-predict-title{font-size:15px}.next-predict-big{font-size:25px}}
+
 /* ══ HUB 完整首頁總覽：不取代原交易資料／統計模組 ══ */
 .hub-home{display:block;margin-bottom:14px}
 .hub-home-title{font-size:16px;font-weight:800;color:var(--text);padding:8px 0 10px}
@@ -809,6 +836,30 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="hub-surf-risk-box" style="margin-bottom:10px">
         <div class="hub-surf-risk-label">歷史路徑 <span id="surf-history-data-count" style="margin-left:10px;font-size:11px;color:var(--muted);font-weight:500">歷史資料：—</span></div><div class="hub-surf-path" id="surf-history-path">—</div>
       </div>
+      <div class="next-predict-card">
+        <div class="next-predict-head">
+          <div><div class="next-predict-title">🔎 下一筆，我要看懂這個</div><div class="next-predict-sub">只用你的歷史 Trade 路徑比對，不預測行情、不保證獲利</div></div>
+          <div class="next-predict-badge" id="surf-predict-badge">等待資料</div>
+        </div>
+        <div class="next-predict-main">
+          <div class="next-predict-hero">
+            <div class="next-predict-label">下一筆 Trade <span id="surf-predict-trade-no">—</span>｜歷史打法傾向</div>
+            <div class="next-predict-big" id="surf-predict-direction">—<small id="surf-predict-direction-count"></small></div>
+            <div class="next-predict-note" id="surf-predict-text">目前還沒有足夠的相同歷史路徑。</div>
+          </div>
+          <div class="next-predict-stat"><span>歷史勝率</span><b id="surf-predict-winrate">—</b></div>
+          <div class="next-predict-stat"><span>歷史敗率</span><b id="surf-predict-lossrate">—</b></div>
+        </div>
+        <div class="next-predict-path" id="surf-predict-path"></div>
+        <div class="next-predict-detail">
+          <div><span>平均損益</span><b id="surf-predict-avg">—</b></div>
+          <div><span>歷史樣本</span><b id="surf-predict-sample">—</b></div>
+          <div><span>2口歷史</span><b id="surf-predict-2lot">—</b></div>
+          <div><span>3口歷史</span><b id="surf-predict-3lot">—</b></div>
+        </div>
+        <div class="next-predict-warning">⚠️ <b>怎麼看：</b>勝率只是「過去相同路徑」的統計。若樣本很少，數字容易失真；紅／綠不代表下一筆一定輸贏。</div>
+      </div>
+
       <div class="hub-surf-risk-grid">
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">🔎 下一筆分析 · Trade <span id="surf-next-trade-no">1</span></div><div class="hub-surf-risk-value" id="surf-path-winrate">—</div><div class="hub-surf-risk-note">勝率　平均損益　樣本 <span id="surf-path-stats">—</span></div></div>
         <div class="hub-surf-risk-box"><div class="hub-surf-risk-label">2口實際歷史</div><div class="hub-surf-risk-value" id="surf-2lot">—</div><div class="hub-surf-risk-note" id="surf-2lot-note">只統計歷史上實際以2口進場的 Trade</div></div>
@@ -4001,10 +4052,41 @@ function renderHubHome(){
   same.forEach(function(d){var a=d.trades[nextTrade-1],b=d.trades[nextTrade];if(a&&b){streakN++;if(Number(a.net)<=0&&Number(b.net)<=0)streakPairs++;}});
   set('surf-streak-risk',streakN?pct(streakPairs,streakN):'—');
 
+  // ══ 白話版「下一筆預測」：把歷史統計翻成一眼看得懂的結果 ══
+  set('surf-predict-trade-no',nextTrade);
+  set('surf-predict-winrate',pct(wins,next.length));
+  set('surf-predict-lossrate',next.length?pct(next.length-wins,next.length):'—');
+  set('surf-predict-avg',next.length?fmtMoney(avg):'—');
+  set('surf-predict-sample',next.length+' 筆');
+  var dirStats={B:{n:0,w:0},S:{n:0,w:0}};
+  next.forEach(function(g){var k=g.dir==='B'?'B':'S';dirStats[k].n++;if(Number(g.net)>0)dirStats[k].w++;});
+  var dirKeys=['B','S'].sort(function(a,b){return dirStats[b].n-dirStats[a].n;});
+  var lead=dirStats[dirKeys[0]],leadDir=dirKeys[0];
+  if(next.length){
+    var dirText=leadDir==='B'?'多':'空';
+    set('surf-predict-direction',dirText);
+    set('surf-predict-direction-count','（歷史 '+lead.n+' 筆）');
+    set('surf-predict-direction-count', '（歷史 '+lead.n+' 筆）');
+    set('surf-predict-text','相同路徑過去最常出現「'+dirText+'」；這是歷史打法傾向，不是行情保證。');
+    set('surf-predict-badge',next.length<8?'樣本偏少':'已有歷史樣本');
+  }else{
+    set('surf-predict-direction','—');
+    set('surf-predict-direction-count','');
+    set('surf-predict-text','找不到相同歷史路徑，因此不硬猜下一筆。');
+    set('surf-predict-badge','無相同樣本');
+  }
+  var pp=document.getElementById('surf-predict-path');
+  if(pp){
+    var pc=prefixCodes.length?prefixCodes:[];
+    pp.innerHTML=pc.length?pc.map(function(x){return '<span class="next-predict-chip">'+esc(x)+'</span>';}).join('<span class="next-predict-arrow">→</span>')+'<span class="next-predict-arrow">→ 下一筆</span>':'<span class="next-predict-chip">第一筆</span><span class="next-predict-arrow">→ 下一筆</span>';
+  }
+
   function lotStats(lots){var arr=next.filter(function(g){return Number(g.entryLots||g.rows&&g.rows[0]&&g.rows[0].entryLots||0)===lots;});var w=arr.filter(function(g){return Number(g.net)>0;}).length;return {n:arr.length,w:w};}
   var l2=lotStats(2),l3=lotStats(3);
   set('surf-2lot',l2.n?pct(l2.w,l2.n):'—');set('surf-2lot-note',l2.n?'實際2口 Trade：'+l2.n+' 筆':'無相同路徑的2口 Trade');
   set('surf-3lot',l3.n?pct(l3.w,l3.n):'—');set('surf-3lot-note',l3.n?'實際3口 Trade：'+l3.n+' 筆':'無相同路徑的3口 Trade');
+  set('surf-predict-2lot',l2.n?pct(l2.w,l2.n):'—');
+  set('surf-predict-3lot',l3.n?pct(l3.w,l3.n):'—');
 
   // 歷史打法：只描述同一路徑下 Trade N 實際出現的方向／浪級，不做保證式預測。
   var combos={}; next.forEach(function(g){var key=(g.dir==='B'?'多':'空')+'／'+(g.wave||'未標記');if(!combos[key])combos[key]={n:0,w:0};combos[key].n++;if(Number(g.net)>0)combos[key].w++;});
