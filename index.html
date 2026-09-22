@@ -567,6 +567,16 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-surf-cell b{display:block;font:800 16px/1.2 monospace;color:var(--text)}
 .hub-surf-cell small{display:block;font-size:12px;color:var(--muted2);margin-top:4px}
 .hub-surf-status{font-size:20px!important}
+
+.hub-trade-brake{margin-top:10px;border:1px solid var(--border2);border-radius:10px;padding:12px 14px;background:var(--bg3)}
+.hub-trade-brake-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hub-trade-brake-title{font-size:13px;font-weight:800;color:var(--text)}
+.hub-trade-brake-badge{font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid var(--border2);color:var(--text)}
+.hub-trade-brake-msg{margin-top:7px;font-size:12px;line-height:1.65;color:var(--muted2)}
+.hub-trade-brake-rule{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:9px}
+.hub-trade-brake-rule div{padding:7px 8px;border:1px solid var(--border);border-radius:7px;font-size:10px;color:var(--muted)}
+.hub-trade-brake-rule b{display:block;color:var(--text);font-size:11px;margin-bottom:2px}
+@media(max-width:700px){.hub-trade-brake-rule{grid-template-columns:1fr 1fr}}
 .hub-surf-progress{height:8px;border-radius:99px;background:#e5e7eb;overflow:hidden;margin-top:7px}
 .hub-surf-progress i{display:block;height:100%;width:0;border-radius:99px;background:#334155;transition:width .25s ease}
 .hub-surf-risk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -820,6 +830,20 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         <div class="hub-surf-cell"><span>今日狀態</span><b id="surf-status" class="hub-surf-status">—</b></div>
       </div>
     </section>
+
+    <div class="hub-trade-brake" id="hub-trade-brake">
+      <div class="hub-trade-brake-head">
+        <div class="hub-trade-brake-title">🛑 今日交易煞車</div>
+        <div class="hub-trade-brake-badge" id="surf-brake-badge">正常</div>
+      </div>
+      <div class="hub-trade-brake-msg" id="surf-brake-msg">前 2 筆正常；第 3 筆開始會提醒你檢查歷史路徑與進場理由。</div>
+      <div class="hub-trade-brake-rule">
+        <div><b>Trade 1–2</b>正常操作</div>
+        <div><b>Trade 3</b>提醒減速</div>
+        <div><b>Trade 4</b>強提醒</div>
+        <div><b>Trade 5+</b>禁止新交易</div>
+      </div>
+    </div>
 
     <section class="hub-surf-section">
       <h3>② 🎯 30萬目標進度</h3>
@@ -2120,6 +2144,38 @@ window.setDTradeMode = function(continueTrade) {
   }
 };
 
+function getHubTradeBrakeState(){
+  var today=dTodayKey(), rows=hubTodayRows(), groups=hubTradeGroups(rows), completed=groups.filter(function(g){return g.closed;}).sort(hubTradeSort);
+  var net=rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)-getDPremium(today);
+  var target=15000;
+  var last2=completed.slice(-2);
+  var twoLoss=last2.length===2 && last2.every(function(g){return Number(g.net)<0;});
+  var maxTrades=5;
+  var state='normal', msg='前 2 筆正常；第 3 筆開始會提醒你檢查歷史路徑與進場理由。', lockReason='';
+  if(net>=target){ state='locked'; lockReason='今日損益已達 +$'+target.toLocaleString('zh-TW')+' 日目標，依你的規則今天收工。'; msg='已達今日 +$'+target.toLocaleString('zh-TW')+' 目標：停止新增 Trade，保留資料與統計。';}
+  else if(completed.length>=maxTrades){ state='locked'; lockReason='今天已完成 5 個 Trade；停止新增交易。'; msg='今天已完成 5 個 Trade，觸發上限。不要為了多賺一筆破壞今天的交易節奏。';}
+  else if(twoLoss){
+    var key='hubBrakeCooldown_'+today, until=Number(sessionStorage.getItem(key)||0), now=Date.now();
+    if(!until){ until=now+5*60*1000; sessionStorage.setItem(key,String(until)); }
+    if(now<until){ state='cooldown'; lockReason='連續 2 筆虧損：強制冷靜 5 分鐘。'; msg='連續 2 筆 L：暫停新增 Trade。剩餘 '+Math.ceil((until-now)/60000)+' 分鐘；時間到才可重新進場。';}
+    else { state='caution'; msg='剛出現連續 2 筆 L，冷靜時間已結束；下一筆必須重新確認歷史路徑與進場理由。'; }
+  }
+  else if(completed.length>=4){ state='strong'; msg='已到 Trade '+(completed.length+1)+'：強提醒。除非有明確歷史路徑／訊號，不新增 Trade。';}
+  else if(completed.length>=3){ state='caution'; msg='已完成 3 筆：進入減速區。下一筆前先看「下一筆分析」與進場理由，不因想多賺或追回虧損而下單。';}
+  return {count:completed.length,net:net,state:state,msg:msg,lockReason:lockReason};
+}
+function renderHubTradeBrake(){
+  var b=document.getElementById('surf-brake-badge'), m=document.getElementById('surf-brake-msg'); if(!b||!m)return;
+  var st=getHubTradeBrakeState();
+  var label={normal:'正常',caution:'減速',strong:'強提醒',cooldown:'暫停 5 分鐘',locked:'今日停止'}[st.state]||'提醒';
+  b.textContent=label; m.textContent=st.msg;
+  b.style.borderColor=st.state==='normal'?'var(--border2)':'rgba(245,158,11,.45)';
+  b.style.background=st.state==='locked'||st.state==='cooldown'?'rgba(239,68,68,.08)':'rgba(245,158,11,.07)';
+  var btn=document.getElementById('D-new-trade-btn');
+  if(btn){ var locked=(st.state==='locked'||st.state==='cooldown'); btn.disabled=locked; btn.style.opacity=locked?'.45':'1'; btn.title=locked?(st.lockReason||st.msg):'新增 Trade'; }
+}
+window.renderHubTradeBrake=renderHubTradeBrake;
+
 window.addDtrade = async function() {
   if (!canEdit) { alert('⛔ 唯讀模式，請用含編輯金鑰的網址開啟'); return; }
   var dateEl=document.getElementById('D-date');
@@ -2129,6 +2185,14 @@ window.addDtrade = async function() {
   var lots = parseInt(document.getElementById('D-lots').value) || 1;
   var entryLots = parseInt(document.getElementById('D-entry-lots').value) || lots;
   var sameTrade = window._DTradeMode === 'continue';
+  if(!sameTrade){
+    var brake=getHubTradeBrakeState();
+    if(brake.state==='locked' || brake.state==='cooldown'){
+      alert('🛑 今日交易煞車\n\n'+(brake.lockReason||brake.msg)+'\n\n延續上一筆／分批出場不受此限制。');
+      renderHubTradeBrake();
+      return;
+    }
+  }
   var wave = document.getElementById('D-wave').value || _marketBiasToday || '多';
   var dir  = document.getElementById('D-dir').value || 'B';
   var en   = parseFloat(document.getElementById('D-en').value);
@@ -4110,6 +4174,7 @@ function renderHubHome(){
 
   set('hub-raw-pnl',fmtMoney(rows.reduce(function(s,r){return s+(Number(r.net)||0);},0)));
   set('hub-net-pnl',fmtMoney(currentNet));
+  renderHubTradeBrake();
 }
 window.renderHubHome=renderHubHome;
 function getWeekKeyForHub(dateStr){var p=dateStr.split('/');if(p.length!==3)return '';var d=new Date(+p[0],+p[1]-1,+p[2]);var thu=new Date(d);thu.setDate(d.getDate()-((d.getDay()+6)%7)+3);var firstThu=new Date(thu.getFullYear(),0,4);var week=1+Math.round(((thu-firstThu)/86400000-3+((firstThu.getDay()+6)%7))/7);return thu.getFullYear()+'-W'+String(week).padStart(2,'0');}
