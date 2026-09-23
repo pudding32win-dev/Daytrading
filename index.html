@@ -4326,6 +4326,11 @@ function hubCollectFirebaseTradeRows(){
   }
   return out;
 }
+function getFirebaseVerifyState(){
+  return (window._firebaseVerifyState && typeof window._firebaseVerifyState==='object')
+    ? window._firebaseVerifyState
+    : {status:'pending',message:'☁ Firebase 驗證狀態尚未建立'};
+}
 function renderHubWinrateStats(){
   try{
     var today=(typeof dTodayKey==='function')?String(dTodayKey()):'';
