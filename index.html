@@ -1047,7 +1047,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
       <div class="card-bd" id="D-stats-block"></div>
       <!-- 可展開圖表區 -->
-      <div class="hub-winrate-box" id="hub-winrate-box" data-fallback-stats="104,53,51,51.0%,11064,-9189,1.25">
+      <div class="hub-winrate-box" id="hub-winrate-box" data-fallback-stats="—,—,—,—,—,—,—">
   <h3 style="margin:0 0 10px;font-size:13px">勝率統計 <span style="font-size:10px;font-weight:400;color:var(--muted)">（0918 Trade 歷史）</span></h3>
   <div class="hub-winrate-grid">
     <div class="hub-winrate-item"><span>總 Trade</span><b id="hub-wr-total">104</b></div>
@@ -4257,10 +4257,21 @@ function renderHubWinrateStats(){
     }
     var source='Firebase';
     if(!rows.length){ rows=HUB_WINRATE_FALLBACK.slice(); source='0918 CSV 備份'; }
+    // 顯示「資料截至哪一天」：取原始資料中的最新交易日期，避免只寫來源名稱。
+    var latestDate='—';
+    rows.forEach(function(r){
+      var d=String(r&&r.date||'').replace(/-/g,'/');
+      if(d && (latestDate==='—' || d>latestDate)) latestDate=d;
+    });
     rows=rows.filter(function(r){ var d=String(r&&r.date||'').replace(/-/g,'/'); return d!==today; });
     if(!rows.length && HUB_WINRATE_FALLBACK && HUB_WINRATE_FALLBACK.length){
       rows=HUB_WINRATE_FALLBACK.slice().filter(function(r){ var d=String(r&&r.date||'').replace(/-/g,'/'); return d!==today; });
       source='0918 CSV 備份';
+      latestDate='—';
+      rows.forEach(function(r){
+        var d=String(r&&r.date||'').replace(/-/g,'/');
+        if(d && (latestDate==='—' || d>latestDate)) latestDate=d;
+      });
     }
     var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(rows):[];
     groups=groups.filter(function(g){return g && g.closed===true;});
@@ -4279,14 +4290,14 @@ function renderHubWinrateStats(){
     put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString('zh-TW'));
     put('hub-wr-pf',grossLoss?pf.toFixed(2):'—');
     var note=document.querySelector('#hub-winrate-box .hub-winrate-note');
-    if(note) note.textContent='以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日不列入。資料來源：'+source+(breakeven.length?'　持平 Trade：'+breakeven.length+' 筆。':'');
+    if(note) note.textContent='以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日不列入。資料來源：'+source+'｜資料截至：'+latestDate+(breakeven.length?'　持平 Trade：'+breakeven.length+' 筆。':'');
   }catch(e){
     console.error('renderHubWinrateStats',e);
     ['hub-wr-total','hub-wr-win','hub-wr-loss','hub-wr-rate','hub-wr-avgwin','hub-wr-avgloss','hub-wr-pf'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='資料錯誤';});
   }
 }
 // 預覽／離線時先用內嵌歷史資料，不等待 Firebase。
-/* 勝率統計：本區採用 HTML 靜態歷史驗證值，不由 Firebase/JS 覆蓋。 */
+/* 勝率統計：畫面數值由 renderHubWinrateStats() 重新計算；HTML 只提供離線初始值。 */
 
 </script>
 </body>
