@@ -1048,15 +1048,15 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="card-bd" id="D-stats-block"></div>
       <!-- 可展開圖表區 -->
       <div class="hub-winrate-box" id="hub-winrate-box" data-fallback-stats="—,—,—,—,—,—,—">
-  <h3 style="margin:0 0 10px;font-size:13px">勝率統計 <span style="font-size:10px;font-weight:400;color:var(--muted)">（0918 Trade 歷史）</span></h3>
+  <h3 style="margin:0 0 10px;font-size:13px">勝率統計 <span id="hub-wr-title-date" style="font-size:10px;font-weight:400;color:var(--muted)">（資料截至：—）</span></h3>
   <div class="hub-winrate-grid">
-    <div class="hub-winrate-item"><span>總 Trade</span><b id="hub-wr-total">104</b></div>
-    <div class="hub-winrate-item"><span>獲利 Trade</span><b id="hub-wr-win">53</b></div>
-    <div class="hub-winrate-item"><span>虧損 Trade</span><b id="hub-wr-loss">51</b></div>
-    <div class="hub-winrate-item hub-winrate-main"><span>歷史勝率</span><b id="hub-wr-rate">51.0%</b></div>
-    <div class="hub-winrate-item"><span>平均獲利</span><b id="hub-wr-avgwin">11,064</b></div>
-    <div class="hub-winrate-item"><span>平均虧損</span><b id="hub-wr-avgloss">-9,189</b></div>
-    <div class="hub-winrate-item"><span>Profit Factor</span><b id="hub-wr-pf">1.25</b></div>
+    <div class="hub-winrate-item"><span>總 Trade</span><b id="hub-wr-total">—</b></div>
+    <div class="hub-winrate-item"><span>獲利 Trade</span><b id="hub-wr-win">—</b></div>
+    <div class="hub-winrate-item"><span>虧損 Trade</span><b id="hub-wr-loss">—</b></div>
+    <div class="hub-winrate-item hub-winrate-main"><span>歷史勝率</span><b id="hub-wr-rate">—</b></div>
+    <div class="hub-winrate-item"><span>平均獲利</span><b id="hub-wr-avgwin">—</b></div>
+    <div class="hub-winrate-item"><span>平均虧損</span><b id="hub-wr-avgloss">—</b></div>
+    <div class="hub-winrate-item"><span>Profit Factor</span><b id="hub-wr-pf">—</b></div>
   </div>
   <div class="hub-winrate-note">以 Trade 為統計單位；同一進場的分批出場合併計算。獲利／虧損不因出場口數而重複計算；今日資料不併入歷史統計。</div>
 </div>
@@ -3736,7 +3736,7 @@ async function initData() {
     }
     setCloudStatus('connected', '已連線 · 即時同步中');
     renderDPanel();
-    /* static winrate */
+    renderHubWinrateStats();
 
     // 若本機有上次存檔失敗、還沒同步上去的資料，提示使用者
     var unsynced = getUnsyncedBackup();
@@ -3753,12 +3753,13 @@ async function initData() {
           _dLastRev = d._revD || null;
           normalizeDDates(DATA);
           renderDPanel();
+          renderHubWinrateStats();
         } else {
           // 自己這次寫入觸發的回調：也同步更新版本戳記，避免誤判為「被別人改過」
           _dLastRev = d._revD || _dLastRev;
         }
         setCloudStatus('connected', '已連線 · 即時同步中');
-        /* static winrate */
+        /* winrate is recalculated after every Firebase snapshot */
       }
     });
   } catch (err) {
@@ -4290,6 +4291,7 @@ function renderHubWinrateStats(){
     put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString('zh-TW'));
     put('hub-wr-pf',grossLoss?pf.toFixed(2):'—');
     var note=document.querySelector('#hub-winrate-box .hub-winrate-note');
+    var titleDate=document.getElementById('hub-wr-title-date'); if(titleDate) titleDate.textContent='（資料截至：'+latestDate+'）';
     if(note) note.textContent='以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日不列入。資料來源：'+source+'｜資料截至：'+latestDate+(breakeven.length?'　持平 Trade：'+breakeven.length+' 筆。':'');
   }catch(e){
     console.error('renderHubWinrateStats',e);
@@ -4297,7 +4299,7 @@ function renderHubWinrateStats(){
   }
 }
 // 預覽／離線時先用內嵌歷史資料，不等待 Firebase。
-/* 勝率統計：畫面數值由 renderHubWinrateStats() 重新計算；HTML 只提供離線初始值。 */
+/* 勝率統計：Firebase 優先；無 Firebase 資料時使用內嵌備援。標題日期與數值均由 renderHubWinrateStats() 更新。 */
 
 </script>
 </body>
