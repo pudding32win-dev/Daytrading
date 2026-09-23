@@ -1043,13 +1043,13 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
     <!-- 統計分析（含圖表展開）-->
     <div class="card">
       <div class="card-hd" style="cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px" onclick="toggleDStatsCharts()">
-        <span>📊 統計分析 &amp; 績效圖表</span>
+        <span>📊 統計分析 &amp; 績效圖表 <span id="d-stats-meta" style="font-size:10px;font-weight:400;color:var(--muted)">（等待 Firebase 最新資料）</span></span>
         <span id="d-stats-toggle-icon" style="margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap">▼ 展開圖表</span>
       </div>
       <div class="card-bd" id="D-stats-block"></div>
       <!-- 可展開圖表區 -->
       <div class="hub-winrate-box" id="hub-winrate-box" data-fallback-stats="—,—,—,—,—,—,—">
-  <h3 style="margin:0 0 10px;font-size:13px">勝率統計 <span id="hub-wr-title-date" style="font-size:10px;font-weight:400;color:var(--muted)">（資料截至：2026/09/17）</span></h3>
+  <h3 style="margin:0 0 10px;font-size:13px">勝率統計 <span id="hub-wr-title-date" style="font-size:10px;font-weight:400;color:var(--muted)">（等待 Firebase 最新資料）</span></h3>
   <div class="hub-winrate-grid">
     <div class="hub-winrate-item"><span>總 Trade</span><b id="hub-wr-total">62</b></div>
     <div class="hub-winrate-item"><span>獲利 Trade</span><b id="hub-wr-win">30</b></div>
@@ -2714,6 +2714,66 @@ window.editMarginPerLot = async function() {
   await saveData();
 };
 
+function getHubStatsSourceRows() {
+  // 統計分析與勝率統計使用同一套資料來源：
+  // ① Firebase 最新 DATA.D；② Firebase D_archive；③ Firebase 不可讀時才退回目前 DATA。
+  var rows = [];
+  function append(src) {
+    if (!src) return;
+    if (Array.isArray(src)) {
+      src.forEach(function(x){ if(x && typeof x === 'object') rows.push(x); });
+    } else if (typeof src === 'object') {
+      Object.keys(src).forEach(function(k){ var x=src[k]; if(x && typeof x === 'object') rows.push(x); });
+    }
+  }
+  append(DATA && DATA.D);
+  if (DATA && DATA.D_archive) {
+    if (Array.isArray(DATA.D_archive)) DATA.D_archive.forEach(function(b){
+      if(b){ append(b.trades); append(b.D); append(b.data); }
+    });
+    else if (typeof DATA.D_archive === 'object') Object.keys(DATA.D_archive).forEach(function(k){
+      var b=DATA.D_archive[k];
+      if(b){ append(b.trades); append(b.D); append(b.data); }
+    });
+  }
+  // 若目前 DATA 尚未載入，但 Firebase 伺服器驗證資料已存在，使用伺服器快照。
+  if (!rows.length && window._firebaseServerData) {
+    append(window._firebaseServerData.D);
+    if(window._firebaseServerData.D_archive){
+      if(Array.isArray(window._firebaseServerData.D_archive)) window._firebaseServerData.D_archive.forEach(function(b){
+        if(b){ append(b.trades); append(b.D); append(b.data); }
+      });
+      else if(typeof window._firebaseServerData.D_archive === 'object') Object.keys(window._firebaseServerData.D_archive).forEach(function(k){
+        var b=window._firebaseServerData.D_archive[k];
+        if(b){ append(b.trades); append(b.D); append(b.data); }
+      });
+    }
+  }
+  return rows;
+}
+
+function getHubStatsTrades() {
+  if(typeof hubStatsGroups !== 'function') return [];
+  return hubStatsGroups(getHubStatsSourceRows())
+    .filter(function(g){return g && g.closed===true;})
+    .sort(function(a,b){
+      var da=String(a.date||''), db=String(b.date||'');
+      if(da!==db) return da.localeCompare(db);
+      var ta=a.exitTime?new Date(a.exitTime).getTime():Infinity;
+      var tb=b.exitTime?new Date(b.exitTime).getTime():Infinity;
+      if(isFinite(ta)&&isFinite(tb)&&ta!==tb) return ta-tb;
+      return (a.no||0)-(b.no||0);
+    });
+}
+
+function getHubStatsLatestDate(trades) {
+  var latest='—';
+  (trades||[]).forEach(function(g){
+    if(g.date && (latest==='—' || g.date>latest)) latest=g.date;
+  });
+  return latest;
+}
+
 function renderDPanel() {
   renderDSubtitle();
   prefillDForm();
@@ -2835,19 +2895,27 @@ function renderDPanel() {
     ioBlock.innerHTML = '<div style="font-size:11px;color:var(--muted)">尚無出入金記錄，點右上角＋新增</div>';
   }
 
-  // ── 統計分析卡 ──
+  // ── 統計分析卡：與勝率統計共用 Firebase 最新資料，並以完成 Trade 為單位 ──
   var statsEl = document.getElementById('D-stats-block');
   if (statsEl) {
-    var longs  = trades.filter(function(r){ return r.dir==='B'; }).length;
-    var shorts = trades.filter(function(r){ return r.dir==='S'; }).length;
-    var profitTrades = trades.filter(function(r){ return (r.net||0)>0; });
-    var lossTrades   = trades.filter(function(r){ return (r.net||0)<0; });
-    var avgWin  = profitTrades.length ? Math.round(profitTrades.reduce(function(a,r){return a+r.net;},0)/profitTrades.length) : 0;
-    var avgLoss = lossTrades.length  ? Math.round(lossTrades.reduce(function(a,r){return a+r.net;},0)/lossTrades.length) : 0;
-    var maxSingleWin  = trades.length ? Math.max.apply(null, trades.map(function(r){return r.net||0;})) : 0;
-    var maxSingleLoss = trades.length ? Math.min.apply(null, trades.map(function(r){return r.net||0;})) : 0;
-    var avgNet = trades.length ? Math.round(totalNet/trades.length) : 0;
-    var marginUsed = maxLots * _dMargin();
+    var statsTrades = getHubStatsTrades();
+    var statsLatest = getHubStatsLatestDate(statsTrades);
+    var statsNets = statsTrades.map(function(g){ return Number(g.net)||0; });
+    var longs  = statsTrades.filter(function(g){ return g.dir==='B'; }).length;
+    var shorts = statsTrades.filter(function(g){ return g.dir==='S'; }).length;
+    var profitTrades = statsTrades.filter(function(g){ return (g.net||0)>0; });
+    var lossTrades   = statsTrades.filter(function(g){ return (g.net||0)<0; });
+    var avgWin  = profitTrades.length ? Math.round(profitTrades.reduce(function(a,g){return a+g.net;},0)/profitTrades.length) : 0;
+    var avgLoss = lossTrades.length  ? Math.round(lossTrades.reduce(function(a,g){return a+g.net;},0)/lossTrades.length) : 0;
+    var maxSingleWin  = statsNets.length ? Math.max.apply(null, statsNets) : 0;
+    var maxSingleLoss = statsNets.length ? Math.min.apply(null, statsNets) : 0;
+    var statsNet = statsNets.reduce(function(a,n){return a+n;},0);
+    var avgNet = statsTrades.length ? Math.round(statsNet/statsTrades.length) : 0;
+    var marginUsed = statsTrades.length ? Math.max.apply(null, statsTrades.map(function(g){return g.entryLots||0;})) * _dMargin() : 0;
+    var statsMaxLots = statsTrades.length ? Math.max.apply(null, statsTrades.map(function(g){return g.entryLots||0;})) : 0;
+    var statsWinRate = statsTrades.length ? (profitTrades.length/statsTrades.length*100) : 0;
+    var statsMeta = document.getElementById('d-stats-meta');
+    if(statsMeta) statsMeta.textContent='（Firebase 最新完成 Trade：'+statsTrades.length+'｜統計截至：'+statsLatest+'）';
     function sr(label, val, color) {
       return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'
         +'<span style="font-size:12px;color:var(--muted)">'+label+'</span>'
@@ -2855,11 +2923,14 @@ function renderDPanel() {
     }
     var waveLevels = ['小浪','中浪','大浪'];
     var waveStats = waveLevels.map(function(level){
-      var arr = trades.filter(function(r){ return getDWaveLevel(r)===level; });
-      var wn = arr.reduce(function(a,r){return a+(r.net||0);},0);
-      var ww = arr.filter(function(r){return (r.net||0)>0;}).length;
-      var wp = arr.reduce(function(a,r){
-        var pts = r.dir==='B' ? (r.ex-r.en) : (r.en-r.ex);
+      var arr = statsTrades.filter(function(g){
+        var base = g.rows && g.rows.length ? g.rows[0] : g;
+        return getDWaveLevel(base)===level;
+      });
+      var wn = arr.reduce(function(a,g){return a+(g.net||0);},0);
+      var ww = arr.filter(function(g){return (g.net||0)>0;}).length;
+      var wp = arr.reduce(function(a,g){
+        var pts = g.dir==='B' ? (g.ex-g.en) : (g.en-g.ex);
         return a + Math.abs(pts||0);
       },0);
       return {level:level,n:arr.length,win:arr.length?ww/arr.length*100:0,net:wn,avg:arr.length?wn/arr.length:0,pts:arr.length?wp/arr.length:0};
@@ -2882,20 +2953,23 @@ function renderDPanel() {
       '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em">浪級統計</div>'
       + waveStats.map(function(x){return sr(x.level, x.n+'筆　勝率 '+(x.n?x.win.toFixed(1):'-')+'%　'+(x.net>=0?'+$':'-$')+Math.abs(Math.round(x.net)).toLocaleString(), getDWaveColor(x.level));}).join('')
       + '<div style="font-size:10px;color:var(--muted);margin:10px 0 6px;letter-spacing:.04em">損益統計</div>'
-      + sr('平均每筆淨額', (avgNet>=0?'+$':'-$')+Math.abs(avgNet).toLocaleString(), avgNet>=0?'var(--gain)':'var(--loss)')
+      + sr('平均每筆 Trade 淨額', (avgNet>=0?'+$':'-$')+Math.abs(avgNet).toLocaleString(), avgNet>=0?'var(--gain)':'var(--loss)')
       + sr('平均獲利筆', '+$'+avgWin.toLocaleString(), '#34d399')
       + sr('平均虧損筆', '$'+avgLoss.toLocaleString(), '#f87171')
       + sr('最大單筆獲利', '+$'+maxSingleWin.toLocaleString(), 'var(--gain)')
       + sr('最大單筆虧損', '$'+maxSingleLoss.toLocaleString(), 'var(--loss)')
-      + sr('盈利筆數', wins+' 筆', '#34d399')
-      + sr('虧損筆數', losses+' 筆', '#f87171')
-      + sr('多單筆數', longs+' 筆', '#34d399')
-      + sr('空單筆數', shorts+' 筆', '#a78bfa')
+      + sr('盈利 Trade', profitTrades.length+' 筆', '#34d399')
+      + sr('虧損 Trade', lossTrades.length+' 筆', '#f87171')
+      + sr('多單 Trade', longs+' 筆', '#34d399')
+      + sr('空單 Trade', shorts+' 筆', '#a78bfa')
       + '<div style="font-size:10px;color:var(--muted);margin:10px 0 6px;letter-spacing:.04em">保證金</div>'
-      + sr('最大單筆口數', maxLots+' 口', 'var(--text)')
-      + sr('最大保證金佔用', '$'+marginUsed.toLocaleString()+'（'+maxLots+'口×$'+_dMargin().toLocaleString()+'）', '#f59e0b')
+      + sr('完成 Trade 數', statsTrades.length+' 筆', 'var(--text)')
+      + sr('最新統計日期', statsLatest, 'var(--text)')
+      + sr('最大單筆口數', statsMaxLots+' 口', 'var(--text)')
+      + sr('最大保證金佔用', '$'+marginUsed.toLocaleString()+'（'+statsMaxLots+'口×$'+_dMargin().toLocaleString()+'）', '#f59e0b')
       + sr('累計出入金', (totalIo>=0?'+$':'-$')+Math.abs(totalIo).toLocaleString(), totalIo>=0?'#fbbf24':'#f87171')
-      + sr('系統計算權益金', '$'+sysEquity.toLocaleString(), '#60a5fa');
+      + sr('系統計算權益金', '$'+sysEquity.toLocaleString(), '#60a5fa')
+      + '<div style="margin-top:10px;padding:9px 10px;background:var(--bg3);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.6">統計分析已與「勝率統計」同步：使用 Firebase 最新資料，依 Trade 合併；分批出場不拆 Trade；未完成 Trade 不列入。截止：'+statsLatest+'</div>';
   }
 
   // 更新差異顯示（如果已有輸入）
@@ -2936,7 +3010,7 @@ window.toggleDStatsCharts = function() {
 function renderRRBlock() {
   var el = document.getElementById('d-rr-block');
   if (!el) return;
-  var trades = DATA.D || [];
+  var trades = getHubStatsTrades();
   var wins  = trades.filter(function(r){ return (r.net||0) > 0; });
   var losses = trades.filter(function(r){ return (r.net||0) < 0; });
   var avgWin  = wins.length  ? wins.reduce(function(a,r){ return a+r.net; },0)/wins.length  : 0;
@@ -2976,8 +3050,8 @@ function renderRRBlock() {
 function renderStreakBlock() {
   var el = document.getElementById('d-streak-block');
   if (!el) return;
-  var trades = DATA.D || [];
-  if (!trades.length) { el.innerHTML = '<div style="font-size:12px;color:var(--muted)">尚無資料</div>'; return; }
+  var trades = getHubStatsTrades();
+  if (!trades.length) { el.innerHTML = '<div style="font-size:12px;color:var(--muted)">尚無完成 Trade 資料</div>'; return; }
  
   var maxWin=0, maxLoss=0, curWin=0, curLoss=0;
   var streakWins=[], streakLosses=[], curWinStart=null, curLossStart=null;
@@ -3035,7 +3109,7 @@ function renderStreakBlock() {
 function renderWaterfallChart() {
   var canvas = document.getElementById('chart-waterfall');
   if (!canvas || !window.Chart) return;
-  var trades = DATA.D || [];
+  var trades = getHubStatsTrades();
   if (!trades.length) return;
  
   var tc = getThemeColors();
@@ -3085,7 +3159,7 @@ function renderWaterfallChart() {
 function renderPnlDistChart() {
   var canvas = document.getElementById('chart-pnl-dist');
   if (!canvas || !window.Chart) return;
-  var trades = DATA.D || [];
+  var trades = getHubStatsTrades();
   if (!trades.length) return;
  
   var nets = trades.map(function(r){ return r.net||0; });
@@ -3794,6 +3868,8 @@ async function initData() {
     onSnapshot(DOC_REF, snap => {
       if (snap.exists()) {
         const d = snap.data();
+        // 即時快照也更新伺服器資料來源，讓「勝率統計」與「統計分析」永遠跟著最新雲端版本。
+        window._firebaseServerData = d;
         if (!isSaving) {
           DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
           _dLastRev = d._revD || null;
@@ -4235,7 +4311,7 @@ function getWeekKeyForHub(dateStr){var p=dateStr.split('/');if(p.length!==3)retu
 // 不覆寫 window.renderDPanel，避免模組作用域與全域作用域不同造成失效。
 
 updateLastBackupInfo();
-// 先立即顯示內嵌歷史統計，避免 Firebase 尚未回應時看到「總 Trade 0」。
+// 先立即顯示內嵌歷史統計；Firebase 成功後會立即用最新完成 Trade 重算。
 // Firebase 成功載入後，renderHubWinrateStats() 直接依最新伺服器資料重算完成 Trade，不再固定 0918。
 try { renderHubWinrateStats(); } catch(e) { console.warn('initial winrate render', e); }
 initData();
