@@ -1959,6 +1959,7 @@ async function verifyFirebaseTradeData(showAlert) {
     var snap=await Promise.race([getDocFromServer(DOC_REF),new Promise(function(_,reject){setTimeout(function(){var e=new Error('Firebase 伺服器讀取逾時（12秒）');e.code='deadline-exceeded';reject(e);},12000);})]);
     if(!snap.exists()){var em0='❌ Firebase 文件不存在：dashboard/00631L';window._firebaseVerifyState={status:'error',message:em0};var e0=document.getElementById('hub-wr-cloud-info');if(e0)e0.textContent=em0;if(showAlert)alert(em0);return false;}
     var d=snap.data()||{}, rows=Array.isArray(d.D)?d.D:[], archives=Array.isArray(d.D_archive)?d.D_archive:[], archiveRows=[];
+    window._firebaseServerData = d;
     archives.forEach(function(b){if(b&&Array.isArray(b.trades))archiveRows=archiveRows.concat(b.trades);});
     var allRows=rows.concat(archiveRows);
     var dates=allRows.map(function(r){return String(r&&r.date||'').replace(/-/g,'/');}).filter(Boolean).sort();
@@ -3746,6 +3747,7 @@ window.toggleDGroup = function(uid) {
 // ══ Firebase 載入（完整讀取 G/Y/C/T 只為了不遺失欄位資訊、方便日後擴充，
 //    但存檔時只會回寫本頁管理的 D 系列欄位，詳見 saveData()）══
 window._firebaseVerifyState = {status:'pending', message:'☁ 正在向 Firebase 伺服器驗證最新交易資料…'};
+window._firebaseServerData = null;
 
 async function initData() {
   try {
@@ -3758,6 +3760,7 @@ async function initData() {
     if (snap.exists()) {
       window._firebaseVerifyState = {status:'success', message:'☁ Firebase 伺服器：已取得最新資料'};
       const d = snap.data();
+      window._firebaseServerData = d;
       DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
       _dLastRev = d._revD || null;
       normalizeDDates(DATA);
@@ -4335,77 +4338,55 @@ function renderHubWinrateStats(){
   try{
     var today=(typeof dTodayKey==='function')?String(dTodayKey()):'';
     var firebaseRows=[];
+    var serverData=window._firebaseServerData;
     function appendRows(src){
       if(!src) return;
       if(Array.isArray(src)) firebaseRows=firebaseRows.concat(src);
       else if(typeof src==='object') firebaseRows=firebaseRows.concat(Object.keys(src).map(function(k){return src[k];}));
     }
-    if(typeof DATA!=='undefined' && DATA){
+    // 勝率統計優先使用「最後一次 getDocFromServer / 驗證」取得的伺服器資料，
+    // 不使用可能被 onSnapshot 舊快照暫時覆蓋的 DATA。
+    if(serverData && typeof serverData==='object'){
+      appendRows(serverData.D);
+      if(Array.isArray(serverData.D_archive)) serverData.D_archive.forEach(function(b){
+        if(b) appendRows(b.trades || b.D || b.data);
+      });
+    }else if(typeof DATA!=='undefined' && DATA){
       appendRows(DATA.D);
-      if(Array.isArray(DATA.D_archive)) DATA.D_archive.forEach(function(b){ if(b) appendRows(b.trades); });
+      if(Array.isArray(DATA.D_archive)) DATA.D_archive.forEach(function(b){ if(b) appendRows(b.trades || b.D || b.data); });
     }
-    var source='Firebase';
-    var rows=firebaseRows.slice();
-    var histFirebase=rows.filter(function(r){ return String(r&&r.date||'').replace(/-/g,'/')!==today; });
+
+    var histFirebase=firebaseRows.filter(function(r){
+      return String(r&&r.date||'').replace(/-/g,'/')!==today;
+    });
     var firebaseGroups=(typeof hubTradeGroups==='function')?hubTradeGroups(histFirebase):[];
     firebaseGroups=firebaseGroups.filter(function(g){return g&&g.closed===true;});
 
-    // Firebase 尚未提供交易時，預覽版使用「已驗證的 0918 歷史資料」確保畫面有真實統計；
-    // 絕不把它冒充成 Firebase。正式雲端狀態仍在 cloudInfo 明確顯示。
-    var usingFallback=false;
-    if(!firebaseRows.length){
-      rows=HUB_WINRATE_FALLBACK.slice();
-      source='0918 CSV 備援（已驗證預覽資料）';
-      usingFallback=true;
-    }else if(!firebaseGroups.length){
-      rows=HUB_WINRATE_FALLBACK.slice();
-      source='0918 CSV 備援（Firebase 有資料但尚無可完成 Trade）';
-      usingFallback=true;
-    }
+    // 目前的勝率預覽規則：只有 Firebase 資料能依「日期＋方向＋進場價」
+    // 完整形成已結束 Trade 時，才使用 Firebase 統計；否則維持已驗證 0918 歷史統計。
+    var usingFallback = (firebaseGroups.length===0);
+    var source = usingFallback
+      ? '0918 CSV 備援（已驗證預覽資料）'
+      : 'Firebase';
+    var rows = usingFallback ? HUB_WINRATE_FALLBACK.slice() : histFirebase.slice();
 
     var latestAll='—';
     firebaseRows.forEach(function(r){
       var d=String(r&&r.date||'').replace(/-/g,'/');
       if(d && (latestAll==='—'||d>latestAll)) latestAll=d;
     });
-    var verifiedFallbackUsed=false;
-    var latestStat='—';
-    rows.forEach(function(r){
-      var d=String(r&&r.date||'').replace(/-/g,'/');
-      if(d && d!==today && (latestStat==='—'||d>latestStat)) latestStat=d;
-    });
-    if(verifiedFallbackUsed) latestStat=VERIFIED_FALLBACK_STATS.date;
+
+    var VERIFIED_FALLBACK_STATS={total:62,win:30,loss:32,rate:'48.4%',avgWin:19721,avgLoss:-14646,pf:'1.26',date:'2026/09/17'};
     rows=rows.filter(function(r){return String(r&&r.date||'').replace(/-/g,'/')!==today;});
     var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(rows):[];
     groups=groups.filter(function(g){return g&&g.closed===true;});
 
-    // 重要：預覽備援資料已在發布前驗證為 62 Trade / 30 勝 / 32 敗。
-    // 若 Firebase 為空，或預覽環境的日期/資料初始化造成 fallback 無法重新分組，
-    // 不得讓畫面退回 0；直接使用已驗證的 Trade 統計值。Firebase 狀態仍明確標示為空。
-    var VERIFIED_FALLBACK_STATS={total:62,win:30,loss:32,rate:'48.4%',avgWin:19721,avgLoss:-14646,pf:'1.26',date:'2026/09/17'};
-    if(usingFallback && groups.length===0){
-      verifiedFallbackUsed=true;
-      var statGroups=[];
-      for(var vi=0;vi<VERIFIED_FALLBACK_STATS.total;vi++) statGroups.push({closed:true,net:vi<VERIFIED_FALLBACK_STATS.win?1:-1});
-      groups=statGroups;
-    }
     var wins=groups.filter(function(g){return Number(g.net||0)>0;});
     var losses=groups.filter(function(g){return Number(g.net||0)<0;});
     var breakeven=groups.filter(function(g){return Number(g.net||0)===0;});
-    var grossWin=wins.reduce(function(s,g){return s+Number(g.net||0);},0);
-    var grossLoss=Math.abs(losses.reduce(function(s,g){return s+Number(g.net||0);},0));
-    var avgWin=wins.length?grossWin/wins.length:0;
-    var avgLoss=losses.length?losses.reduce(function(s,g){return s+Number(g.net||0);},0)/losses.length:0;
-    var pf=grossLoss?grossWin/grossLoss:0;
+
     function put(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-    put('hub-wr-total',groups.length);
-    put('hub-wr-win',wins.length);
-    put('hub-wr-loss',losses.length);
-    put('hub-wr-rate',groups.length?((wins.length/groups.length)*100).toFixed(1)+'%':'0.0%');
-    put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgWin):Math.round(avgWin).toLocaleString('zh-TW'));
-    put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString('zh-TW'));
-    put('hub-wr-pf',grossLoss?pf.toFixed(2):'—');
-    if(verifiedFallbackUsed){
+    if(usingFallback){
       put('hub-wr-total',VERIFIED_FALLBACK_STATS.total);
       put('hub-wr-win',VERIFIED_FALLBACK_STATS.win);
       put('hub-wr-loss',VERIFIED_FALLBACK_STATS.loss);
@@ -4413,17 +4394,36 @@ function renderHubWinrateStats(){
       put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(VERIFIED_FALLBACK_STATS.avgWin):'+$19,721');
       put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(VERIFIED_FALLBACK_STATS.avgLoss):'-$14,646');
       put('hub-wr-pf',VERIFIED_FALLBACK_STATS.pf);
+    }else{
+      var grossWin=wins.reduce(function(s,g){return s+Number(g.net||0);},0);
+      var grossLoss=Math.abs(losses.reduce(function(s,g){return s+Number(g.net||0);},0));
+      var avgWin=wins.length?grossWin/wins.length:0;
+      var avgLoss=losses.length?losses.reduce(function(s,g){return s+Number(g.net||0);},0)/losses.length:0;
+      put('hub-wr-total',groups.length);
+      put('hub-wr-win',wins.length);
+      put('hub-wr-loss',losses.length);
+      put('hub-wr-rate',groups.length?((wins.length/groups.length)*100).toFixed(1)+'%':'0.0%');
+      put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgWin):Math.round(avgWin).toLocaleString('zh-TW'));
+      put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString('zh-TW'));
+      put('hub-wr-pf',grossLoss?(grossWin/grossLoss).toFixed(2):'—');
     }
+
     var titleDate=document.getElementById('hub-wr-title-date');
-    if(titleDate) titleDate.textContent='（統計截至：'+latestStat+'）';
+    if(titleDate) titleDate.textContent='（統計截至：'+(usingFallback?VERIFIED_FALLBACK_STATS.date:latestAll)+'）';
     var note=document.querySelector('#hub-winrate-box .hub-winrate-note');
-    if(note) note.textContent='以 Trade 為統計單位；分批出場不拆 Trade。今日不列入。資料來源：'+source+'｜統計截至：'+latestStat+(breakeven.length?'｜持平 Trade：'+breakeven.length+' 筆':'');
+    if(note) note.textContent='以 Trade 為統計單位；分批出場不拆 Trade。今日不列入。資料來源：'+source+'｜統計截至：'+(usingFallback?VERIFIED_FALLBACK_STATS.date:latestAll);
+
     var cloudInfo=document.getElementById('hub-wr-cloud-info');
     if(cloudInfo){
-      if(firebaseRows.length){
-        cloudInfo.textContent = firebaseGroups.length ? ('☁ Firebase 已載入 '+firebaseRows.length+' 筆原始交易｜最新日：'+latestAll+'｜完成 Trade：'+firebaseGroups.length) : ('⚠ Firebase 已載入 '+firebaseRows.length+' 筆原始交易｜最新日：'+latestAll+'｜目前 0 筆可統計完成 Trade；畫面暫用已驗證歷史資料');
+      if(usingFallback){
+        // Firebase 有原始資料但無法形成完成 Trade 時，也不冒充為 Firebase 統計。
+        if(firebaseRows.length){
+          cloudInfo.textContent='☁ Firebase 已取得原始資料 '+firebaseRows.length+' 筆｜最新日期：'+latestAll+'｜目前 0 筆可統計完成 Trade｜預覽顯示已驗證 0918 歷史資料（62 Trade），未冒充為 Firebase 最新資料';
+        }else{
+          cloudInfo.textContent='☁ Firebase 已連線但目前 D + D_archive = 0 筆｜預覽顯示已驗證 0918 歷史資料（62 Trade），未冒充為 Firebase 最新資料';
+        }
       }else{
-        cloudInfo.textContent='☁ Firebase 已連線但目前 D + D_archive = 0 筆｜預覽顯示已驗證 0918 歷史資料（62 Trade），未冒充為 Firebase 最新資料';
+        cloudInfo.textContent='☁ Firebase 已載入 '+firebaseRows.length+' 筆原始交易｜最新日：'+latestAll+'｜完成 Trade：'+firebaseGroups.length;
       }
     }
   }catch(e){
