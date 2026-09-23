@@ -1058,7 +1058,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
     <div class="hub-winrate-item"><span>平均虧損</span><b id="hub-wr-avgloss">—</b></div>
     <div class="hub-winrate-item"><span>Profit Factor</span><b id="hub-wr-pf">—</b></div>
   </div>
-  <div class="hub-winrate-note">以 Trade 為統計單位；同一進場的分批出場合併計算。獲利／虧損不因出場口數而重複計算；今日資料不併入歷史統計。</div>
+  <div id="hub-wr-cloud-info" style="font-size:11px;color:var(--muted2);margin-bottom:4px">正在讀取 Firebase…</div><div class="hub-winrate-note">以 Trade 為統計單位；同一進場的分批出場合併計算。獲利／虧損不因出場口數而重複計算；今日資料不併入歷史統計。</div>
 </div>
 
 
@@ -4256,24 +4256,34 @@ function renderHubWinrateStats(){
       appendRows(DATA.D);
       if(Array.isArray(DATA.D_archive)) DATA.D_archive.forEach(function(b){ if(b) appendRows(b.trades); });
     }
+
+    // Firebase 是主要來源。只有「完全沒有可計算的歷史 Trade」時才使用內嵌 0918 備援。
     var source='Firebase';
-    if(!rows.length){ rows=HUB_WINRATE_FALLBACK.slice(); source='0918 CSV 備份'; }
-    // 顯示「資料截至哪一天」：取原始資料中的最新交易日期，避免只寫來源名稱。
-    var latestDate='—';
+    var firebaseRows=rows.slice();
+    var histFirebase=rows.filter(function(r){
+      var d=String(r&&r.date||'').replace(/-/g,'/');
+      return d && d!==today;
+    });
+    var firebaseGroups=(typeof hubTradeGroups==='function')?hubTradeGroups(histFirebase):[];
+    firebaseGroups=firebaseGroups.filter(function(g){return g && g.closed===true;});
+    if(!firebaseGroups.length && HUB_WINRATE_FALLBACK && HUB_WINRATE_FALLBACK.length){
+      rows=HUB_WINRATE_FALLBACK.slice();
+      source='0918 CSV 備援';
+    }
+
+    // 最新交易日：以「實際目前 DATA」為準；統計日期則排除今天。
+    var latestAll='—';
+    firebaseRows.forEach(function(r){
+      var d=String(r&&r.date||'').replace(/-/g,'/');
+      if(d && (latestAll==='—' || d>latestAll)) latestAll=d;
+    });
+    var latestStat='—';
     rows.forEach(function(r){
       var d=String(r&&r.date||'').replace(/-/g,'/');
-      if(d && (latestDate==='—' || d>latestDate)) latestDate=d;
+      if(d && d!==today && (latestStat==='—' || d>latestStat)) latestStat=d;
     });
-    rows=rows.filter(function(r){ var d=String(r&&r.date||'').replace(/-/g,'/'); return d!==today; });
-    if(!rows.length && HUB_WINRATE_FALLBACK && HUB_WINRATE_FALLBACK.length){
-      rows=HUB_WINRATE_FALLBACK.slice().filter(function(r){ var d=String(r&&r.date||'').replace(/-/g,'/'); return d!==today; });
-      source='0918 CSV 備份';
-      latestDate='—';
-      rows.forEach(function(r){
-        var d=String(r&&r.date||'').replace(/-/g,'/');
-        if(d && (latestDate==='—' || d>latestDate)) latestDate=d;
-      });
-    }
+    rows=rows.filter(function(r){return String(r&&r.date||'').replace(/-/g,'/')!==today;});
+
     var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(rows):[];
     groups=groups.filter(function(g){return g && g.closed===true;});
     var wins=groups.filter(function(g){return Number(g.net||0)>0;});
@@ -4285,21 +4295,29 @@ function renderHubWinrateStats(){
     var avgLoss=losses.length?losses.reduce(function(s,g){return s+Number(g.net||0);},0)/losses.length:0;
     var pf=grossLoss?grossWin/grossLoss:0;
     function put(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-    put('hub-wr-total',groups.length); put('hub-wr-win',wins.length); put('hub-wr-loss',losses.length);
+    put('hub-wr-total',groups.length);
+    put('hub-wr-win',wins.length);
+    put('hub-wr-loss',losses.length);
     put('hub-wr-rate',groups.length?((wins.length/groups.length)*100).toFixed(1)+'%':'0.0%');
     put('hub-wr-avgwin',typeof fmtMoney==='function'?fmtMoney(avgWin):Math.round(avgWin).toLocaleString('zh-TW'));
     put('hub-wr-avgloss',typeof fmtMoney==='function'?fmtMoney(avgLoss):Math.round(avgLoss).toLocaleString('zh-TW'));
     put('hub-wr-pf',grossLoss?pf.toFixed(2):'—');
+    var titleDate=document.getElementById('hub-wr-title-date');
+    if(titleDate) titleDate.textContent='（統計截至：'+latestStat+'）';
     var note=document.querySelector('#hub-winrate-box .hub-winrate-note');
-    var titleDate=document.getElementById('hub-wr-title-date'); if(titleDate) titleDate.textContent='（資料截至：'+latestDate+'）';
-    if(note) note.textContent='以 Trade 為統計單位；分批出場仍視為同一筆 Trade。今日不列入。資料來源：'+source+'｜資料截至：'+latestDate+(breakeven.length?'　持平 Trade：'+breakeven.length+' 筆。':'');
+    if(note) note.textContent='以 Trade 為統計單位；分批出場不拆 Trade。今日不列入。資料來源：'+source+'｜目前資料最新日：'+latestAll+'｜統計截至：'+latestStat+(breakeven.length?'｜持平 Trade：'+breakeven.length+' 筆':'');
+    // 額外顯示雲端資料狀態，避免使用者誤以為 0918 備援就是最新資料。
+    var cloudInfo=document.getElementById('hub-wr-cloud-info');
+    if(cloudInfo){
+      cloudInfo.textContent = firebaseRows.length ? ('☁ Firebase 已載入 '+firebaseRows.length+' 筆原始交易，最新 '+latestAll) : '⚠ Firebase 尚未載入交易資料';
+    }
   }catch(e){
     console.error('renderHubWinrateStats',e);
     ['hub-wr-total','hub-wr-win','hub-wr-loss','hub-wr-rate','hub-wr-avgwin','hub-wr-avgloss','hub-wr-pf'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent='資料錯誤';});
   }
 }
 // 預覽／離線時先用內嵌歷史資料，不等待 Firebase。
-/* 勝率統計：Firebase 優先；無 Firebase 資料時使用內嵌備援。標題日期與數值均由 renderHubWinrateStats() 更新。 */
+/* 勝率統計：Firebase 優先；若 Firebase 無法組成已完成 Trade，使用內嵌 0918 備援，避免 0 筆。 */
 
 </script>
 </body>
