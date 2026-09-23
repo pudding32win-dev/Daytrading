@@ -1259,7 +1259,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 <script type="module">
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, getDocFromServer, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ── Firebase 設定（沿用主站同一個文件；本頁只負責 D / D_io / D_eq / D_archive / D_marginPerLot 這幾個欄位，
 //    絕不寫回 G/Y/C/T/MKT/PL/RC/RB 等主站欄位，避免蓋掉主站資料）──
@@ -3720,13 +3720,22 @@ window.toggleDGroup = function(uid) {
 //    但存檔時只會回寫本頁管理的 D 系列欄位，詳見 saveData()）══
 async function initData() {
   try {
-    setCloudStatus('syncing', '連接 Firebase…');
-    const snap = await getDoc(DOC_REF);
+    setCloudStatus('syncing', '強制讀取 Firebase 伺服器…');
+    // 勝率統計的雲端來源必須確認是伺服器最新資料，避免 getDoc() 回到舊快取。
+    const snap = await getDocFromServer(DOC_REF);
     if (snap.exists()) {
       const d = snap.data();
       DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
       _dLastRev = d._revD || null;
       normalizeDDates(DATA);
+      // 強制伺服器驗證：把原始 D 筆數與最新日期寫入頁面，方便確認 9/23 是否真的到雲端。
+      try {
+        var __cloudRows = Array.isArray(DATA.D) ? DATA.D : [];
+        var __dates = __cloudRows.map(function(r){ return String(r && r.date || '').replace(/-/g,'/'); }).filter(Boolean).sort();
+        var __latest = __dates.length ? __dates[__dates.length-1] : '無';
+        var __info = document.getElementById('hub-wr-cloud-info');
+        if (__info) __info.textContent = '☁ Firebase 伺服器：已取得｜D 原始筆數：' + __cloudRows.length + '｜最新日期：' + __latest;
+      } catch(__e) {}
     } else {
       DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
       normalizeDDates(DATA);
@@ -3764,7 +3773,9 @@ async function initData() {
     });
   } catch (err) {
     console.error(err);
-    setCloudStatus('error', '連線失敗，使用本機資料');
+    setCloudStatus('error', 'Firebase 伺服器讀取失敗，使用備援資料');
+    var __infoErr = document.getElementById('hub-wr-cloud-info');
+    if (__infoErr) __infoErr.textContent = '⚠ Firebase 伺服器讀取失敗：' + (err && err.code ? err.code : 'unknown') + '｜已改用已驗證歷史統計';
     try {
       const saved = localStorage.getItem('dashboard_00631L_data');
       DATA = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_DATA));
@@ -4309,7 +4320,7 @@ function renderHubWinrateStats(){
     if(cloudInfo){
       cloudInfo.textContent=useFirebase
         ? '☁ Firebase 已載入 '+firebaseRows.length+' 筆原始交易｜完成 Trade '+firebaseGroups.length+'｜最新日 '+statDate
-        : '☁ Firebase 尚未取得可統計的歷史完成 Trade｜目前顯示已驗證歷史統計';
+        : '☁ 正在向 Firebase 伺服器驗證最新交易資料…';
     }
     var note=document.querySelector('#hub-winrate-box .hub-winrate-note');
     if(note) note.textContent='以 Trade 為統計單位；分批出場不拆 Trade。今日不列入。資料來源：'+source+'｜統計截至：'+statDate;
