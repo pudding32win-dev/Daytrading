@@ -2200,7 +2200,14 @@ function renderHubTradeBrake(){
   b.style.borderColor=st.state==='normal'?'var(--border2)':'rgba(245,158,11,.45)';
   b.style.background=st.state==='locked'||st.state==='cooldown'?'rgba(239,68,68,.08)':'rgba(245,158,11,.07)';
   var btn=document.getElementById('D-new-trade-btn');
-  if(btn){ var locked=(st.state==='locked'||st.state==='cooldown'); btn.disabled=locked; btn.style.opacity=locked?'.45':'1'; btn.title=locked?(st.lockReason||st.msg):'新增 Trade'; }
+  if(btn){
+    // 交易煞車只做「警示」，絕不阻擋儲存。
+    // 使用者通常是成交後才回來記錄，因此即使已達目標、5 Trade、連續虧損，
+    // 都必須能把實際成交完整寫入系統。
+    btn.disabled=false;
+    btn.style.opacity='1';
+    btn.title = st.state==='normal' ? '新增 Trade' : ('⚠️ '+(st.msg||'請注意今日交易狀態，但仍可儲存成交紀錄'));
+  }
 }
 window.renderHubTradeBrake=renderHubTradeBrake;
 
@@ -2215,10 +2222,9 @@ window.addDtrade = async function() {
   var sameTrade = window._DTradeMode === 'continue';
   if(!sameTrade){
     var brake=getHubTradeBrakeState();
-    if(brake.state==='locked' || brake.state==='cooldown'){
-      alert('🛑 今日交易煞車\n\n'+(brake.lockReason||brake.msg)+'\n\n延續上一筆／分批出場不受此限制。');
-      renderHubTradeBrake();
-      return;
+    // 交易煞車只警示，不攔截儲存。成交已經發生後，這筆紀錄一定要能留下。
+    if(brake.state!=='normal'){
+      document.getElementById('msg-D').textContent = '⚠️ '+(brake.msg||'請注意今日交易狀態')+'｜本次成交仍可儲存。';
     }
   }
   var wave = document.getElementById('D-wave').value || _marketBiasToday || '多';
@@ -2271,8 +2277,10 @@ window.addDtrade = async function() {
   if(document.getElementById('D-ex')) document.getElementById('D-ex').value=ex;
   if(document.getElementById('D-fee') && document.getElementById('D-fee').value==='') document.getElementById('D-fee').value=0;
   setDTradeMode(false);
-  document.getElementById('msg-D').textContent = '已儲存 ' + dParseDate(dateVal) + ' · ' + displayDateTime(exitTime) + ' · 淨額 ' + (net>=0?'+':'')+net.toLocaleString();
+  var afterBrake=getHubTradeBrakeState();
+  document.getElementById('msg-D').textContent = '已儲存 ' + dParseDate(dateVal) + ' · ' + displayDateTime(exitTime) + ' · 淨額 ' + (net>=0?'+':'')+net.toLocaleString() + (afterBrake.state!=='normal' ? '　｜ ⚠️ '+afterBrake.msg : '');
   renderDPanel();
+  renderHubTradeBrake();
 };
 
 window.openDioModal = function() {
