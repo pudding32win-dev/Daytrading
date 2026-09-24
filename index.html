@@ -220,6 +220,11 @@ tr:last-child td { border-bottom:none; }
 .op { font-size:11px; padding:3px 8px; border-radius:5px; cursor:pointer; font-family:var(--font); border:none; }
 .op-add  { background:rgba(52,211,153,0.1);  color:var(--green);  border:1px solid rgba(52,211,153,0.25); }
 .op-edit { background:rgba(251,191,36,0.1);  color:var(--yellow2);border:1px solid rgba(251,191,36,0.25); }
+/* v57：交易明細操作欄固定在右側，編輯/刪除不再被寬表格推到畫面外 */
+.dtrade-op-col{position:sticky;right:0;z-index:5;background:var(--bg2);box-shadow:-6px 0 10px rgba(0,0,0,.06);min-width:92px;}
+.dtrade-op-cell{position:sticky;right:0;z-index:4;background:var(--bg);white-space:nowrap;min-width:92px;box-shadow:-6px 0 10px rgba(0,0,0,.05);}
+.dtrade-op-cell .op{font-size:12px;padding:4px 8px;margin-right:4px;}
+
 .op-del  { background:rgba(248,113,113,0.1); color:var(--red);    border:1px solid rgba(248,113,113,0.25); }
 .op + .op { margin-left:4px; }
 
@@ -764,6 +769,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-trade-diagnostic .diag-row{font-family:monospace;font-size:12px;overflow-wrap:anywhere;color:var(--muted)}
 
 </style>
+<meta name="x-surf-version" content="v57-edit-sticky">
 </head>
 <body class="light" data-hub-version="v55">
 
@@ -2961,7 +2967,7 @@ function renderDPanel() {
           return '<div style="background:var(--bg3);border-radius:6px;padding:5px 10px;font-size:11px">'
             + '<span style="color:var(--muted)">'+r.date+'</span> '
             + '<span style="font-family:monospace;color:'+(r.amt>=0?'#fbbf24':'#f87171')+'">'+(r.amt>=0?'+':'')+r.amt.toLocaleString()+'</span>'
-            + (r.note?'<span style="color:var(--muted);font-size:10px"> '+r.note+'</span>':'')
+            + (r.note?'<span style="color:var(--muted);font-size:11px"> '+r.note+'</span>':'')
             + '</div>';
         }).join('')
       + '</div>';
@@ -2991,7 +2997,7 @@ function renderDPanel() {
     var statsMeta = document.getElementById('d-stats-meta');
     if(statsMeta) statsMeta.textContent='（Firebase 最新完成 Trade：'+statsTrades.length+'｜統計截至：'+statsLatest+'）';
     function sr(label, val, color) {
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);border-right:1px solid var(--border)">'
         +'<span style="font-size:12px;color:var(--muted)">'+label+'</span>'
         +'<span style="font-size:13px;font-weight:600;font-family:monospace;color:'+(color||'var(--text)')+'">'+val+'</span></div>';
     }
@@ -3741,26 +3747,28 @@ window.renderDDetailTab = function() {
       + '</div>'
       + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
       + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">口數欄：<b style="color:var(--text)">初始口數 → 本次出場口數</b>；例如 <b style="color:var(--text)">3口 → 1口</b> 代表 3 口進場、本次平 1 口</div>'
-      + '<table class="hub-trade-detail-table" style="width:1366px;min-width:1366px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:13px;white-space:nowrap">'
+      + '<table class="hub-trade-detail-table" style="width:1446px;min-width:1446px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:13px;white-space:nowrap">'
       + '<colgroup>'
-      + '<col style="width:105px"><col style="width:85px"><col style="width:95px"><col style="width:210px"><col style="width:110px"><col style="width:210px"><col style="width:110px"><col style="width:80px"><col style="width:70px"><col style="width:95px"><col style="width:110px">'
-      + (canEdit ? '<col style="width:86px">' : '')
+      + '<col style="width:155px"><col style="width:80px"><col style="width:80px"><col style="width:195px"><col style="width:100px"><col style="width:195px"><col style="width:100px"><col style="width:75px"><col style="width:65px"><col style="width:95px"><col style="width:105px"><col style="width:106px">'
+      + (canEdit ? '<col style="width:95px">' : '')
       + '</colgroup>'
       + '<thead><tr>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">口數（初始／出場）</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">市場認知</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">方向</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">進場時間</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">進場價</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">出場時間</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">出場價</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">差價</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">手費</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">淨額</th>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">累計</th>'
-      + (canEdit ? '<th style="padding:7px 10px;background:var(--bg2)"></th>' : '')
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">口數（初始／出場）</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">市場認知</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">波段</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">方向</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">進場時間</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">進場價</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">出場時間</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">出場價</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">差價</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">手費</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">淨額</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">累計</th>'
+      + (canEdit ? '<th class="dtrade-op-col" style="padding:9px 12px;border-right:1px solid var(--border);background:var(--bg2);text-align:left;color:var(--muted);font-weight:600;font-size:12px">操作</th>' : '')
       + '</tr></thead><tbody>';
 
+    // v58：表頭補上「波段」欄，與表身 13 欄完全對齊；口數欄加寬並加入欄位分隔線。
     // 當日交易：依進場時間→出場時間→原始順序，讓 Trade 1、2、3 的順序與實際交易一致。
     var orderedDayTrades = dayTrades.slice().sort(function(a,b){
       var ai = a.entryTime ? new Date(a.entryTime).getTime() : Infinity;
@@ -3800,21 +3808,21 @@ window.renderDDetailTab = function() {
       var waveColor = r.wave==='多' ? 'color:#34d399' : 'color:#a78bfa';
       var cumVal = cumMap[origIdx];
       html += '<tr>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-weight:700"><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:6px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(Number(r.entryLots||r.lots||1))+'口 → '+(Number(r.lots||1))+'口</span> <span style="color:var(--muted);font-size:10px">'+meta.n+'/'+meta.total+'　TP'+meta.tp+'</span></td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="font-size:10px;font-weight:600;'+waveColor+'">'+(r.wave||'—')+'</span>'+(isContra?'<span style="font-size:9px;color:#f59e0b;margin-left:3px">逆</span>':'')+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
+        + '<td style="padding:9px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-weight:700"><span style="display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(Number(r.entryLots||r.lots||1))+'口 → '+(Number(r.lots||1))+'口</span> <span style="color:var(--muted);font-size:11px">'+meta.n+'/'+meta.total+'　TP'+meta.tp+'</span></td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="font-size:10px;font-weight:600;'+waveColor+'">'+(r.wave||'—')+'</span>'+(isContra?'<span style="font-size:9px;color:#f59e0b;margin-left:3px">逆</span>':'')+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
         + (r.dir==='B'?'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399':'background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#a78bfa')
         + '">'+(r.dir==='B'?'多 B':'空 S')+'</span></td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:10px;color:var(--muted2)">'+displayDateTime(r.entryTime)+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace">'+r.en+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-size:10px;color:var(--muted2)">'+displayDateTime(r.exitTime)+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace">'+r.ex+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;'+ptsCls+'">'+(pts>=0?'+':'')+pts+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;color:var(--muted);font-size:11px">'+(r.fee?'-'+r.fee:'—')+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-weight:600;'+netCls+'">'+(r.net>=0?'+':'')+r.net.toLocaleString()+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;'+(cumVal>=0?'color:var(--gain)':'color:var(--loss)')+'">'+Math.round(cumVal).toLocaleString()+'</td>'
-        + (canEdit ? '<td style="padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap"><button class="op op-edit" onclick="openEditDtrade('+trades.indexOf(r)+')">改</button> <button class="op op-del" onclick="deleteDtrade('+trades.indexOf(r)+')">刪</button></td>' : '')
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-size:10px;color:var(--muted2)">'+displayDateTime(r.entryTime)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace">'+r.en+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-size:10px;color:var(--muted2)">'+displayDateTime(r.exitTime)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace">'+r.ex+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;'+ptsCls+'">'+(pts>=0?'+':'')+pts+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;color:var(--muted);font-size:11px">'+(r.fee?'-'+r.fee:'—')+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-weight:600;'+netCls+'">'+(r.net>=0?'+':'')+r.net.toLocaleString()+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;'+(cumVal>=0?'color:var(--gain)':'color:var(--loss)')+'">'+Math.round(cumVal).toLocaleString()+'</td>'
+        + (canEdit ? '<td class="dtrade-op-cell" style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);white-space:nowrap"><button class="op op-edit" onclick="openEditDtrade('+trades.indexOf(r)+')">改</button><button class="op op-del" onclick="deleteDtrade('+trades.indexOf(r)+')">刪</button></td>' : '')
         + '</tr>';
     });
     html += '</tbody></table></div></div>';
@@ -3841,7 +3849,7 @@ window.openTPBatchModal = function(date){
     if(!groups[k]) groups[k]=[];
     groups[k].push({r:r,i:i});
   });
-  var h='<div style="padding:7px 9px;background:var(--bg2);color:var(--muted);font-size:10px">交易ID　→　目前 TP　→　整理後 TP</div>';
+  var h='<div style="padding:7px 9px;background:var(--bg2);color:var(--muted);font-size:11px">交易ID　→　目前 TP　→　整理後 TP</div>';
   Object.keys(groups).forEach(function(k){
     var arr=groups[k].slice().sort(function(a,b){
       var ta=a.r.exitTime?new Date(a.r.exitTime).getTime():Infinity;
