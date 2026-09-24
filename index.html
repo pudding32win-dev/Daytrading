@@ -3666,13 +3666,14 @@ window.renderDDetailTab = function() {
       + '</div>'
       + '</div>'
       + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
+      + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">口數欄：<b style="color:var(--text)">初始口數 → 本次出場口數</b>；例如 <b style="color:var(--text)">3口 → 1口</b> 代表 3 口進場、本次平 1 口</div>'
       + '<table style="width:100%;min-width:1280px;table-layout:fixed;border-collapse:collapse;font-size:12px;white-space:nowrap">'
       + '<colgroup>'
       + '<col style="width:105px"><col style="width:90px"><col style="width:78px"><col style="width:150px"><col style="width:92px"><col style="width:150px"><col style="width:92px"><col style="width:82px"><col style="width:70px"><col style="width:86px"><col style="width:105px">'
       + (canEdit ? '<col style="width:86px">' : '')
       + '</colgroup>'
       + '<thead><tr>'
-      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">初始／本次</th>'
+      + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">口數（初始／出場）</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">市場認知</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">方向</th>'
       + '<th style="padding:7px 10px;text-align:left;color:var(--muted);font-weight:400;font-size:11px;background:var(--bg2)">進場時間</th>'
@@ -3725,7 +3726,7 @@ window.renderDDetailTab = function() {
       var waveColor = r.wave==='多' ? 'color:#34d399' : 'color:#a78bfa';
       var cumVal = cumMap[origIdx];
       html += '<tr>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-weight:700"><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:6px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+meta.n+'/'+meta.total+'</span> <span style="color:var(--muted);font-size:10px">TP'+meta.tp+'</span></td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:monospace;font-weight:700"><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:6px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(Number(r.entryLots||r.lots||1))+'口 → '+(Number(r.lots||1))+'口</span> <span style="color:var(--muted);font-size:10px">'+meta.n+'/'+meta.total+'　TP'+meta.tp+'</span></td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="font-size:10px;font-weight:600;'+waveColor+'">'+(r.wave||'—')+'</span>'+(isContra?'<span style="font-size:9px;color:#f59e0b;margin-left:3px">逆</span>':'')+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
@@ -4212,18 +4213,19 @@ function renderHubHome(){
   set('surf-month-pnl',fmtMoney(monthNet)); set('surf-month-pct','達成率 '+monthPct.toFixed(1)+'%');
   var bar=document.getElementById('surf-month-bar');if(bar)bar.style.width=monthPct+'%';
   set('surf-week-pnl',fmtMoney(weekNet));
-  var td=new Date(today.replace(/\//g,'-')+'T12:00:00'); var friday=new Date(td); friday.setDate(td.getDate()+(5-td.getDay()+7)%7);
-  set('surf-friday',String(friday.getMonth()+1).padStart(2,'0')+'/'+String(friday.getDate()).padStart(2,'0'));
-  // 以當月工作日進度估算「目前進度」，不把它混進風險模型。
+  var td=new Date(today.replace(/\//g,'-')+'T12:00:00');
+  var settlementKey=lastTWTradingDayOfWeek(today),sp=settlementKey.split('/');
+  set('surf-friday',sp.length===3?String(+sp[1]).padStart(2,'0')+'/'+String(+sp[2]).padStart(2,'0'):'—');
+  // 以台股實際交易日計算工作日進度，排除週末與 TWSE 休市日。
   var y=td.getFullYear(),m=td.getMonth(),daysInMonth=new Date(y,m+1,0).getDate(),elapsed=0,totalBiz=0;
-  for(var di=1;di<=daysInMonth;di++){var wd=new Date(y,m,di).getDay();if(wd!==0&&wd!==6){totalBiz++;if(di<=td.getDate())elapsed++;}}
+  for(var di=1;di<=daysInMonth;di++){var dk=y+'/'+String(m+1).padStart(2,'0')+'/'+String(di).padStart(2,'0');if(isTWTradingDay(dk)){totalBiz++;if(di<=td.getDate())elapsed++;}}
   var expected=target*(elapsed/Math.max(1,totalBiz)), pace=expected>0?monthNet/expected:0;
   var progressStatus=monthNet>=target?'🟢':(pace>=0.8?'🟢':(pace>=0.5?'🟡':'🔴'));
   set('surf-progress-status',progressStatus);set('surf-progress-note',monthNet>=target?'已達月目標':('工作日進度 '+elapsed+'/'+totalBiz));
 
   // 歷史路徑：以 Trade 為核心；分批出場先由 hubTradeGroups 合併。
   var daysBy={};
-  all.forEach(function(r){var d=String(r.date||'');var dt=d?new Date(d+'T00:00:00'):null;if(!d||d===today||(dt&&((dt.getDay()===0)||(dt.getDay()===6))))return;(daysBy[d]||(daysBy[d]=[])).push(r);});
+  all.forEach(function(r){var d=String(r.date||'');if(!d||d===today||!isTWTradingDay(d))return;(daysBy[d]||(daysBy[d]=[])).push(r);});
   var hist=Object.keys(daysBy).sort().map(function(d){var gs=hubTradeGroups(daysBy[d]);gs.sort(function(a,b){var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity,tb=b.entryTime?new Date(b.entryTime).getTime():Infinity;return (isFinite(ta)&&isFinite(tb))?ta-tb:a.firstIndex-b.firstIndex;});return {date:d,trades:gs};}).filter(function(x){return x.trades.length;});
   var histTradeCount=hist.reduce(function(sum,day){return sum+day.trades.length;},0);
   set('surf-history-data-count','歷史資料：'+hist.length+' 天 / '+histTradeCount+' Trade');
@@ -4305,6 +4307,16 @@ function renderHubHome(){
   renderHubTradeBrake();
 }
 window.renderHubHome=renderHubHome;
+// ══ 台灣交易日曆（2026）══
+var TWSE_HOLIDAYS_2026 = {
+  '2026/01/01':true,'2026/02/12':true,'2026/02/13':true,'2026/02/16':true,'2026/02/17':true,'2026/02/18':true,'2026/02/19':true,'2026/02/20':true,
+  '2026/02/27':true,'2026/04/03':true,'2026/04/06':true,'2026/05/01':true,'2026/06/19':true,
+  '2026/09/25':true,'2026/09/28':true,'2026/10/09':true,'2026/10/26':true,'2026/12/25':true
+};
+function normHubDateKey(v){var x=String(v||'').trim().replace(/-/g,'/'),p=x.split('/');return p.length===3?(+p[0]+'/'+String(+p[1]).padStart(2,'0')+'/'+String(+p[2]).padStart(2,'0')):'';}
+function isTWTradingDay(dateStr){var k=normHubDateKey(dateStr);if(!k)return false;var p=k.split('/'),d=new Date(+p[0],+p[1]-1,+p[2]),wd=d.getDay();return wd!==0&&wd!==6&&!TWSE_HOLIDAYS_2026[k];}
+function lastTWTradingDayOfWeek(dateStr){var k=normHubDateKey(dateStr),p=k.split('/');if(p.length!==3)return dateStr;var d=new Date(+p[0],+p[1]-1,+p[2]),end=new Date(d);end.setDate(d.getDate()+(5-d.getDay()+7)%7);for(var i=0;i<7;i++){var q=new Date(end);q.setDate(end.getDate()-i);var qs=q.getFullYear()+'/'+String(q.getMonth()+1).padStart(2,'0')+'/'+String(q.getDate()).padStart(2,'0');if(isTWTradingDay(qs))return qs;}return k;}
+
 function getWeekKeyForHub(dateStr){var p=dateStr.split('/');if(p.length!==3)return '';var d=new Date(+p[0],+p[1]-1,+p[2]);var thu=new Date(d);thu.setDate(d.getDate()-((d.getDay()+6)%7)+3);var firstThu=new Date(thu.getFullYear(),0,4);var week=1+Math.round(((thu-firstThu)/86400000-3+((firstThu.getDay()+6)%7))/7);return thu.getFullYear()+'-W'+String(week).padStart(2,'0');}
 
 // renderDPanel / loadMtxQuote 是本模組內的函式，直接在其流程中呼叫首頁更新；
