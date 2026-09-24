@@ -198,6 +198,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 /* ── 表格 ── */
 .tbl-wrap { overflow-x:auto; max-height:360px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 table { width:100%; border-collapse:collapse; font-size:12px; white-space:nowrap; }
+.hub-trade-detail-table { table-layout:fixed !important; width:1256px !important; min-width:1256px !important; }
+.hub-trade-detail-table th, .hub-trade-detail-table td { box-sizing:border-box; vertical-align:middle; border-right:1px solid rgba(148,163,184,.10); }
+.hub-trade-detail-table th:nth-child(4), .hub-trade-detail-table td:nth-child(4),
+.hub-trade-detail-table th:nth-child(5), .hub-trade-detail-table td:nth-child(5),
+.hub-trade-detail-table th:nth-child(6), .hub-trade-detail-table td:nth-child(6),
+.hub-trade-detail-table th:nth-child(7), .hub-trade-detail-table td:nth-child(7) { padding-left:12px !important; padding-right:12px !important; }
 th { padding:8px 10px; text-align:left; color:var(--muted); font-weight:400; font-size:11px; border-bottom:1px solid var(--border2); background:var(--bg2); position:sticky; top:0; }
 td { padding:8px 10px; border-bottom:1px solid var(--border); font-family:monospace; }
 tr:last-child td { border-bottom:none; }
@@ -704,6 +710,40 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-detail-toolbar button{border:1px solid rgba(37,99,235,.35);background:#2563eb;color:#fff;border-radius:7px;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:var(--font);white-space:nowrap;}
 @media(max-width:699px){.hub-detail-toolbar{align-items:flex-start}.hub-detail-toolbar div{display:flex;flex-direction:column;gap:3px}.hub-detail-toolbar span{margin-left:0;}}
 
+
+/* v52：交易明細表頭／表身統一欄寬與字級 */
+.hub-trade-detail-table{
+  width:100% !important;
+  table-layout:fixed !important;
+  border-collapse:collapse !important;
+  font-size:13px !important;
+  line-height:1.45 !important;
+}
+.hub-trade-detail-table th{
+  box-sizing:border-box !important;
+  text-align:left !important;
+  vertical-align:middle !important;
+  padding:9px 10px !important;
+  font-size:12px !important;
+  line-height:1.35 !important;
+  white-space:nowrap !important;
+}
+.hub-trade-detail-table td{
+  box-sizing:border-box !important;
+  text-align:left !important;
+  vertical-align:middle !important;
+  padding:9px 10px !important;
+  font-size:13px !important;
+  line-height:1.45 !important;
+}
+.hub-trade-detail-table td span{
+  font-size:inherit;
+}
+.hub-trade-detail-table td span[style*="font-size:10px"],
+.hub-trade-detail-table td span[style*="font-size:11px"],
+.hub-trade-detail-table td span[style*="font-size:9px"]{
+  font-size:12px !important;
+}
 </style>
 </head>
 <body class="light">
@@ -2037,7 +2077,11 @@ async function saveData() {
     throw err;
   } finally {
     // 延遲重置，讓 setDoc 的 onSnapshot 回調先被忽略，避免重複 render
-    setTimeout(() => { isSaving = false; }, 2000);
+    setTimeout(() => {
+      isSaving = false;
+      // 最後一道保險：如果 snapshot 與 setDoc 的事件順序不同，2 秒後仍以目前 DATA 重算。
+      try { normalizeDDates(DATA); renderDPanel(); renderHubWinrateStats(); renderHubTradeBrake(); renderHubHome(); } catch(e) { console.warn('post-save hub refresh', e); }
+    }, 2000);
   }
 }
 
@@ -3678,9 +3722,9 @@ window.renderDDetailTab = function() {
       + '</div>'
       + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
       + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">口數欄：<b style="color:var(--text)">初始口數 → 本次出場口數</b>；例如 <b style="color:var(--text)">3口 → 1口</b> 代表 3 口進場、本次平 1 口</div>'
-      + '<table style="width:100%;min-width:1280px;table-layout:fixed;border-collapse:collapse;font-size:12px;white-space:nowrap">'
+      + '<table class="hub-trade-detail-table" style="width:1256px;min-width:1256px;table-layout:fixed;border-collapse:collapse;font-size:13px;white-space:nowrap">'
       + '<colgroup>'
-      + '<col style="width:105px"><col style="width:90px"><col style="width:78px"><col style="width:150px"><col style="width:92px"><col style="width:150px"><col style="width:92px"><col style="width:82px"><col style="width:70px"><col style="width:86px"><col style="width:105px">'
+      + '<col style="width:105px"><col style="width:90px"><col style="width:78px"><col style="width:175px"><col style="width:100px"><col style="width:175px"><col style="width:100px"><col style="width:82px"><col style="width:70px"><col style="width:90px"><col style="width:105px">'
       + (canEdit ? '<col style="width:86px">' : '')
       + '</colgroup>'
       + '<thead><tr>'
@@ -3882,18 +3926,18 @@ async function initData() {
         const d = snap.data();
         // 即時快照也更新伺服器資料來源，讓「勝率統計」與「統計分析」永遠跟著最新雲端版本。
         window._firebaseServerData = d;
-        if (!isSaving) {
-          DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
-          _dLastRev = d._revD || null;
-          normalizeDDates(DATA);
-          renderDPanel();
-          renderHubWinrateStats();
-        } else {
-          // 自己這次寫入觸發的回調：也同步更新版本戳記，避免誤判為「被別人改過」
-          _dLastRev = d._revD || _dLastRev;
-        }
+        // 重要：自己剛存檔時也必須套用 Firebase 最新 snapshot。
+        // 舊版在 isSaving=true 時只更新 _revD、不更新 DATA，造成「明細已是第3筆，
+        // 首頁仍停在 2 已完成 / 3 今日 Trade」的延遲畫面。
+        DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
+        _dLastRev = d._revD || _dLastRev;
+        normalizeDDates(DATA);
+        renderDPanel();
+        renderHubWinrateStats();
+        try { renderHubTradeBrake(); } catch(e) {}
+        try { renderHubHome(); } catch(e) { console.warn('snapshot → hub home refresh', e); }
         setCloudStatus('connected', '已連線 · 即時同步中');
-        /* winrate is recalculated after every Firebase snapshot */
+        /* every Firebase snapshot, including our own save, recalculates the whole HUB */
       }
     });
   } catch (err) {
@@ -4166,18 +4210,56 @@ function hubEsc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/<
 function hubMoney(v){ v=Number(v)||0; return (v>=0?'+$':'-$')+Math.abs(Math.round(v)).toLocaleString('zh-TW'); }
 function hubSigned(v){ v=Number(v)||0; return (v>=0?'+':'')+Math.round(v).toLocaleString('zh-TW'); }
 function hubMinutes(ms){ if(!isFinite(ms)||ms<0)return '—'; var m=Math.floor(ms/60000), h=Math.floor(m/60); m%=60; return h? h+'小時 '+m+'分':m+' 分鐘'; }
+// v52：首頁與統計都以「日期＋方向＋進場價」為同一 Trade；每一列出場若缺 lots，
+// 但有出場價／時間，視為 1 口出場，與交易明細表的顯示規則一致。
 function hubTradeGroups(rows){
+  // 每一個 Trade = 一次進場；分批出場仍合併成同一 Trade。
+  // closed 必須以「進場口數 vs 累計實際出場口數」判斷，不能只看某一列。
   var map={}, order=[];
   (rows||[]).forEach(function(r,i){
-    var key=(r.date!=null && r.dir!=null && r.en!=null && r.en!=='') ? String(r.date||'')+'|'+String(r.dir||'')+'|'+String(r.en) : (r.tradeId ? 'id:'+r.tradeId : String(r.date||'')+'|'+String(r.dir||'')+'|');
-    if(!map[key]){ map[key]={key:key,rows:[],firstIndex:i,tradeId:r.tradeId||'',date:r.date||'',dir:r.dir||'',wave:r.wave||'',en:r.en,entryLots:0,exitLots:0,net:0,fee:0,entryTime:null,exitTime:null,exits:[]}; order.push(key); }
-    var g=map[key]; g.rows.push(r); g.entryLots=Math.max(g.entryLots,Number(r.entryLots||r.lots||0)); g.exitLots+=Number(r.lots||0); g.net+=Number(r.net||0); g.fee+=Number(r.fee||0);
-    if(g.en==null && r.en!=null)g.en=r.en; if(!g.wave&&r.wave)g.wave=r.wave; if(!g.dir&&r.dir)g.dir=r.dir;
-    if(r.entryTime && (!g.entryTime || new Date(r.entryTime)<new Date(g.entryTime)))g.entryTime=r.entryTime;
-    if(r.exitTime && (!g.exitTime || new Date(r.exitTime)>new Date(g.exitTime)))g.exitTime=r.exitTime;
-    if(r.ex!=null)g.exits.push(Number(r.ex));
+    if(!r || typeof r!=='object') return;
+    var date=String(r.date==null?'':r.date).replace(/-/g,'/');
+    var dir=String(r.dir==null?'':r.dir);
+    var en=(r.en!=null && r.en!=='') ? String(r.en) : '';
+    var tid=String(r.tradeId==null?'':r.tradeId);
+    // 依既定規則：同一天＋同方向＋同進場價視為同一次進場；
+    // 只有缺少進場價時才使用 Trade ID，避免舊資料的自動 ID 把分批出場拆開。
+    var key=(date && dir && en) ? date+'|'+dir+'|'+en : (tid ? 'id:'+tid : date+'|'+dir+'|'+String(i));
+    if(!map[key]){
+      map[key]={key:key,rows:[],firstIndex:i,tradeId:tid,date:date||r.date||'',dir:dir,wave:r.wave||'',en:(r.en!=null?r.en:null),entryLots:0,exitLots:0,net:0,fee:0,entryTime:null,exitTime:null,exits:[]};
+      order.push(key);
+    }
+    var g=map[key];
+    g.rows.push(r);
+    var entryLots=Number(r.entryLots);
+    var exitLots=Number(r.lots);
+    // 舊資料有些列沒有 lots 欄位，但表身本身就是一筆實際出場紀錄；
+    // 依畫面既有規則「空白 lots 顯示 1 口」，這裡也必須用 1 口計入完成判定。
+    if(!isFinite(exitLots) || exitLots<=0){
+      if((r.ex!=null && r.ex!=='') || r.exitTime) exitLots=1;
+    }
+    if(isFinite(entryLots) && entryLots>g.entryLots) g.entryLots=entryLots;
+    if(isFinite(exitLots) && exitLots>0) g.exitLots+=exitLots;
+    g.net+=Number(r.net)||0;
+    g.fee+=Number(r.fee)||0;
+    if(g.en==null && r.en!=null) g.en=r.en;
+    if(!g.wave&&r.wave) g.wave=r.wave;
+    if(!g.dir&&r.dir) g.dir=r.dir;
+    if(r.entryTime && (!g.entryTime || new Date(r.entryTime)<new Date(g.entryTime))) g.entryTime=r.entryTime;
+    if(r.exitTime && (!g.exitTime || new Date(r.exitTime)>new Date(g.exitTime))) g.exitTime=r.exitTime;
+    if(r.ex!=null && r.ex!=='') g.exits.push(Number(r.ex));
   });
-  return order.map(function(k,n){var g=map[k];g.no=n+1;g.remaining=Math.max(0,g.entryLots-g.exitLots);g.closed=g.remaining<=0;g.ex=g.exits.length?g.exits[g.exits.length-1]:null;return g;});
+  return order.map(function(k,n){
+    var g=map[k];
+    // 舊 Firebase 紀錄可能沒有 entryLots。這時以該 Trade 累計出場口數作為完整成交量，
+    // 避免歷史舊資料被錯誤判成「未完成」。
+    if(!(g.entryLots>0)) g.entryLots=g.exitLots;
+    g.remaining=Math.max(0,g.entryLots-g.exitLots);
+    g.closed=(g.entryLots>0 && g.exitLots>=g.entryLots);
+    g.ex=g.exits.length ? g.exits[g.exits.length-1] : null;
+    g.no=n+1;
+    return g;
+  });
 }
 function hubTradeSort(a,b){
   var ta=a.entryTime?new Date(a.entryTime).getTime():Infinity;
@@ -4250,7 +4332,7 @@ function renderHubHome(){
     var p=day.trades.slice(0,prefixCodes.length).map(pathCode);
     return day.trades.length>prefixCodes.length && p.join('')===prefix;
   }):[];
-  var nextTrade=prefixCodes.length+1; set('surf-next-trade-no',nextTrade);set('surf-sample',same.length+' 天');
+  var nextTrade=prefixCodes.length+1; set('surf-next-trade-no',nextNo);set('surf-sample',same.length+' 天');
   var next=same.map(function(d){return d.trades[nextTrade-1];}).filter(Boolean);
   var wins=next.filter(function(g){return Number(g.net)>0;}).length, avg=next.length?next.reduce(function(s,g){return s+Number(g.net||0);},0)/next.length:0;
   set('surf-path-winrate',pct(wins,next.length));
@@ -4454,7 +4536,11 @@ function hubStatsGroups(rows){
     }
     var g=map[key];
     g.rows.push(r);
-    var el=Number(r.entryLots||0), lot=Number(r.lots||0);
+    var el=Number(r.entryLots||0), lot=Number(r.lots);
+    // 與首頁 Trade 完成判定一致：沒有 lots 的舊出場列，若有出場價/時間則按 1 口計。
+    if(!isFinite(lot) || lot<=0){
+      if((r.ex!=null && r.ex!=='') || r.exitTime) lot=1;
+    }
     if(isFinite(el) && el>g.entryLotsExplicit) g.entryLotsExplicit=el;
     if(isFinite(lot) && lot>0) g.exitLots+=lot;
     g.net += Number(r.net||0);
