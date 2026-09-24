@@ -2281,6 +2281,9 @@ window.addDtrade = async function() {
   document.getElementById('msg-D').textContent = '已儲存 ' + dParseDate(dateVal) + ' · ' + displayDateTime(exitTime) + ' · 淨額 ' + (net>=0?'+':'')+net.toLocaleString() + (afterBrake.state!=='normal' ? '　｜ ⚠️ '+afterBrake.msg : '');
   renderDPanel();
   renderHubTradeBrake();
+  // 儲存成功後立即重算「下一筆」：已完成 3 Trade 就立刻顯示 Trade 4。
+  // 不等待 Firebase onSnapshot；因為 DATA.D 已經包含剛儲存的成交紀錄。
+  try { renderHubHome(); } catch(e) { console.warn('save → next-trade refresh', e); }
 };
 
 window.openDioModal = function() {
@@ -4315,6 +4318,8 @@ function renderHubHome(){
   renderHubTradeBrake();
 }
 window.renderHubHome=renderHubHome;
+// 每次新增/分批出場儲存後，addDtrade() 會立即呼叫 renderHubHome()，
+// 因此「下一筆 Trade N」不需等待 Firebase 即時監聽回來才更新。
 // ══ 台灣交易日曆（2026）══
 var TWSE_HOLIDAYS_2026 = {
   '2026/01/01':true,'2026/02/12':true,'2026/02/13':true,'2026/02/16':true,'2026/02/17':true,'2026/02/18':true,'2026/02/19':true,'2026/02/20':true,
