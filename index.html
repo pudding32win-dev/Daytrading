@@ -721,14 +721,14 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 
 /* v52：交易明細表頭／表身統一欄寬與字級 */
 .hub-trade-detail-table{
-  width:1366px !important;
-  min-width:1366px !important;
+  width:1500px !important;
+  min-width:1500px !important;
   max-width:none !important;
   table-layout:fixed !important;
   border-collapse:separate !important;
   border-spacing:0 !important;
-  font-size:13px !important;
-  line-height:1.45 !important;
+  font-size:14px !important;
+  line-height:1.5 !important;
 }
 .hub-trade-detail-table th, .hub-trade-detail-table td{
   box-sizing:border-box !important;
@@ -740,14 +740,14 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   border-right:1px solid var(--border2) !important;
 }
 .hub-trade-detail-table th{
-  padding:10px 12px !important;
-  font-size:12px !important;
+  padding:12px 14px !important;
+  font-size:13px !important;
   line-height:1.35 !important;
   font-weight:600 !important;
 }
 .hub-trade-detail-table td{
-  padding:10px 12px !important;
-  font-size:13px !important;
+  padding:12px 14px !important;
+  font-size:14px !important;
   line-height:1.45 !important;
 }
 .hub-trade-detail-table th:last-child, .hub-trade-detail-table td:last-child{border-right:0 !important;}
@@ -757,6 +757,22 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-trade-detail-table td span[style*="font-size:9px"]{font-size:12px !important;}
 .hub-trade-detail-table td:nth-child(4), .hub-trade-detail-table td:nth-child(6),
 .hub-trade-detail-table th:nth-child(4), .hub-trade-detail-table th:nth-child(6){font-family:monospace !important;letter-spacing:.02em !important;}
+/* v59：交易明細重新排版：欄位不壓縮、字體放大、時間/價格各自獨立 */
+.hub-trade-detail-table th, .hub-trade-detail-table td{
+  overflow:visible !important;
+  text-overflow:clip !important;
+  padding-left:14px !important;
+  padding-right:14px !important;
+}
+.hub-trade-detail-table th:nth-child(1), .hub-trade-detail-table td:nth-child(1){text-align:left !important;}
+.hub-trade-detail-table th:nth-child(4), .hub-trade-detail-table td:nth-child(4){text-align:center !important;}
+.hub-trade-detail-table th:nth-child(5), .hub-trade-detail-table td:nth-child(5),
+.hub-trade-detail-table th:nth-child(7), .hub-trade-detail-table td:nth-child(7){text-align:left !important; font-family:monospace !important; letter-spacing:0 !important;}
+.hub-trade-detail-table th:nth-child(6), .hub-trade-detail-table td:nth-child(6),
+.hub-trade-detail-table th:nth-child(8), .hub-trade-detail-table td:nth-child(8){text-align:center !important; font-family:monospace !important; letter-spacing:.02em !important;}
+.hub-trade-detail-table th:nth-child(n+9), .hub-trade-detail-table td:nth-child(n+9){text-align:right !important;}
+.hub-trade-detail-table .dtrade-op-col, .hub-trade-detail-table td:last-child{text-align:center !important;}
+
 
 /* v56：Trade 完成判定診斷區；只顯示今日資料，協助核對 DATA.D 與首頁判定是否一致 */
 .hub-trade-diagnostic{margin:10px 0 0;padding:10px 12px;border:1px solid #f59e0b55;background:rgba(245,158,11,.055);border-radius:8px;font-size:13px;line-height:1.65;color:var(--text)}
@@ -3747,10 +3763,10 @@ window.renderDDetailTab = function() {
       + '</div>'
       + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
       + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">口數欄：<b style="color:var(--text)">初始口數 → 本次出場口數</b>；例如 <b style="color:var(--text)">3口 → 1口</b> 代表 3 口進場、本次平 1 口</div>'
-      + '<table class="hub-trade-detail-table" style="width:1446px;min-width:1446px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:13px;white-space:nowrap">'
+      + '<table class="hub-trade-detail-table" style="width:1500px;min-width:1500px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:14px;white-space:nowrap">'
       + '<colgroup>'
-      + '<col style="width:155px"><col style="width:80px"><col style="width:80px"><col style="width:195px"><col style="width:100px"><col style="width:195px"><col style="width:100px"><col style="width:75px"><col style="width:65px"><col style="width:95px"><col style="width:105px"><col style="width:106px">'
-      + (canEdit ? '<col style="width:95px">' : '')
+      + '<col style="width:160px"><col style="width:100px"><col style="width:80px"><col style="width:80px"><col style="width:200px"><col style="width:110px"><col style="width:200px"><col style="width:110px"><col style="width:80px"><col style="width:70px"><col style="width:100px"><col style="width:110px">'
+      + (canEdit ? '<col style="width:100px">' : '')
       + '</colgroup>'
       + '<thead><tr>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">口數（初始／出場）</th>'
