@@ -862,7 +862,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
       <div class="next-predict-card">
         <div class="next-predict-head">
-          <div><div class="next-predict-title">🔎 下一筆，我要看懂這個</div><div class="next-predict-sub">只用你的歷史 Trade 路徑比對，不預測行情、不保證獲利</div></div>
+          <div><div class="next-predict-title">🔎 下一筆，我要看懂這個</div><div class="next-predict-sub">只用你的歷史 Trade 路徑比對，不預測行情、不保證獲利</div><div class="next-predict-sub" id="surf-predict-completed-count">今日 Trade：等待資料</div></div>
           <div class="next-predict-badge" id="surf-predict-badge">等待資料</div>
         </div>
         <div class="next-predict-main">
@@ -4200,7 +4200,10 @@ function renderHubHome(){
   var currentLots=open?open.remaining:0;
   function pathCode(g){ return (g.dir==='B'?'B':'S') + (Number(g.net)>0?'W':'L'); }
   var path=completed.map(pathCode).join(' → ')||'—';
-  var nextNo=completed.length+1;
+  // 下一筆編號依「今日已建立的 Trade」計算；歷史比對仍只使用已完成 Trade。
+  // 這樣即使最後一筆的出場資料尚未被 Firestore listener 補齊，也不會把 Trade 3 顯示成下一筆。
+  var nextNo=groups.length+1;
+  var completedCount=completed.length;
   var fmtMoney=function(v){return (Number(v)>=0?'+$':'-$')+Math.abs(Math.round(Number(v)||0)).toLocaleString('zh-TW');};
   var pct=function(n,d){return d?(n/d*100).toFixed(1)+'%':'—';};
   var esc=hubEsc;
@@ -4258,7 +4261,8 @@ function renderHubHome(){
   set('surf-streak-risk',streakN?pct(streakPairs,streakN):'—');
 
   // ══ 白話版「下一筆預測」：把歷史統計翻成一眼看得懂的結果 ══
-  set('surf-predict-trade-no',nextTrade);
+  set('surf-predict-trade-no',nextNo);
+  set('surf-predict-completed-count',completedCount+' 已完成 / '+groups.length+' 今日 Trade');
   set('surf-predict-winrate',pct(wins,next.length));
   set('surf-predict-lossrate',next.length?pct(next.length-wins,next.length):'—');
   set('surf-predict-avg',next.length?fmtMoney(avg):'—');
