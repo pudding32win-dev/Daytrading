@@ -1366,6 +1366,26 @@ let isSaving = false;
 // 本頁自己的版本戳記（存在 Firestore 的 _revD 欄位），只用來偵測「本頁管理的 D 系列欄位」是否被其他分頁/裝置改過。
 // 刻意不使用主站共用的 _rev 欄位，避免主站編輯 G/Y/C/T 時被本頁誤判成衝突，也避免本頁存檔誤觸主站的版本判斷。
 let _dLastRev = null;
+// v61：衝突保護改用「雲端內容基準」而不是單純比較 _revD。
+// _revD 可能因即時 snapshot / 自己剛寫入而變動；真正需要判斷的是：
+// 「自上次同步後，雲端 D 系列內容是否真的被別處改過」。
+let _dBaseSig = null;
+function _dManagedSnapshot(obj) {
+  obj = obj || {};
+  return {
+    D: obj.D || [],
+    D_io: obj.D_io || [],
+    D_eq: obj.D_eq || [],
+    D_premium: obj.D_premium || [],
+    D_marketBias: obj.D_marketBias || [],
+    D_archive: obj.D_archive || [],
+    D_marginPerLot: obj.D_marginPerLot || null
+  };
+}
+function _dSignature(obj) {
+  try { return JSON.stringify(_dManagedSnapshot(obj)); }
+  catch (e) { return ''; }
+}
 const EDIT_KEY = 'pudding2026';
 const urlKey = new URLSearchParams(location.search).get('edit');
 const canEdit = urlKey === EDIT_KEY;
@@ -2060,15 +2080,16 @@ window.verifyFirebaseTradeData=function(){return verifyFirebaseTradeData(true);}
 async function saveData() {
   normalizeDTradeRecords();
   normalizeDDates(DATA); // 儲存前強制正規化所有日期格式，避免舊資料/未轉換格式被寫回 Firebase
-  // ── 寫入前先從 Firebase 伺服器讀取最新版本，避免 getDoc() 的本機快取造成誤判 ──
-  // getDoc() 可能拿到本機/快取版本；這裡必須用 getDocFromServer() 才能比較真正的雲端 _revD。
-  // 因此不會因「瀏覽器快取比本頁更新戳記舊」而誤跳版本衝突警告。
-  // ── 寫入前先檢查雲端「本頁欄位」是否已被其他分頁/裝置更新過，避免「舊分頁蓋掉新資料」──
+  // ── v61 衝突保護：從 Firebase 伺服器讀最新「內容」，不再只比較 _revD ──
+  // 延續上一筆／分批出場會正常修改 DATA.D；這本身不是雲端衝突。
+  // 真正需要警告的是：自上次同步後，雲端 D 系列內容真的被其他分頁/裝置改過。
+  // 因此用 _dBaseSig（上次同步的內容基準）與 serverSig 比較。
   try {
     var checkSnap = await getDocFromServer(DOC_REF);
     if (checkSnap.exists()) {
-      var serverRev = checkSnap.data()._revD || null;
-      if (_dLastRev !== null && serverRev !== null && serverRev !== _dLastRev) {
+      var serverData = checkSnap.data() || {};
+      var serverSig = _dSignature(serverData);
+      if (_dBaseSig !== null && serverSig !== _dBaseSig) {
         var NL = String.fromCharCode(10);
         var proceed = confirm(
           '⚠️ 偵測到雲端的當沖資料已被其他分頁或裝置更新過！' + NL + NL +
@@ -2106,6 +2127,7 @@ async function saveData() {
     var __writeVerified=await verifyFirebaseTradeData(false);
     if(!__writeVerified) throw new Error('Firebase 寫入後讀回驗證失敗；本次儲存不視為完成');
     _dLastRev = DATA._revD;
+    _dBaseSig = _dSignature(DATA);
     localStorage.setItem('dashboard_00631L_data', JSON.stringify(DATA));
     clearUnsynced();
     setCloudStatus('connected', '已連線 · 即時同步中');
@@ -3940,6 +3962,9 @@ async function initData() {
       DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
       _dLastRev = d._revD || null;
       normalizeDDates(DATA);
+      _dBaseSig = _dSignature(DATA);
+      // v61：記住這次「真正從伺服器讀到的內容」作為衝突比較基準。
+      // 後續即使 _revD 變動，只要雲端 D 內容沒變，就不應誤判衝突。
       // 強制伺服器驗證：把原始 D 筆數與最新日期寫入頁面，方便確認 9/23 是否真的到雲端。
       try {
         var __cloudRows = Array.isArray(DATA.D) ? DATA.D : [];
@@ -3955,6 +3980,7 @@ async function initData() {
       DATA._revD = Date.now();
       await setDoc(DOC_REF, DATA);
       _dLastRev = DATA._revD;
+      _dBaseSig = _dSignature(DATA);
     }
     setCloudStatus('connected', '已連線 · 即時同步中');
     renderDPanel();
@@ -3979,6 +4005,8 @@ async function initData() {
         _dLastRev = d._revD || _dLastRev;
         normalizeDDates(DATA);
         normalizeDTradeRecords();
+        _dBaseSig = _dSignature(DATA);
+        // snapshot 是目前真正的雲端基準；不要再只靠 _revD 判斷衝突。
         renderDPanel();
         renderHubWinrateStats();
         refreshHubNow();
