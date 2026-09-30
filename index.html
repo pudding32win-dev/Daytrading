@@ -2060,9 +2060,12 @@ window.verifyFirebaseTradeData=function(){return verifyFirebaseTradeData(true);}
 async function saveData() {
   normalizeDTradeRecords();
   normalizeDDates(DATA); // 儲存前強制正規化所有日期格式，避免舊資料/未轉換格式被寫回 Firebase
+  // ── 寫入前先從 Firebase 伺服器讀取最新版本，避免 getDoc() 的本機快取造成誤判 ──
+  // getDoc() 可能拿到本機/快取版本；這裡必須用 getDocFromServer() 才能比較真正的雲端 _revD。
+  // 因此不會因「瀏覽器快取比本頁更新戳記舊」而誤跳版本衝突警告。
   // ── 寫入前先檢查雲端「本頁欄位」是否已被其他分頁/裝置更新過，避免「舊分頁蓋掉新資料」──
   try {
-    var checkSnap = await getDoc(DOC_REF);
+    var checkSnap = await getDocFromServer(DOC_REF);
     if (checkSnap.exists()) {
       var serverRev = checkSnap.data()._revD || null;
       if (_dLastRev !== null && serverRev !== null && serverRev !== _dLastRev) {
