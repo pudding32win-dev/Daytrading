@@ -2080,10 +2080,10 @@ window.verifyFirebaseTradeData=function(){return verifyFirebaseTradeData(true);}
 async function saveData() {
   normalizeDTradeRecords();
   normalizeDDates(DATA); // 儲存前強制正規化所有日期格式，避免舊資料/未轉換格式被寫回 Firebase
-  // ── v61 衝突保護：從 Firebase 伺服器讀最新「內容」，不再只比較 _revD ──
+  // ── v62 衝突保護：從 Firebase 伺服器讀最新「原始內容」，不再只比較 _revD ──
   // 延續上一筆／分批出場會正常修改 DATA.D；這本身不是雲端衝突。
   // 真正需要警告的是：自上次同步後，雲端 D 系列內容真的被其他分頁/裝置改過。
-  // 因此用 _dBaseSig（上次同步的內容基準）與 serverSig 比較。
+  // 因此用 _dBaseSig（上次 Firebase snapshot 的原始內容基準）與 serverSig 比較。
   try {
     var checkSnap = await getDocFromServer(DOC_REF);
     if (checkSnap.exists()) {
@@ -3961,8 +3961,12 @@ async function initData() {
       window._firebaseServerData = d;
       DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
       _dLastRev = d._revD || null;
+      // v62：衝突基準一定取「Firebase 原始內容」。
+      // 不能在 normalizeDTradeRecords() 之後才建立基準，因為正規化可能補上 tradeId/tpStage，
+      // 造成本機基準與 Firebase 原始內容字串不同，進而每次「延續上一筆」存檔都誤跳衝突。
+      _dBaseSig = _dSignature(d);
       normalizeDDates(DATA);
-      _dBaseSig = _dSignature(DATA);
+      // 不在這裡重新用 DATA 建基準；DATA 可能已被日期/Trade 正規化改寫。
       // v61：記住這次「真正從伺服器讀到的內容」作為衝突比較基準。
       // 後續即使 _revD 變動，只要雲端 D 內容沒變，就不應誤判衝突。
       // 強制伺服器驗證：把原始 D 筆數與最新日期寫入頁面，方便確認 9/23 是否真的到雲端。
@@ -4001,11 +4005,13 @@ async function initData() {
         // 重要：自己剛存檔時也必須套用 Firebase 最新 snapshot。
         // 舊版在 isSaving=true 時只更新 _revD、不更新 DATA，造成「明細已是第3筆，
         // 首頁仍停在 2 已完成 / 3 今日 Trade」的延遲畫面。
+        // v62：先保存 Firebase 原始 snapshot 作為衝突基準，再做本機正規化。
+        // 否則 normalizeDTradeRecords() 補欄位後，會讓 baseSig 與下一次 serverSig 不一致。
+        _dBaseSig = _dSignature(d);
         DATA = { G: d.G || [], Y: d.Y || [], C: d.C || [], T: d.T || [], D: d.D || [], D_io: d.D_io || [], D_eq: d.D_eq || [], D_premium: d.D_premium || [], D_marketBias: d.D_marketBias || [], D_archive: d.D_archive || [], D_marginPerLot: d.D_marginPerLot || null, PL: d.PL || [], RC: d.RC || {}, RB: d.RB || null };
         _dLastRev = d._revD || _dLastRev;
         normalizeDDates(DATA);
         normalizeDTradeRecords();
-        _dBaseSig = _dSignature(DATA);
         // snapshot 是目前真正的雲端基準；不要再只靠 _revD 判斷衝突。
         renderDPanel();
         renderHubWinrateStats();
@@ -4741,7 +4747,7 @@ function renderHubWinrateStats(){
     var cloudInfo=document.getElementById('hub-wr-cloud-info');
     if(cloudInfo){
       if(cloudRows.length){
-        cloudInfo.textContent='☁ Firebase 已取得原始資料 '+cloudRows.length+' 筆｜最新日期：'+latestAll+'｜已完成 Trade：'+groups.length+(breakeven.length?'｜持平 Trade：'+breakeven.length:'');
+        cloudInfo.textContent='☁ Firebase｜已完成 Trade：'+groups.length+(breakeven.length?'｜持平 Trade：'+breakeven.length:'');
       }else{
         cloudInfo.textContent='☁ Firebase 暫無可讀取原始資料｜目前顯示 0918 已驗證備援統計';
       }
