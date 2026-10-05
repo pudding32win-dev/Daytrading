@@ -784,10 +784,11 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-trade-diagnostic .diag-bad{color:var(--loss,#dc2626);font-weight:700}
 .hub-trade-diagnostic .diag-row{font-family:monospace;font-size:12px;overflow-wrap:anywhere;color:var(--muted)}
 
+.dgrp-arrow-open{transform:rotate(180deg)!important;}
 </style>
-<meta name="x-surf-version" content="v57-edit-sticky">
+<meta name="x-surf-version" content="v69-direct-pnl-navigation">
 </head>
-<body class="light" data-hub-version="v55">
+<body class="light" data-hub-version="v69">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -3783,18 +3784,18 @@ window.renderDDetailTab = function() {
       + '<div style="display:flex;gap:5px;margin-left:auto;align-items:center">'
       + wkBadge + moBadge + eqDiffBadge
       + (canEdit ? '<button type="button" onclick="event.stopPropagation();openTPBatchModal(\''+date+'\')" style="font-size:10px;padding:3px 8px;border-radius:7px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25);color:#93c5fd;cursor:pointer">TP批次</button>' : '')
-      + '<span id="'+uid+'-arrow" style="font-size:12px;color:var(--muted);transition:transform 0.2s;margin-left:4px">▼</span>'
+       + '<span id="'+uid+'-arrow" class="dgrp-arrow-open" style="font-size:12px;color:var(--muted);transition:transform 0.2s;margin-left:4px;transform:rotate(180deg)">▼</span>'
       + '</div>'
       + '</div>'
-      + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
-      + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">口數欄：<b style="color:var(--text)">初始口數 → 本次出場口數</b>；例如 <b style="color:var(--text)">3口 → 1口</b> 代表 3 口進場、本次平 1 口</div>'
+       + '<div id="'+uid+'" style="display:block;border-top:1px solid var(--border);overflow-x:auto">'
+      + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">交易／口數：<b style="color:var(--text)">第一筆、第二筆…＋口數變化</b>；分批出場直接列出，不顯示 TP1／TP2</div>'
       + '<table class="hub-trade-detail-table" style="width:1500px;min-width:1500px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:14px;white-space:nowrap">'
       + '<colgroup>'
       + '<col style="width:160px"><col style="width:100px"><col style="width:80px"><col style="width:80px"><col style="width:200px"><col style="width:110px"><col style="width:200px"><col style="width:110px"><col style="width:80px"><col style="width:70px"><col style="width:100px"><col style="width:110px">'
       + (canEdit ? '<col style="width:100px">' : '')
       + '</colgroup>'
       + '<thead><tr>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">口數（初始／出場）</th>'
+      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">交易／口數</th>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">市場認知</th>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">波段</th>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">方向</th>'
@@ -3821,7 +3822,9 @@ window.renderDDetailTab = function() {
       if (isFinite(ax) && isFinite(bx) && ax !== bx) return ax-bx;
       return allSorted.indexOf(a)-allSorted.indexOf(b);
     });
-    // 同一天＋同方向＋同進場價，視為同一次進場；左欄直接顯示 1/3、2/3、3/3。
+    // 筆次的定義：同一天「每一次新的進場」就是第 1、2、3…筆。
+    // 分批出場仍屬於同一筆，不能因為有 2～3 行出場紀錄就變成第 2、3、4 筆。
+    // 因此這裡先按「日期＋方向＋進場價」分組，再依首次進場時間排序，給整組唯一的 tradeNo。
     var rowGroupMeta = {};
     var groupRows = {};
     orderedDayTrades.forEach(function(rr){
@@ -3829,19 +3832,27 @@ window.renderDDetailTab = function() {
       var gk = (rr.en!=null && rr.en!=='') ? String(rr.date||'')+'|'+String(rr.dir||'')+'|'+String(rr.en) : 'row|'+oi;
       (groupRows[gk]||(groupRows[gk]=[])).push({r:rr,idx:oi});
     });
-    Object.keys(groupRows).forEach(function(gk){
+    var groupList = Object.keys(groupRows).map(function(gk){
       var arr=groupRows[gk];
       arr.sort(function(a,b){
-        var ai=a.r.exitTime?new Date(a.r.exitTime).getTime():Infinity, bi=b.r.exitTime?new Date(b.r.exitTime).getTime():Infinity;
+        var ai=a.r.entryTime?new Date(a.r.entryTime).getTime():Infinity, bi=b.r.entryTime?new Date(b.r.entryTime).getTime():Infinity;
         if(isFinite(ai)&&isFinite(bi)&&ai!==bi) return ai-bi;
         if(isFinite(ai)!==isFinite(bi)) return isFinite(ai)?-1:1;
         return a.idx-b.idx;
       });
-      arr.forEach(function(x,n){ rowGroupMeta[x.idx]={n:n+1,total:arr.length,tp:n+1}; });
+      return {gk:gk,arr:arr,first:arr[0]};
+    }).sort(function(a,b){
+      var ai=a.first.r.entryTime?new Date(a.first.r.entryTime).getTime():Infinity, bi=b.first.r.entryTime?new Date(b.first.r.entryTime).getTime():Infinity;
+      if(isFinite(ai)&&isFinite(bi)&&ai!==bi) return ai-bi;
+      if(isFinite(ai)!==isFinite(bi)) return isFinite(ai)?-1:1;
+      return a.first.idx-b.first.idx;
+    });
+    groupList.forEach(function(g,tradeNo){
+      g.arr.forEach(function(x,n){ rowGroupMeta[x.idx]={tradeNo:tradeNo+1,exitNo:n+1,total:g.arr.length,isFirst:n===0}; });
     });
     orderedDayTrades.forEach(function(r){
       var origIdx = allSorted.indexOf(r);
-      var meta = rowGroupMeta[origIdx] || {n:1,total:1,tp:r.tpStage||1};
+      var meta = rowGroupMeta[origIdx] || {tradeNo:1,exitNo:1,total:1,isFirst:true};
       var pts = r.dir==='B' ? (r.ex-r.en) : (r.en-r.ex);
       var netCls = (r.net||0)>=0?'color:var(--gain)':'color:var(--loss)';
       var ptsCls  = pts>=0?'color:var(--gain)':'color:var(--loss)';
@@ -3849,7 +3860,7 @@ window.renderDDetailTab = function() {
       var waveColor = r.wave==='多' ? 'color:#34d399' : 'color:#a78bfa';
       var cumVal = cumMap[origIdx];
       html += '<tr>'
-        + '<td style="padding:9px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-weight:700"><span style="display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(Number(r.entryLots||r.lots||1))+'口 → '+(Number(r.lots||1))+'口</span> <span style="color:var(--muted);font-size:11px">'+meta.n+'/'+meta.total+'　TP'+meta.tp+'</span></td>'
+        + '<td style="padding:9px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-weight:700"><div style="font-family:var(--font);font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px">第'+meta.tradeNo+'筆</div><span style="display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(meta.isFirst?Number(r.entryLots||r.lots||1)+'口 → '+Number(r.lots||1)+'口':'↳ 再出 '+Number(r.lots||1)+'口')+'</span></td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="font-size:10px;font-weight:600;'+waveColor+'">'+(r.wave||'—')+'</span>'+(isContra?'<span style="font-size:9px;color:#f59e0b;margin-left:3px">逆</span>':'')+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
@@ -4597,8 +4608,16 @@ window.hubNav=function(btn,tab){
   }else{
     if(panel) panel.classList.remove('hub-home-active');
     if(typeof switchDTab==='function') switchDTab(tab);
+    // 每日／每月損益：切換後直接跳到目標內容，不再先回到當沖表頭。
+    if(tab==='daily' || tab==='monthly' || tab==='io' || tab==='detail'){
+      setTimeout(function(){
+        var target=document.getElementById('dpanel-'+tab);
+        if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+      },80);
+    }
   }
-  if(panel && tab!=='entry' && tab!=='stats') panel.scrollIntoView({behavior:'smooth',block:'start'});
+  // 只有首頁／新增／統計等特殊頁面維持原本導覽位置；每日／每月等由上面的目標區塊直接定位。
+  if(panel && tab!=='entry' && tab!=='stats' && tab!=='daily' && tab!=='monthly' && tab!=='io' && tab!=='detail') panel.scrollIntoView({behavior:'smooth',block:'start'});
 };
 (function(){
   try{ if(!localStorage.getItem('dashboard_theme')) localStorage.setItem('dashboard_theme','light'); }catch(e){}
