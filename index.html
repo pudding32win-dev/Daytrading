@@ -785,6 +785,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 .hub-trade-diagnostic .diag-row{font-family:monospace;font-size:12px;overflow-wrap:anywhere;color:var(--muted)}
 
 .dgrp-arrow-open{transform:rotate(180deg)!important;}
+#D-wave-cards{display:none!important;}
 </style>
 <meta name="x-surf-version" content="v71-collapse-daily-records">
 </head>
@@ -1004,19 +1005,18 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
     </div>
     <div class="card" style="margin-bottom:0">
-      <div class="card-hd"><span>市場方向認知（你判斷）</span><span style="font-size:10px;color:var(--muted)">月線＋5日振幅差</span></div>
+      <div class="card-hd"><span>今日方向＋開盤基準</span><span style="font-size:10px;color:var(--muted)">一天設定一次</span></div>
       <div class="card-bd">
-        <div class="dboard-choice">
-          <button id="D-bias-bull" type="button" onclick="setMarketBias('多')">月線多方</button>
-          <button id="D-bias-bear" type="button" onclick="setMarketBias('空')">月線空方</button>
+        <div class="dboard-mini-grid">
+          <div class="dboard-mini"><div class="k">月線</div><div class="v" id="D-month-state">未選</div><div style="margin-top:6px;display:flex;gap:6px"><button id="D-month-bull" type="button" onclick="setMarketFrame('month','多')" style="flex:1">多</button><button id="D-month-bear" type="button" onclick="setMarketFrame('month','空')" style="flex:1">空</button></div></div>
+          <div class="dboard-mini"><div class="k">5日均線</div><div class="v" id="D-ma5-state">未選</div><div style="margin-top:6px;display:flex;gap:6px"><button id="D-ma5-bull" type="button" onclick="setMarketFrame('ma5','多')" style="flex:1">多</button><button id="D-ma5-bear" type="button" onclick="setMarketFrame('ma5','空')" style="flex:1">空</button></div></div>
         </div>
-        <div class="dboard-mini-grid" style="margin-top:8px">
-          <div class="dboard-mini"><div class="k">5日平均振幅</div><div class="v" id="D-5d-amp">—</div></div>
-          <div class="dboard-mini"><div class="k">前5日平均</div><div class="v" id="D-prev5d-amp">—</div></div>
-          <div class="dboard-mini"><div class="k">5日振幅差</div><div class="v" id="D-5d-diff">—</div></div>
-          <div class="dboard-mini"><div class="k">認知狀態</div><div class="v" id="D-bias-state">未選</div></div>
+        <div style="display:flex;gap:8px;align-items:end;margin-top:10px">
+          <div style="flex:1"><div class="k" style="font-size:11px;color:var(--muted);margin-bottom:4px">今日開盤價（只輸入一次）</div><input id="D-open-price" type="number" inputmode="numeric" placeholder="例：48600" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:14px"></div>
+          <button type="button" onclick="saveDailyOpenPrice()" style="padding:9px 13px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">設定</button>
         </div>
-        <div id="D-bias-note" class="dboard-status" style="margin-top:7px">正差＝偏多、負差＝偏空；最後方向由你確認，不由系統代判。</div>
+        <div id="D-bias-state" class="dboard-status" style="margin-top:9px">請先設定月線、5日均線與今日開盤價。</div>
+        <div id="D-bias-note" class="dboard-status" style="margin-top:5px;font-size:14px;font-weight:800">等待今日提示</div>
       </div>
     </div>
   </div>
@@ -2774,6 +2774,7 @@ window.loadMtxQuote = async function(force){
     if(metaEl) metaEl.textContent='MTX／小型臺指　·　'+(_mtxQuote.source||'Worker')+(quoteStale?'　·　資料較舊':'');
     if(timeEl) timeEl.textContent=_mtxQuote.timestamp?displayDateTime(_mtxQuote.timestamp):'—';
     autoFillQuoteInputs();
+    renderOpenPricePrompt();
     try{ if(typeof renderHubHome==='function') renderHubHome(); }catch(e){}
     return _mtxQuote;
   }catch(e){
@@ -2781,6 +2782,7 @@ window.loadMtxQuote = async function(force){
     if(metaEl) metaEl.textContent='報價尚未同步：'+(e.message||'未知錯誤');
     if(priceEl && !_mtxQuote.price) priceEl.textContent='—';
     if(timeEl) timeEl.textContent='—';
+    renderOpenPricePrompt();
     try{ if(typeof renderHubHome==='function') renderHubHome(); }catch(e){}
     return null;
   }
@@ -2793,35 +2795,59 @@ function autoFillQuoteInputs(){
   if(ex && !String(ex.value).trim()) ex.value=_mtxQuote.price;
   if(typeof window._updateDPreview==='function') window._updateDPreview();
 }
-window.setMarketBias = async function(bias){
-  _marketBiasToday=bias==='空'?'空':'多';
-  if(!DATA.D_marketBias) DATA.D_marketBias=[];
-  var d=dTodayKey(), idx=DATA.D_marketBias.findIndex(function(x){return x.date===d;});
-  if(idx>=0) DATA.D_marketBias[idx].bias=_marketBiasToday;
-  else DATA.D_marketBias.push({date:d,bias:_marketBiasToday});
+function getTodayMarketFrame(){
+  var d=dTodayKey(), r=(DATA.D_marketBias||[]).find(function(x){return x.date===d;})||{};
+  return {month:r.monthBias||r.bias||'', ma5:r.ma5Bias||'', open:r.openPrice!=null?Number(r.openPrice):null};
+}
+window.setMarketFrame = async function(type,bias){
+  var d=dTodayKey(); if(!DATA.D_marketBias) DATA.D_marketBias=[];
+  var idx=DATA.D_marketBias.findIndex(function(x){return x.date===d;});
+  if(idx<0){ DATA.D_marketBias.push({date:d}); idx=DATA.D_marketBias.length-1; }
+  DATA.D_marketBias[idx][type==='month'?'monthBias':'ma5Bias']=bias==='空'?'空':'多';
+  DATA.D_marketBias[idx].bias=(DATA.D_marketBias[idx].monthBias===DATA.D_marketBias[idx].ma5Bias)?DATA.D_marketBias[idx].monthBias:'';
+  _marketBiasToday=DATA.D_marketBias[idx].bias||'';
+  renderMarketRecognition();
+  try{ await saveData(); }catch(e){ console.error('方向設定儲存失敗',e); }
+};
+window.saveDailyOpenPrice = async function(){
+  var el=document.getElementById('D-open-price');
+  var val=parseFloat(String(el&&el.value||'').replace(/,/g,''));
+  if(!isFinite(val)||val<=0){ alert('請輸入有效的今日開盤價'); return; }
+  var d=dTodayKey(); if(!DATA.D_marketBias) DATA.D_marketBias=[];
+  var idx=DATA.D_marketBias.findIndex(function(x){return x.date===d;});
+  if(idx<0){ DATA.D_marketBias.push({date:d}); idx=DATA.D_marketBias.length-1; }
+  DATA.D_marketBias[idx].openPrice=val;
   DATA.D_marketBias.sort(function(a,b){return a.date.localeCompare(b.date);});
   renderMarketRecognition();
-  try{ await saveData(); }catch(e){ console.error('市場方向認知儲存失敗',e); }
+  try{ await saveData(); }catch(e){ console.error('開盤價儲存失敗',e); }
 };
+// 舊按鈕相容：保留既有資料，不再用振幅差代替 5 日均線。
+window.setMarketBias = async function(bias){ await setMarketFrame('month',bias); };
 function renderMarketRecognition(){
-  var d=dTodayKey(), r=(DATA.D_marketBias||[]).find(function(x){return x.date===d;});
-  _marketBiasToday=r?r.bias:'';
-  var b1=document.getElementById('D-bias-bull'), b2=document.getElementById('D-bias-bear'), st=document.getElementById('D-bias-state');
-  if(b1) b1.classList.toggle('active',_marketBiasToday==='多');
-  if(b2) b2.classList.toggle('active',_marketBiasToday==='空');
-  if(st) st.textContent=_marketBiasToday==='多'?'多方':_marketBiasToday==='空'?'空方':'未選';
-  var rec=D_WAVE_AMPLITUDE&&Array.isArray(D_WAVE_AMPLITUDE.records)?D_WAVE_AMPLITUDE.records.slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date));}):[];
-  var amps=rec.map(function(x){return Number(x.amplitude);}).filter(isFinite);
-  var cur5=amps.slice(0,5), prev5=amps.slice(5,10);
-  var a=cur5.length?cur5.reduce(function(x,y){return x+y;},0)/cur5.length:null;
-  var p=prev5.length?prev5.reduce(function(x,y){return x+y;},0)/prev5.length:null;
-  var diff=a!=null&&p!=null?a-p:null;
+  var f=getTodayMarketFrame();
   var set=function(id,val){var el=document.getElementById(id);if(el)el.textContent=val;};
-  set('D-5d-amp',a!=null?Math.round(a)+' 點':'—');
-  set('D-prev5d-amp',p!=null?Math.round(p)+' 點':'—');
-  set('D-5d-diff',diff!=null?(diff>=0?'+':'')+Math.round(diff)+' 點':'—');
-  var note=document.getElementById('D-bias-note');
-  if(note) note.textContent=diff==null?'5日振幅資料不足，先保留你的方向認知。':(diff>0?'5日振幅差為正，資料結構偏多；仍由你確認月線方向後再操作。':diff<0?'5日振幅差為負，資料結構偏空；仍由你確認月線方向後再操作。':'5日振幅差接近 0，資料未提供明確偏向；由你確認。');
+  set('D-month-state',f.month||'未選'); set('D-ma5-state',f.ma5||'未選');
+  var op=document.getElementById('D-open-price'); if(op) op.value=f.open!=null?String(f.open):'';
+  ['month','ma5'].forEach(function(t){
+    var b=f[t], p1=document.getElementById(t==='month'?'D-month-bull':'D-ma5-bull'), p2=document.getElementById(t==='month'?'D-month-bear':'D-ma5-bear');
+    if(p1) p1.classList.toggle('active',b==='多'); if(p2) p2.classList.toggle('active',b==='空');
+  });
+  _marketBiasToday=(f.month && f.month===f.ma5)?f.month:'';
+  set('D-bias-state', f.month&&f.ma5&&f.month===f.ma5 ? ('背景：'+f.month+'方') : (f.month&&f.ma5?'月線／5日均線分歧':'請先設定方向'));
+  renderOpenPricePrompt();
+}
+function renderOpenPricePrompt(){
+  var box=document.getElementById('D-bias-note'); if(!box) return;
+  var f=getTodayMarketFrame(), q=(_mtxQuote&&isFinite(Number(_mtxQuote.price)))?Number(_mtxQuote.price):null;
+  if(!f.month || !f.ma5){ box.textContent='① 設定月線　② 設定5日均線　③ 今日開盤價；完成後由系統提示順勢方向。'; return; }
+  if(f.month!==f.ma5){ box.textContent='⚪ 月線與5日均線分歧｜今天不預設追單，等方向確認再做短線。'; return; }
+  if(f.open==null){ box.textContent='已判定'+f.month+'方背景｜請輸入今日開盤價，之後一天不用再輸入。'; return; }
+  if(q==null){ box.textContent='今日開盤 '+Math.round(f.open).toLocaleString()+'｜等待目前價格資料，再提示多／空順勢。'; return; }
+  var above=q>f.open, same=(f.month==='多'&&above)||(f.month==='空'&&!above);
+  if(f.month==='多'&&above) box.textContent='🟢 多順勢｜目前 '+Math.round(q).toLocaleString()+' ＞ 開盤 '+Math.round(f.open).toLocaleString()+'｜只找短多';
+  else if(f.month==='空'&&!above) box.textContent='🔵 空順勢｜目前 '+Math.round(q).toLocaleString()+' ＜ 開盤 '+Math.round(f.open).toLocaleString()+'｜只找短空';
+  else if(f.month==='多') box.textContent='⚠️ 多方背景｜目前在開盤下，不追空；等站回開盤再找短多';
+  else box.textContent='⚠️ 空方背景｜目前在開盤上，不追多；等跌回開盤再找短空';
 }
 
 window.editMarginPerLot = async function() {
@@ -3797,8 +3823,7 @@ window.renderDDetailTab = function() {
       + '<thead><tr>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">交易／口數</th>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">市場認知</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">波段</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">方向</th>'
+            + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">方向</th>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">進場時間</th>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">進場價</th>'
       + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">出場時間</th>'
@@ -3810,7 +3835,7 @@ window.renderDDetailTab = function() {
       + (canEdit ? '<th class="dtrade-op-col" style="padding:9px 12px;border-right:1px solid var(--border);background:var(--bg2);text-align:left;color:var(--muted);font-weight:600;font-size:12px">操作</th>' : '')
       + '</tr></thead><tbody>';
 
-    // v58：表頭補上「波段」欄，與表身 13 欄完全對齊；口數欄加寬並加入欄位分隔線。
+    // v72：暫時隱藏波段欄；當沖方向改以月線＋5日均線＋今日開盤基準提示。
     // 當日交易：依進場時間→出場時間→原始順序，讓 Trade 1、2、3 的順序與實際交易一致。
     var orderedDayTrades = dayTrades.slice().sort(function(a,b){
       var ai = a.entryTime ? new Date(a.entryTime).getTime() : Infinity;
@@ -3861,7 +3886,6 @@ window.renderDDetailTab = function() {
       var cumVal = cumMap[origIdx];
       html += '<tr>'
         + '<td style="padding:9px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-weight:700"><div style="font-family:var(--font);font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px">第'+meta.tradeNo+'筆</div><span style="display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(meta.isFirst?Number(r.entryLots||r.lots||1)+'口 → '+Number(r.lots||1)+'口':'↳ 再出 '+Number(r.lots||1)+'口')+'</span></td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="font-size:10px;font-weight:600;'+waveColor+'">'+(r.wave||'—')+'</span>'+(isContra?'<span style="font-size:9px;color:#f59e0b;margin-left:3px">逆</span>':'')+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
         + (r.dir==='B'?'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399':'background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#a78bfa')
