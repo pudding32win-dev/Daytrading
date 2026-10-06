@@ -1011,10 +1011,6 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="dboard-mini"><div class="k">月線</div><div class="v" id="D-month-state">未選</div><div style="margin-top:6px;display:flex;gap:6px"><button id="D-month-bull" type="button" onclick="setMarketFrame('month','多')" style="flex:1">多</button><button id="D-month-bear" type="button" onclick="setMarketFrame('month','空')" style="flex:1">空</button></div></div>
           <div class="dboard-mini"><div class="k">5日均線</div><div class="v" id="D-ma5-state">未選</div><div style="margin-top:6px;display:flex;gap:6px"><button id="D-ma5-bull" type="button" onclick="setMarketFrame('ma5','多')" style="flex:1">多</button><button id="D-ma5-bear" type="button" onclick="setMarketFrame('ma5','空')" style="flex:1">空</button></div></div>
         </div>
-        <div style="display:flex;gap:8px;align-items:end;margin-top:10px">
-          <div style="flex:1"><div class="k" style="font-size:11px;color:var(--muted);margin-bottom:4px">今日開盤價（只輸入一次）</div><input id="D-open-price" type="number" inputmode="numeric" placeholder="例：48600" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:14px"></div>
-          <button type="button" onclick="saveDailyOpenPrice()" style="padding:9px 13px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">設定</button>
-        </div>
         <div id="D-bias-state" class="dboard-status" style="margin-top:9px">請先設定月線、5日均線與今日開盤價。</div>
         <div id="D-bias-note" class="dboard-status" style="margin-top:5px;font-size:14px;font-weight:800">等待今日提示</div>
       </div>
@@ -1080,6 +1076,18 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="card-hd">📊 20日市場振幅｜Apps Script 自動更新</div>
       <div class="card-bd" id="D-wave-amplitude-body"></div>
     </div>
+    <!-- ★ 今日開盤基準：放在新增當沖交易附近，當天只需設定一次 -->
+    <div class="card" id="D-open-price-card" style="margin-bottom:10px">
+      <div class="card-hd"><span>📌 今日開盤價</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">一天設定一次</span></div>
+      <div class="card-bd" style="padding:10px 12px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="D-open-price" type="number" inputmode="numeric" placeholder="輸入今日開盤價，例如 48600" style="flex:1;min-width:0;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 11px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700">
+          <button type="button" onclick="saveDailyOpenPrice()" style="padding:10px 15px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">設定</button>
+        </div>
+        <div id="D-open-price-hint" style="margin-top:7px;font-size:12px;color:var(--muted)">設定後今天會沿用，不需要重複輸入。</div>
+      </div>
+    </div>
+
     <!-- ★ 新增交易：唯一入口，首頁／側欄／上方按鈕都導向這裡 -->
     <div class="card hub-entry-card" id="hub-entry-card">
       <div class="card-hd"><span>➕ 新增當沖交易</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">進場價＋進場時間必填</span></div>
@@ -2828,6 +2836,7 @@ function renderMarketRecognition(){
   var set=function(id,val){var el=document.getElementById(id);if(el)el.textContent=val;};
   set('D-month-state',f.month||'未選'); set('D-ma5-state',f.ma5||'未選');
   var op=document.getElementById('D-open-price'); if(op) op.value=f.open!=null?String(f.open):'';
+  var oh=document.getElementById('D-open-price-hint'); if(oh) oh.textContent=f.open!=null ? ('今日開盤基準：'+Math.round(f.open).toLocaleString()+'｜今天已設定，不需要重複輸入。') : '設定後今天會沿用，不需要重複輸入。';
   ['month','ma5'].forEach(function(t){
     var b=f[t], p1=document.getElementById(t==='month'?'D-month-bull':'D-ma5-bull'), p2=document.getElementById(t==='month'?'D-month-bear':'D-ma5-bear');
     if(p1) p1.classList.toggle('active',b==='多'); if(p2) p2.classList.toggle('active',b==='空');
