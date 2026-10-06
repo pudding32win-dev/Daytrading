@@ -786,9 +786,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 
 .dgrp-arrow-open{transform:rotate(180deg)!important;}
 </style>
-<meta name="x-surf-version" content="v69-direct-pnl-navigation">
+<meta name="x-surf-version" content="v71-collapse-daily-records">
 </head>
-<body class="light" data-hub-version="v69">
+<body class="light" data-hub-version="v71">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -1072,7 +1072,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <span id="D-count-label" style="margin-left:auto;font-size:11px;color:var(--muted)"></span>
     </div>
     <!-- ★ 浪級與市場振幅：放在新增當沖交易上方 -->
-    <div class="card" id="D-wave-cards">
+    <div class="card" id="D-wave-cards" style="display:none!important" aria-hidden="true">
       <div class="card-hd">🌊 浪級績效｜小浪・中浪・大浪</div>
       <div class="card-bd" id="D-wave-cards-body"></div>
     </div>
@@ -3784,10 +3784,10 @@ window.renderDDetailTab = function() {
       + '<div style="display:flex;gap:5px;margin-left:auto;align-items:center">'
       + wkBadge + moBadge + eqDiffBadge
       + (canEdit ? '<button type="button" onclick="event.stopPropagation();openTPBatchModal(\''+date+'\')" style="font-size:10px;padding:3px 8px;border-radius:7px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25);color:#93c5fd;cursor:pointer">TP批次</button>' : '')
-       + '<span id="'+uid+'-arrow" class="dgrp-arrow-open" style="font-size:12px;color:var(--muted);transition:transform 0.2s;margin-left:4px;transform:rotate(180deg)">▼</span>'
+       + '<span id="'+uid+'-arrow" class="dgrp-arrow-open" style="font-size:12px;color:var(--muted);transition:transform 0.2s;margin-left:4px">▼</span>'
       + '</div>'
       + '</div>'
-       + '<div id="'+uid+'" style="display:block;border-top:1px solid var(--border);overflow-x:auto">'
+       + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
       + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">交易／口數：<b style="color:var(--text)">第一筆、第二筆…＋口數變化</b>；分批出場直接列出，不顯示 TP1／TP2</div>'
       + '<table class="hub-trade-detail-table" style="width:1500px;min-width:1500px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:14px;white-space:nowrap">'
       + '<colgroup>'
