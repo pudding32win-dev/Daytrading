@@ -719,7 +719,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 @media(max-width:699px){.hub-detail-toolbar{align-items:flex-start}.hub-detail-toolbar div{display:flex;flex-direction:column;gap:3px}.hub-detail-toolbar span{margin-left:0;}}
 
 
-/* v52：交易明細表頭／表身統一欄寬與字級 */
+/* v74：交易明細可讀版——時間／價格不再擠在一起；桌機可水平捲動，手機保留完整欄位 */
 .hub-trade-detail-table{
   width:1500px !important;
   min-width:1500px !important;
@@ -727,50 +727,34 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   table-layout:fixed !important;
   border-collapse:separate !important;
   border-spacing:0 !important;
-  font-size:14px !important;
-  line-height:1.5 !important;
+  font-size:13px !important;
+  line-height:1.45 !important;
 }
 .hub-trade-detail-table th, .hub-trade-detail-table td{
   box-sizing:border-box !important;
   text-align:left !important;
   vertical-align:middle !important;
   white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:clip !important;
-  border-right:1px solid var(--border2) !important;
-}
-.hub-trade-detail-table th{
-  padding:12px 14px !important;
-  font-size:13px !important;
-  line-height:1.35 !important;
-  font-weight:600 !important;
-}
-.hub-trade-detail-table td{
-  padding:12px 14px !important;
-  font-size:14px !important;
-  line-height:1.45 !important;
-}
-.hub-trade-detail-table th:last-child, .hub-trade-detail-table td:last-child{border-right:0 !important;}
-.hub-trade-detail-table td span{font-size:inherit;}
-.hub-trade-detail-table td span[style*="font-size:10px"],
-.hub-trade-detail-table td span[style*="font-size:11px"],
-.hub-trade-detail-table td span[style*="font-size:9px"]{font-size:12px !important;}
-.hub-trade-detail-table td:nth-child(4), .hub-trade-detail-table td:nth-child(6),
-.hub-trade-detail-table th:nth-child(4), .hub-trade-detail-table th:nth-child(6){font-family:monospace !important;letter-spacing:.02em !important;}
-/* v59：交易明細重新排版：欄位不壓縮、字體放大、時間/價格各自獨立 */
-.hub-trade-detail-table th, .hub-trade-detail-table td{
   overflow:visible !important;
   text-overflow:clip !important;
-  padding-left:14px !important;
-  padding-right:14px !important;
+  border-right:1px solid var(--border2) !important;
+  padding:10px 12px !important;
 }
-.hub-trade-detail-table th:nth-child(1), .hub-trade-detail-table td:nth-child(1){text-align:left !important;}
-.hub-trade-detail-table th:nth-child(4), .hub-trade-detail-table td:nth-child(4){text-align:center !important;}
+.hub-trade-detail-table th{font-size:12px !important;line-height:1.35 !important;font-weight:700 !important;background:var(--bg2);}
+.hub-trade-detail-table td{font-size:13px !important;line-height:1.4 !important;}
+.hub-trade-detail-table th:last-child, .hub-trade-detail-table td:last-child{border-right:0 !important;}
+.hub-trade-detail-table .trade-dt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.25;font-family:monospace;white-space:nowrap;}
+.hub-trade-detail-table .trade-dt .trade-date{font-size:12px;color:var(--text);font-weight:700;}
+.hub-trade-detail-table .trade-dt .trade-time{font-size:12px;color:var(--muted2);font-weight:600;}
+.hub-trade-detail-table .trade-open{font-family:monospace;font-weight:800;font-size:13px;white-space:nowrap;}
+.hub-trade-detail-table .trade-strategy{display:inline-flex;align-items:center;justify-content:center;margin-top:5px;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:800;line-height:1.2;white-space:nowrap;border:1px solid var(--border2);}
+.hub-trade-detail-table .trade-strategy.follow{background:rgba(96,165,250,.10);color:#60a5fa;}
+.hub-trade-detail-table .trade-strategy.contra{background:rgba(245,158,11,.10);color:#f59e0b;}
+.hub-trade-detail-table th:nth-child(4), .hub-trade-detail-table td:nth-child(4),
+.hub-trade-detail-table th:nth-child(6), .hub-trade-detail-table td:nth-child(6){text-align:center !important;}
 .hub-trade-detail-table th:nth-child(5), .hub-trade-detail-table td:nth-child(5),
-.hub-trade-detail-table th:nth-child(7), .hub-trade-detail-table td:nth-child(7){text-align:left !important; font-family:monospace !important; letter-spacing:0 !important;}
-.hub-trade-detail-table th:nth-child(6), .hub-trade-detail-table td:nth-child(6),
-.hub-trade-detail-table th:nth-child(8), .hub-trade-detail-table td:nth-child(8){text-align:center !important; font-family:monospace !important; letter-spacing:.02em !important;}
-.hub-trade-detail-table th:nth-child(n+9), .hub-trade-detail-table td:nth-child(n+9){text-align:right !important;}
+.hub-trade-detail-table th:nth-child(7), .hub-trade-detail-table td:nth-child(7){text-align:center !important;font-family:monospace !important;}
+.hub-trade-detail-table th:nth-child(n+8), .hub-trade-detail-table td:nth-child(n+8){text-align:right !important;}
 .hub-trade-detail-table .dtrade-op-col, .hub-trade-detail-table td:last-child{text-align:center !important;}
 
 
@@ -786,8 +770,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 
 .dgrp-arrow-open{transform:rotate(180deg)!important;}
 #D-wave-cards{display:none!important;}
+@media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v71-collapse-daily-records">
+<meta name="x-surf-version" content="v74-open-price-in-trade-readable-table">
 </head>
 <body class="light" data-hub-version="v71">
 
@@ -1053,11 +1038,11 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <select id="flt-year">
         <option value="">全部</option>
       </select>
-      <label>市場認知</label>
+      <label>策略／市場認知</label>
       <select id="flt-wave">
         <option value="">全部</option><option value="__小浪__">小浪</option><option value="__中浪__">中浪</option><option value="__大浪__">大浪</option>
         <option value="多">多</option><option value="空">空</option>
-        <option value="__順勢__">順勢</option><option value="__逆勢__">逆勢</option>
+        <option value="__短順勢__">短順勢</option><option value="__短逆勢__">短逆勢</option><option value="__順勢__">舊：市場順勢</option><option value="__逆勢__">舊：市場逆勢</option>
       </select>
       <label>損益</label>
       <select id="flt-pnl">
@@ -2378,8 +2363,11 @@ window.addDtrade = async function() {
   }
   var exitTime=formatLocalDateTimeInput(new Date());
   var net = Math.round(pts * D_MULT * lots) - fee;
+  var tradeFrame=getMarketFrameByDate(tradeDateKey);
+  var openPrice=(sameTrade && lastSame && lastSame.openPrice!=null) ? Number(lastSame.openPrice) : (tradeFrame.openPrice!=null ? Number(tradeFrame.openPrice) : null);
   var rec = {
     date: tradeDateKey, tradeId, tpStage, entryLots, lots, wave, dir, en, ex, fee, net,
+    openPrice: isFinite(openPrice) ? openPrice : null,
     entryTime: entryTime, exitTime: exitTime
   };
 
@@ -2474,7 +2462,10 @@ window.saveEditDtrade = async function() {
   var pts = dir === 'B' ? (ex - en) : (en - ex);
   var net = Math.round(pts * D_MULT * lots) - fee;
   var oldRec = DATA.D[idx] || {};
-  var rec = {date: dParseDate(dateVal), tradeId: tradeId || oldRec.tradeId || (dParseDate(dateVal).replace(/\//g,'-')+'-01'), tpStage, entryLots, lots, wave, dir, en, ex, fee, net, entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || ''};
+  var editDateKey=dParseDate(dateVal);
+  var editFrame=getMarketFrameByDate(editDateKey);
+  var editOpen=(oldRec.openPrice!=null && isFinite(Number(oldRec.openPrice))) ? Number(oldRec.openPrice) : (editFrame.openPrice!=null ? Number(editFrame.openPrice) : null);
+  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || ''};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
@@ -2831,6 +2822,24 @@ window.saveDailyOpenPrice = async function(){
 };
 // 舊按鈕相容：保留既有資料，不再用振幅差代替 5 日均線。
 window.setMarketBias = async function(bias){ await setMarketFrame('month',bias); };
+function getMarketFrameByDate(dateKey){
+  var d=String(dateKey||'');
+  var arr=DATA.D_marketBias||[];
+  return arr.find(function(x){return x.date===d;})||{};
+}
+function getTradeOpenPrice(r){
+  if(r && r.openPrice!=null && isFinite(Number(r.openPrice))) return Number(r.openPrice);
+  var f=getMarketFrameByDate(r && r.date);
+  return f.openPrice!=null && isFinite(Number(f.openPrice)) ? Number(f.openPrice) : null;
+}
+function getTradeShortStrategy(r){
+  var op=getTradeOpenPrice(r), en=Number(r&&r.en);
+  if(op==null || !isFinite(en) || !r || !r.dir) return '';
+  if(en===op) return '開盤';
+  var follow=(r.dir==='B' && en>op) || (r.dir==='S' && en<op);
+  return follow ? '短順勢' : '短逆勢';
+}
+
 function renderMarketRecognition(){
   var f=getTodayMarketFrame();
   var set=function(id,val){var el=document.getElementById(id);if(el)el.textContent=val;};
@@ -3753,7 +3762,11 @@ window.renderDDetailTab = function() {
     if (fDate  && r.date.indexOf(fDate)<0)  return false;
     if (fMonth && r.date.slice(5,7)!==fMonth.trim()) return false;
     if (fYear  && r.date.slice(0,4)!==fYear.trim())  return false;
-    if (fWave === '__順勢__') {
+    if (fWave === '__短順勢__') {
+      if (getTradeShortStrategy(r) !== '短順勢') return false;
+    } else if (fWave === '__短逆勢__') {
+      if (getTradeShortStrategy(r) !== '短逆勢') return false;
+    } else if (fWave === '__順勢__') {
       var _isContra = r.wave && r.dir && ((r.wave==='多'&&r.dir==='S')||(r.wave==='空'&&r.dir==='B'));
       if (_isContra) return false;
       if (!r.wave || !r.dir) return false;
@@ -3826,22 +3839,23 @@ window.renderDDetailTab = function() {
       + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">交易／口數：<b style="color:var(--text)">第一筆、第二筆…＋口數變化</b>；分批出場直接列出，不顯示 TP1／TP2</div>'
       + '<table class="hub-trade-detail-table" style="width:1500px;min-width:1500px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:14px;white-space:nowrap">'
       + '<colgroup>'
-      + '<col style="width:160px"><col style="width:100px"><col style="width:80px"><col style="width:80px"><col style="width:200px"><col style="width:110px"><col style="width:200px"><col style="width:110px"><col style="width:80px"><col style="width:70px"><col style="width:100px"><col style="width:110px">'
+      + '<col style="width:160px"><col style="width:110px"><col style="width:80px"><col style="width:105px"><col style="width:175px"><col style="width:105px"><col style="width:175px"><col style="width:100px"><col style="width:80px"><col style="width:70px"><col style="width:100px"><col style="width:110px">'
       + (canEdit ? '<col style="width:100px">' : '')
       + '</colgroup>'
       + '<thead><tr>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">交易／口數</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">市場認知</th>'
-            + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">方向</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">進場時間</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">進場價</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">出場時間</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">出場價</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">差價</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">手費</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">淨額</th>'
-      + '<th style="padding:9px 12px;border-right:1px solid var(--border);text-align:left;color:var(--muted);font-weight:600;font-size:12px;background:var(--bg2)">累計</th>'
-      + (canEdit ? '<th class="dtrade-op-col" style="padding:9px 12px;border-right:1px solid var(--border);background:var(--bg2);text-align:left;color:var(--muted);font-weight:600;font-size:12px">操作</th>' : '')
+      + '<th>交易／口數</th>'
+      + '<th>市場認知／短線</th>'
+      + '<th>方向</th>'
+      + '<th>今日開盤</th>'
+      + '<th>進場時間</th>'
+      + '<th>進場價</th>'
+      + '<th>出場時間</th>'
+      + '<th>出場價</th>'
+      + '<th>差價</th>'
+      + '<th>手費</th>'
+      + '<th>淨額</th>'
+      + '<th>累計</th>'
+      + (canEdit ? '<th class="dtrade-op-col">操作</th>' : '')
       + '</tr></thead><tbody>';
 
     // v72：暫時隱藏波段欄；當沖方向改以月線＋5日均線＋今日開盤基準提示。
@@ -3895,13 +3909,14 @@ window.renderDDetailTab = function() {
       var cumVal = cumMap[origIdx];
       html += '<tr>'
         + '<td style="padding:9px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-weight:700"><div style="font-family:var(--font);font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px">第'+meta.tradeNo+'筆</div><span style="display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(meta.isFirst?Number(r.entryLots||r.lots||1)+'口 → '+Number(r.lots||1)+'口':'↳ 再出 '+Number(r.lots||1)+'口')+'</span></td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'">'+getDWaveLevel(r)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'"><div>'+getDWaveLevel(r)+'</div>'+((function(){var st=getTradeShortStrategy(r);return st==='短順勢'?'<span class="trade-strategy follow">短順勢</span>':st==='短逆勢'?'<span class="trade-strategy contra">短逆勢</span>':st==='開盤'?'<span class="trade-strategy">開盤</span>':'<span class="trade-strategy">—</span>';})())+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
-        + (r.dir==='B'?'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399':'background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#a78bfa')
+        + (r.dir==='B'?'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399':'background:rgba(167,139,250,.1);border:1px solid rgba(167,139,139,.25);color:#a78bfa')
         + '">'+(r.dir==='B'?'多 B':'空 S')+'</span></td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-size:10px;color:var(--muted2)">'+displayDateTime(r.entryTime)+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace">'+r.en+'</td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-size:10px;color:var(--muted2)">'+displayDateTime(r.exitTime)+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center"><span class="trade-open">'+(getTradeOpenPrice(r)!=null?Math.round(getTradeOpenPrice(r)).toLocaleString():'—')+'</span></td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center"><div class="trade-dt">'+(function(v){var x=String(displayDateTime(v)||'—').split(' ');return '<span class="trade-date">'+(x[0]||'—')+'</span><span class="trade-time">'+(x.slice(1).join(' ')||'')+'</span>';})(r.entryTime)+'</div></td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;font-family:monospace;font-weight:700">'+Number(r.en).toLocaleString()+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center"><div class="trade-dt">'+(function(v){var x=String(displayDateTime(v)||'—').split(' ');return '<span class="trade-date">'+(x[0]||'—')+'</span><span class="trade-time">'+(x.slice(1).join(' ')||'')+'</span>';})(r.exitTime)+'</div></td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace">'+r.ex+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;'+ptsCls+'">'+(pts>=0?'+':'')+pts+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;color:var(--muted);font-size:11px">'+(r.fee?'-'+r.fee:'—')+'</td>'
