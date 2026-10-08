@@ -772,7 +772,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v75-strategy-analysis-export">
+<meta name="x-surf-version" content="v76-auto-manual-open-high-low-strategy-export">
 </head>
 <body class="light" data-hub-version="v75">
 
@@ -1070,6 +1070,27 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <button type="button" onclick="saveDailyOpenPrice()" style="padding:10px 15px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">設定</button>
         </div>
         <div id="D-open-price-hint" style="margin-top:7px;font-size:12px;color:var(--muted)">設定後今天會沿用，不需要重複輸入。</div>
+      </div>
+    </div>
+
+    <!-- ★ 今日高低：系統自動抓取＋可手動覆蓋；一天設定一次即可 -->
+    <div class="card" id="D-high-low-card" style="margin-bottom:10px">
+      <div class="card-hd"><span>📈 今日高低價</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">系統抓取｜可手動修正</span></div>
+      <div class="card-bd" style="padding:10px 12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">今日最高</div>
+            <input id="D-day-high" type="number" inputmode="numeric" placeholder="系統自動抓取" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 11px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700">
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">今日最低</div>
+            <input id="D-day-low" type="number" inputmode="numeric" placeholder="系統自動抓取" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 11px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <button type="button" onclick="saveDailyHighLow()" style="padding:9px 15px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">儲存高低</button>
+          <span id="D-high-low-hint" style="font-size:12px;color:var(--muted)">尚未取得今日高低價</span>
+        </div>
       </div>
     </div>
 
@@ -2402,8 +2423,8 @@ window.addDtrade = async function() {
   var rec = {
     date: tradeDateKey, tradeId, tpStage, tradeNo: prior.length+1, entryLots, lots, wave, dir, en, ex, fee, net,
     openPrice: isFinite(openPrice) ? openPrice : null,
-    dayHigh: (_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayHigh!=null) ? Number(_mtxQuote.todayHigh) : (sameTrade&&lastSame&&lastSame.dayHigh!=null?Number(lastSame.dayHigh):null),
-    dayLow: (_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayLow!=null) ? Number(_mtxQuote.todayLow) : (sameTrade&&lastSame&&lastSame.dayLow!=null?Number(lastSame.dayLow):null),
+    dayHigh: tradeFrame.dayHigh!=null ? Number(tradeFrame.dayHigh) : ((_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayHigh!=null) ? Number(_mtxQuote.todayHigh) : (sameTrade&&lastSame&&lastSame.dayHigh!=null?Number(lastSame.dayHigh):null)),
+    dayLow: tradeFrame.dayLow!=null ? Number(tradeFrame.dayLow) : ((_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayLow!=null) ? Number(_mtxQuote.todayLow) : (sameTrade&&lastSame&&lastSame.dayLow!=null?Number(lastSame.dayLow):null)),
     monthBias: tradeFrame.monthBias||tradeFrame.bias||'', ma5Bias: tradeFrame.ma5Bias||'',
     entryTime: entryTime, exitTime: exitTime, entryReason: entryReason, entryPsychology: entryPsychology
   };
@@ -2502,7 +2523,7 @@ window.saveEditDtrade = async function() {
   var editDateKey=dParseDate(dateVal);
   var editFrame=getMarketFrameByDate(editDateKey);
   var editOpen=(oldRec.openPrice!=null && isFinite(Number(oldRec.openPrice))) ? Number(oldRec.openPrice) : (editFrame.openPrice!=null ? Number(editFrame.openPrice) : null);
-  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:null, dayLow:oldRec.dayLow!=null?oldRec.dayLow:null, monthBias:oldRec.monthBias||editFrame.monthBias||editFrame.bias||'', ma5Bias:oldRec.ma5Bias||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:oldRec.entryReason||'', entryPsychology:oldRec.entryPsychology||''};
+  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:(editFrame.dayHigh!=null?editFrame.dayHigh:null), dayLow:oldRec.dayLow!=null?oldRec.dayLow:(editFrame.dayLow!=null?editFrame.dayLow:null), monthBias:oldRec.monthBias||editFrame.monthBias||editFrame.bias||'', ma5Bias:oldRec.ma5Bias||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:oldRec.entryReason||'', entryPsychology:oldRec.entryPsychology||''};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
@@ -2833,7 +2854,12 @@ function autoFillQuoteInputs(){
 }
 function getTodayMarketFrame(){
   var d=dTodayKey(), r=(DATA.D_marketBias||[]).find(function(x){return x.date===d;})||{};
-  return {month:r.monthBias||r.bias||'', ma5:r.ma5Bias||'', open:r.openPrice!=null?Number(r.openPrice):null};
+  var qh=(_mtxQuote&&isFinite(Number(_mtxQuote.todayHigh)))?Number(_mtxQuote.todayHigh):null;
+  var ql=(_mtxQuote&&isFinite(Number(_mtxQuote.todayLow)))?Number(_mtxQuote.todayLow):null;
+  var high=r.dayHigh!=null?Number(r.dayHigh):qh;
+  var low=r.dayLow!=null?Number(r.dayLow):ql;
+  return {month:r.monthBias||r.bias||'', ma5:r.ma5Bias||'', open:r.openPrice!=null?Number(r.openPrice):null,
+    high:high, low:low, highSource:r.highLowSource||((qh!=null||ql!=null)?'system':'')};
 }
 window.setMarketFrame = async function(type,bias){
   var d=dTodayKey(); if(!DATA.D_marketBias) DATA.D_marketBias=[];
@@ -2853,9 +2879,27 @@ window.saveDailyOpenPrice = async function(){
   var idx=DATA.D_marketBias.findIndex(function(x){return x.date===d;});
   if(idx<0){ DATA.D_marketBias.push({date:d}); idx=DATA.D_marketBias.length-1; }
   DATA.D_marketBias[idx].openPrice=val;
+  DATA.D_marketBias[idx].openSource='manual';
   DATA.D_marketBias.sort(function(a,b){return a.date.localeCompare(b.date);});
   renderMarketRecognition();
   try{ await saveData(); }catch(e){ console.error('開盤價儲存失敗',e); }
+};
+window.saveDailyHighLow = async function(){
+  var hEl=document.getElementById('D-day-high'), lEl=document.getElementById('D-day-low');
+  var h=parseFloat(String(hEl&&hEl.value||'').replace(/,/g,''));
+  var l=parseFloat(String(lEl&&lEl.value||'').replace(/,/g,''));
+  if(!isFinite(h)||h<=0||!isFinite(l)||l<=0){ alert('請輸入有效的今日最高／最低價'); return; }
+  if(h<l){ alert('最高價不能低於最低價'); return; }
+  var d=dTodayKey(); if(!DATA.D_marketBias) DATA.D_marketBias=[];
+  var idx=DATA.D_marketBias.findIndex(function(x){return x.date===d;});
+  if(idx<0){ DATA.D_marketBias.push({date:d}); idx=DATA.D_marketBias.length-1; }
+  DATA.D_marketBias[idx].dayHigh=h; DATA.D_marketBias[idx].dayLow=l;
+  DATA.D_marketBias[idx].highLowSource='manual';
+  // 今日已存在的 Trade 同步到最新日高／低，方便後續位置分析與匯出。
+  (DATA.D||[]).forEach(function(r){ if(r.date===d){ r.dayHigh=h; r.dayLow=l; } });
+  DATA.D_marketBias.sort(function(a,b){return a.date.localeCompare(b.date);});
+  renderMarketRecognition();
+  try{ await saveData(); }catch(e){ console.error('高低價儲存失敗',e); }
 };
 // 舊按鈕相容：保留既有資料，不再用振幅差代替 5 日均線。
 window.setMarketBias = async function(bias){ await setMarketFrame('month',bias); };
@@ -2883,6 +2927,15 @@ function renderMarketRecognition(){
   set('D-month-state',f.month||'未選'); set('D-ma5-state',f.ma5||'未選');
   var op=document.getElementById('D-open-price'); if(op) op.value=f.open!=null?String(f.open):'';
   var oh=document.getElementById('D-open-price-hint'); if(oh) oh.textContent=f.open!=null ? ('今日開盤基準：'+Math.round(f.open).toLocaleString()+'｜今天已設定，不需要重複輸入。') : '設定後今天會沿用，不需要重複輸入。';
+  var hh=document.getElementById('D-day-high'), ll=document.getElementById('D-day-low');
+  if(hh) hh.value=f.high!=null?String(Math.round(f.high)):'';
+  if(ll) ll.value=f.low!=null?String(Math.round(f.low)):'';
+  var hl=document.getElementById('D-high-low-hint');
+  if(hl){
+    var hs=f.high!=null?'高 '+Math.round(f.high).toLocaleString():'高 —', ls=f.low!=null?'低 '+Math.round(f.low).toLocaleString():'低 —';
+    var src=(f.highSource==='manual')?'手動修正':(f.high!=null||f.low!=null?'系統抓取':'尚未取得');
+    hl.textContent=hs+' ｜ '+ls+' ｜ '+src;
+  }
   ['month','ma5'].forEach(function(t){
     var b=f[t], p1=document.getElementById(t==='month'?'D-month-bull':'D-ma5-bull'), p2=document.getElementById(t==='month'?'D-month-bear':'D-ma5-bear');
     if(p1) p1.classList.toggle('active',b==='多'); if(p2) p2.classList.toggle('active',b==='空');
