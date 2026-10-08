@@ -772,9 +772,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v74-open-price-in-trade-readable-table">
+<meta name="x-surf-version" content="v75-strategy-analysis-export">
 </head>
-<body class="light" data-hub-version="v71">
+<body class="light" data-hub-version="v75">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -1095,6 +1095,8 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="fg"><label>出場價 <span style="color:var(--muted2)">（自動）</span></label><input id="D-ex" type="number" placeholder="由 MTX 報價帶入"></div>
           <div class="fg"><label>進場時間</label><input id="D-entry-time" type="datetime-local" class="readonly-input"></div>
           <div class="fg"><label>出場時間</label><input id="D-exit-time" type="datetime-local" class="readonly-input"></div>
+          <div class="fg"><label>進場原因</label><input id="D-entry-reason" type="text" placeholder="例：回踩支撐／突破／訊號確認"></div>
+          <div class="fg"><label>進場心理</label><input id="D-entry-psychology" type="text" placeholder="例：有把握／試單／怕踏空／想追回"></div>
           <div class="fg"><label>手續費（元）</label><input id="D-fee" type="number" placeholder="0"></div>
           <div class="fg" style="grid-column:1/-1">
             <div class="d-trade-mode" id="D-trade-mode">
@@ -1626,14 +1628,43 @@ window.showExportModal = function() {
 };
 
 window.exportTradesCSV = function() {
-  var trades = (DATA.D || []).slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
-  var rows = [['日期','交易ID','TP段次','初始口數','本次出場口數','波段','方向','進場','出場','差價','手續費','淨額']];
+  var trades = (DATA.D || []).slice().sort(function(a,b){
+    return String(a.date||'').localeCompare(String(b.date||'')) || String(a.entryTime||'').localeCompare(String(b.entryTime||'')) || String(a.tradeId||'').localeCompare(String(b.tradeId||''));
+  });
+  var groups = (typeof hubTradeGroups==='function') ? hubTradeGroups(trades) : [];
+  var groupMap = {}; groups.forEach(function(g){ groupMap[g.tradeId||g.id] = g; });
+  function timeBucket(t){
+    if(!t) return ''; var d=new Date(t); if(isNaN(d.getTime())) return '';
+    var h=d.getHours(), m=d.getMinutes(), mins=h*60+m;
+    if(mins<540) return '08:45前';
+    if(mins<555) return '08:45–09:00';
+    if(mins<570) return '09:00–09:15';
+    if(mins<585) return '09:15–09:30';
+    if(mins<600) return '09:30–10:00';
+    if(mins<660) return '10:00–11:00';
+    return '11:00後';
+  }
+  function holdingMin(a,b){
+    if(!a||!b) return ''; var x=new Date(a).getTime(), y=new Date(b).getTime();
+    return isFinite(x)&&isFinite(y)&&y>=x ? Math.round((y-x)/60000) : '';
+  }
+  var rows = [['日期','Trade編號','交易ID','TP段次','初始口數','本次出場口數','市場方向認知','月線方向','5日均線方向','長順勢背景','方向','開盤價','當日最高','當日最低','進場價','短線相對開盤','進場時間','進場時段','進場原因','進場心理','出場時間','出場價','持倉分鐘','差價點數','手續費','淨額','結果W/L']];
   trades.forEach(function(r){
-    var pts = (r.en!=null && r.ex!=null) ? (r.dir==='B' ? (r.ex-r.en) : (r.en-r.ex)) : '';
-    rows.push([r.date, r.tradeId||'', r.tpStage||1, r.entryLots||r.lots||1, r.lots, r.wave||'', r.dir==='B'?'多':'空', r.en, r.ex, pts, r.fee||0, r.net||0]);
+    var frame=getMarketFrameByDate(r.date)||{};
+    var month=frame.monthBias||frame.bias||'';
+    var ma5=frame.ma5Bias||'';
+    var bg=(month && ma5 && month===ma5) ? month : (month||ma5?'分歧':'');
+    var pts=(r.en!=null&&r.ex!=null)?(r.dir==='B'?(Number(r.ex)-Number(r.en)):(Number(r.en)-Number(r.ex))):'';
+    var net=Number(r.net)||0;
+    var wl=net>0?'W':(net<0?'L':'');
+    var open=getTradeOpenPrice(r);
+    var short=getTradeShortStrategy(r);
+    var high=r.dayHigh!=null?r.dayHigh:(_mtxQuote&&r.date===dTodayKey()?_mtxQuote.todayHigh:null);
+    var low=r.dayLow!=null?r.dayLow:(_mtxQuote&&r.date===dTodayKey()?_mtxQuote.todayLow:null);
+    rows.push([r.date||'', r.tradeNo||'', r.tradeId||'', r.tpStage||1, r.entryLots||r.lots||1, r.lots||'', r.wave||'', month, ma5, bg, r.dir==='B'?'多':'空', open!=null?open:'', high!=null?high:'', low!=null?low:'', r.en!=null?r.en:'', short, r.entryTime||'', timeBucket(r.entryTime), r.entryReason||'', r.entryPsychology||'', r.exitTime||'', r.ex!=null?r.ex:'', holdingMin(r.entryTime,r.exitTime), pts, r.fee||0, r.net||0, wl]);
   });
   var csv = String.fromCharCode(0xFEFF) + rows.map(function(row){ return row.map(_csvCell).join(','); }).join(String.fromCharCode(13,10));
-  _downloadFile('當沖交易明細_'+_exportTs()+'.csv', csv, 'text/csv;charset=utf-8;');
+  _downloadFile('當沖交易明細_策略分析版_'+_exportTs()+'.csv', csv, 'text/csv;charset=utf-8;');
   document.getElementById('exportModal').style.display = 'none';
 };
 
@@ -2365,10 +2396,16 @@ window.addDtrade = async function() {
   var net = Math.round(pts * D_MULT * lots) - fee;
   var tradeFrame=getMarketFrameByDate(tradeDateKey);
   var openPrice=(sameTrade && lastSame && lastSame.openPrice!=null) ? Number(lastSame.openPrice) : (tradeFrame.openPrice!=null ? Number(tradeFrame.openPrice) : null);
+  var entryReasonEl=document.getElementById('D-entry-reason'), psychEl=document.getElementById('D-entry-psychology');
+  var entryReason=(sameTrade && lastSame && lastSame.entryReason) ? lastSame.entryReason : ((entryReasonEl&&entryReasonEl.value)||'').trim();
+  var entryPsychology=(sameTrade && lastSame && lastSame.entryPsychology) ? lastSame.entryPsychology : ((psychEl&&psychEl.value)||'').trim();
   var rec = {
-    date: tradeDateKey, tradeId, tpStage, entryLots, lots, wave, dir, en, ex, fee, net,
+    date: tradeDateKey, tradeId, tpStage, tradeNo: prior.length+1, entryLots, lots, wave, dir, en, ex, fee, net,
     openPrice: isFinite(openPrice) ? openPrice : null,
-    entryTime: entryTime, exitTime: exitTime
+    dayHigh: (_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayHigh!=null) ? Number(_mtxQuote.todayHigh) : (sameTrade&&lastSame&&lastSame.dayHigh!=null?Number(lastSame.dayHigh):null),
+    dayLow: (_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayLow!=null) ? Number(_mtxQuote.todayLow) : (sameTrade&&lastSame&&lastSame.dayLow!=null?Number(lastSame.dayLow):null),
+    monthBias: tradeFrame.monthBias||tradeFrame.bias||'', ma5Bias: tradeFrame.ma5Bias||'',
+    entryTime: entryTime, exitTime: exitTime, entryReason: entryReason, entryPsychology: entryPsychology
   };
 
   if (!DATA.D) DATA.D = [];
@@ -2465,7 +2502,7 @@ window.saveEditDtrade = async function() {
   var editDateKey=dParseDate(dateVal);
   var editFrame=getMarketFrameByDate(editDateKey);
   var editOpen=(oldRec.openPrice!=null && isFinite(Number(oldRec.openPrice))) ? Number(oldRec.openPrice) : (editFrame.openPrice!=null ? Number(editFrame.openPrice) : null);
-  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || ''};
+  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:null, dayLow:oldRec.dayLow!=null?oldRec.dayLow:null, monthBias:oldRec.monthBias||editFrame.monthBias||editFrame.bias||'', ma5Bias:oldRec.ma5Bias||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:oldRec.entryReason||'', entryPsychology:oldRec.entryPsychology||''};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
@@ -2725,7 +2762,7 @@ function prefillDForm() {
   var fields = {};
   if (trades.length) {
     var last = trades[trades.length - 1];
-    fields = { 'D-date': last.date, 'D-entry-lots': last.entryLots || last.lots, 'D-lots': last.lots, 'D-wave': last.wave, 'D-dir': last.dir, 'D-en': last.en, 'D-ex': last.ex, 'D-fee': last.fee };
+    fields = { 'D-date': last.date, 'D-entry-lots': last.entryLots || last.lots, 'D-lots': last.lots, 'D-wave': last.wave, 'D-dir': last.dir, 'D-en': last.en, 'D-ex': last.ex, 'D-fee': last.fee, 'D-entry-reason': last.entryReason || '', 'D-entry-psychology': last.entryPsychology || '' };
   } else {
     fields = { 'D-date': today, 'D-wave': '多', 'D-dir': 'B' };
   }
