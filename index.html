@@ -1116,8 +1116,37 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="fg"><label>出場價 <span style="color:var(--muted2)">（自動）</span></label><input id="D-ex" type="number" placeholder="由 MTX 報價帶入"></div>
           <div class="fg"><label>進場時間</label><input id="D-entry-time" type="datetime-local" class="readonly-input"></div>
           <div class="fg"><label>出場時間</label><input id="D-exit-time" type="datetime-local" class="readonly-input"></div>
-          <div class="fg"><label>進場原因</label><input id="D-entry-reason" type="text" placeholder="例：回踩支撐／突破／訊號確認"></div>
-          <div class="fg"><label>進場心理</label><input id="D-entry-psychology" type="text" placeholder="例：有把握／試單／怕踏空／想追回"></div>
+          <div class="fg"><label>進場原因</label>
+            <select id="D-entry-reason" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none">
+              <option value="">請選擇</option>
+              <option value="長順勢">長順勢</option>
+              <option value="回踩支撐">回踩支撐</option>
+              <option value="回踩壓力">回踩壓力</option>
+              <option value="突破壓力">突破壓力</option>
+              <option value="跌破支撐">跌破支撐</option>
+              <option value="突破回踩確認">突破回踩確認</option>
+              <option value="站回開盤">站回開盤</option>
+              <option value="開盤延續">開盤延續</option>
+              <option value="歷史打法">歷史打法</option>
+              <option value="逆勢反轉">逆勢反轉</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="fg"><label>進場心理</label>
+            <select id="D-entry-psychology" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none">
+              <option value="">請選擇</option>
+              <option value="有把握">有把握</option>
+              <option value="等待確認">等待確認</option>
+              <option value="試單">試單</option>
+              <option value="順勢跟進">順勢跟進</option>
+              <option value="怕踏空">怕踏空</option>
+              <option value="追價">追價</option>
+              <option value="想追回">想追回</option>
+              <option value="情緒化">情緒化</option>
+              <option value="猶豫後進場">猶豫後進場</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
           <div class="fg"><label>手續費（元）</label><input id="D-fee" type="number" placeholder="0"></div>
           <div class="fg" style="grid-column:1/-1">
             <div class="d-trade-mode" id="D-trade-mode">
@@ -1323,6 +1352,23 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
       <div class="fg"><label>進場價</label><input id="Dedit-en" type="number" placeholder="22500"></div>
       <div class="fg"><label>出場價</label><input id="Dedit-ex" type="number" placeholder="22580"></div>
+      <div class="fg"><label>進場原因</label>
+        <select id="Dedit-entry-reason" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
+          <option value="">請選擇</option>
+          <option value="長順勢">長順勢</option><option value="回踩支撐">回踩支撐</option><option value="回踩壓力">回踩壓力</option>
+          <option value="突破壓力">突破壓力</option><option value="跌破支撐">跌破支撐</option><option value="突破回踩確認">突破回踩確認</option>
+          <option value="站回開盤">站回開盤</option><option value="開盤延續">開盤延續</option><option value="歷史打法">歷史打法</option>
+          <option value="逆勢反轉">逆勢反轉</option><option value="其他">其他</option>
+        </select>
+      </div>
+      <div class="fg"><label>進場心理</label>
+        <select id="Dedit-entry-psychology" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
+          <option value="">請選擇</option>
+          <option value="有把握">有把握</option><option value="等待確認">等待確認</option><option value="試單">試單</option>
+          <option value="順勢跟進">順勢跟進</option><option value="怕踏空">怕踏空</option><option value="追價">追價</option>
+          <option value="想追回">想追回</option><option value="情緒化">情緒化</option><option value="猶豫後進場">猶豫後進場</option><option value="其他">其他</option>
+        </select>
+      </div>
       <div class="fg" style="grid-column:1/-1"><label>手續費（元）</label><input id="Dedit-fee" type="number" placeholder="0"></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:14px">
@@ -1649,14 +1695,12 @@ window.showExportModal = function() {
 };
 
 window.exportTradesCSV = function() {
-  var trades = (DATA.D || []).slice().sort(function(a,b){
-    return String(a.date||'').localeCompare(String(b.date||'')) || String(a.entryTime||'').localeCompare(String(b.entryTime||'')) || String(a.tradeId||'').localeCompare(String(b.tradeId||''));
-  });
-  var groups = (typeof hubTradeGroups==='function') ? hubTradeGroups(trades) : [];
-  var groupMap = {}; groups.forEach(function(g){ groupMap[g.tradeId||g.id] = g; });
+  // 匯出以「Trade＝一次進場」為單位；分批出場合併成一筆。
+  var raw = (DATA.D || []).slice();
+  var groups = (typeof hubTradeGroups==='function') ? hubTradeGroups(raw) : [];
   function timeBucket(t){
     if(!t) return ''; var d=new Date(t); if(isNaN(d.getTime())) return '';
-    var h=d.getHours(), m=d.getMinutes(), mins=h*60+m;
+    var mins=d.getHours()*60+d.getMinutes();
     if(mins<540) return '08:45前';
     if(mins<555) return '08:45–09:00';
     if(mins<570) return '09:00–09:15';
@@ -1665,28 +1709,55 @@ window.exportTradesCSV = function() {
     if(mins<660) return '10:00–11:00';
     return '11:00後';
   }
+  function fmtTime(t){
+    if(!t) return '';
+    var d=new Date(t); if(isNaN(d.getTime())) return String(t);
+    return d.getFullYear()+'/'+_pad2(d.getMonth()+1)+'/'+_pad2(d.getDate())+' '+_pad2(d.getHours())+':'+_pad2(d.getMinutes());
+  }
   function holdingMin(a,b){
     if(!a||!b) return ''; var x=new Date(a).getTime(), y=new Date(b).getTime();
     return isFinite(x)&&isFinite(y)&&y>=x ? Math.round((y-x)/60000) : '';
   }
-  var rows = [['日期','Trade編號','交易ID','TP段次','初始口數','本次出場口數','市場方向認知','月線方向','5日均線方向','長順勢背景','方向','開盤價','當日最高','當日最低','進場價','短線相對開盤','進場時間','進場時段','進場原因','進場心理','出場時間','出場價','持倉分鐘','差價點數','手續費','淨額','結果W/L']];
-  trades.forEach(function(r){
-    var frame=getMarketFrameByDate(r.date)||{};
-    var month=frame.monthBias||frame.bias||'';
-    var ma5=frame.ma5Bias||'';
-    var bg=(month && ma5 && month===ma5) ? month : (month||ma5?'分歧':'');
-    var pts=(r.en!=null&&r.ex!=null)?(r.dir==='B'?(Number(r.ex)-Number(r.en)):(Number(r.en)-Number(r.ex))):'';
-    var net=Number(r.net)||0;
-    var wl=net>0?'W':(net<0?'L':'');
-    var open=getTradeOpenPrice(r);
-    var short=getTradeShortStrategy(r);
-    var high=r.dayHigh!=null?r.dayHigh:(_mtxQuote&&r.date===dTodayKey()?_mtxQuote.todayHigh:null);
-    var low=r.dayLow!=null?r.dayLow:(_mtxQuote&&r.date===dTodayKey()?_mtxQuote.todayLow:null);
-    rows.push([r.date||'', r.tradeNo||'', r.tradeId||'', r.tpStage||1, r.entryLots||r.lots||1, r.lots||'', r.wave||'', month, ma5, bg, r.dir==='B'?'多':'空', open!=null?open:'', high!=null?high:'', low!=null?low:'', r.en!=null?r.en:'', short, r.entryTime||'', timeBucket(r.entryTime), r.entryReason||'', r.entryPsychology||'', r.exitTime||'', r.ex!=null?r.ex:'', holdingMin(r.entryTime,r.exitTime), pts, r.fee||0, r.net||0, wl]);
+  var rows = [['日期','Trade編號','交易ID','初始口數','出場口數','市場方向認知','月線方向','5日均線方向','長順勢背景','方向','開盤價','當日最高','當日最低','進場價','短線相對開盤','進場時間','進場時段','進場原因','進場心理','出場時間','出場價','持倉分鐘','差價點數','手續費','淨額','結果W/L']];
+  groups.sort(function(a,b){
+    return String(a.date||'').localeCompare(String(b.date||'')) || hubTradeSort(a,b);
   });
-  var csv = String.fromCharCode(0xFEFF) + rows.map(function(row){ return row.map(_csvCell).join(','); }).join(String.fromCharCode(13,10));
-  _downloadFile('當沖交易明細_策略分析版_'+_exportTs()+'.csv', csv, 'text/csv;charset=utf-8;');
-  document.getElementById('exportModal').style.display = 'none';
+  groups.forEach(function(g,idx){
+    var rr=g.rows||[];
+    var first=rr[0]||{};
+    var frame=getMarketFrameByDate(g.date)||{};
+    var month=first.monthBias||frame.monthBias||frame.bias||'';
+    var ma5=first.ma5Bias||frame.ma5Bias||'';
+    var bg=(month && ma5 && month===ma5) ? month : (month||ma5?'分歧':'');
+    var dir=g.dir||first.dir||'';
+    var en=g.en!=null?g.en:first.en;
+    var ex=g.ex!=null?g.ex:(rr.length?rr[rr.length-1].ex:null);
+    var net=Number(g.net)||0;
+    var wl=net>0?'W':(net<0?'L':'');
+    var entryTime=g.entryTime||'';
+    var exitTime=g.exitTime||'';
+    var open=first.openPrice!=null?first.openPrice:(frame.openPrice!=null?frame.openPrice:null);
+    var high=null, low=null;
+    rr.forEach(function(r){
+      if(r.dayHigh!=null && r.dayHigh!=='') high=high==null?Number(r.dayHigh):Math.max(high,Number(r.dayHigh));
+      if(r.dayLow!=null && r.dayLow!=='') low=low==null?Number(r.dayLow):Math.min(low,Number(r.dayLow));
+    });
+    if(high==null && _mtxQuote && String(g.date)===dTodayKey()) high=_mtxQuote.todayHigh;
+    if(low==null && _mtxQuote && String(g.date)===dTodayKey()) low=_mtxQuote.todayLow;
+    var short=getTradeShortStrategy(first);
+    var reason=first.entryReason||'';
+    var psychology=first.entryPsychology||'';
+    var pts=(en!=null&&ex!=null)?(dir==='B'?(Number(ex)-Number(en)):(Number(en)-Number(ex))):'';
+    rows.push([
+      g.date||'', g.no||idx+1, g.tradeId||'', g.entryLots||'', g.exitLots||'', g.wave||'', month, ma5, bg,
+      dir==='B'?'多':'空', open!=null?open:'', high!=null?high:'', low!=null?low:'', en!=null?en:'', short,
+      fmtTime(entryTime), timeBucket(entryTime), reason, psychology, fmtTime(exitTime), ex!=null?ex:'',
+      holdingMin(entryTime,exitTime), pts, g.fee||0, net, wl
+    ]);
+  });
+  var csv=String.fromCharCode(0xFEFF)+rows.map(function(row){return row.map(_csvCell).join(',');}).join(String.fromCharCode(13,10));
+  _downloadFile('當沖交易明細_策略分析版_'+_exportTs()+'.csv',csv,'text/csv;charset=utf-8;');
+  var modal=document.getElementById('exportModal'); if(modal) modal.style.display='none';
 };
 
 window.exportIOCSV = function() {
@@ -2367,6 +2438,20 @@ function renderHubTradeBrake(){
 }
 window.renderHubTradeBrake=renderHubTradeBrake;
 
+function ensureDSelectValue(id, value) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  value = value == null ? '' : String(value);
+  var exists = Array.prototype.some.call(el.options, function(o){ return o.value === value; });
+  // 舊資料若有歷史自訂文字，不丟掉；修改時先暫時加入選項並帶出原值。
+  if (value && !exists) {
+    var opt = document.createElement('option');
+    opt.value = value; opt.textContent = value + '（舊資料）';
+    el.appendChild(opt);
+  }
+  el.value = value;
+}
+
 window.addDtrade = async function() {
   if (!canEdit) { alert('⛔ 唯讀模式，請用含編輯金鑰的網址開啟'); return; }
   var dateEl=document.getElementById('D-date');
@@ -2498,6 +2583,8 @@ window.openEditDtrade = function(idx) {
   document.getElementById('Dedit-en').value   = r.en   || '';
   document.getElementById('Dedit-ex').value   = r.ex   || '';
   document.getElementById('Dedit-fee').value  = r.fee  || 0;
+  ensureDSelectValue('Dedit-entry-reason', r.entryReason || '');
+  ensureDSelectValue('Dedit-entry-psychology', r.entryPsychology || '');
   document.getElementById('D-edit-modal').style.display = 'flex';
 };
 
@@ -2513,6 +2600,8 @@ window.saveEditDtrade = async function() {
   var en   = parseFloat(document.getElementById('Dedit-en').value);
   var ex   = parseFloat(document.getElementById('Dedit-ex').value);
   var fee  = parseFloat(document.getElementById('Dedit-fee').value) || 0;
+  var entryReason = (document.getElementById('Dedit-entry-reason').value || '').trim();
+  var entryPsychology = (document.getElementById('Dedit-entry-psychology').value || '').trim();
   var entryTime = document.getElementById('Dedit-entry-time').value || '';
   var exitTime = document.getElementById('Dedit-exit-time').value || '';
   if (!dateVal || isNaN(en) || isNaN(ex)) { alert('日期/進場價/出場價必填'); return; }
@@ -2523,7 +2612,7 @@ window.saveEditDtrade = async function() {
   var editDateKey=dParseDate(dateVal);
   var editFrame=getMarketFrameByDate(editDateKey);
   var editOpen=(oldRec.openPrice!=null && isFinite(Number(oldRec.openPrice))) ? Number(oldRec.openPrice) : (editFrame.openPrice!=null ? Number(editFrame.openPrice) : null);
-  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:(editFrame.dayHigh!=null?editFrame.dayHigh:null), dayLow:oldRec.dayLow!=null?oldRec.dayLow:(editFrame.dayLow!=null?editFrame.dayLow:null), monthBias:oldRec.monthBias||editFrame.monthBias||editFrame.bias||'', ma5Bias:oldRec.ma5Bias||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:oldRec.entryReason||'', entryPsychology:oldRec.entryPsychology||''};
+  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:(editFrame.dayHigh!=null?editFrame.dayHigh:null), dayLow:oldRec.dayLow!=null?oldRec.dayLow:(editFrame.dayLow!=null?editFrame.dayLow:null), monthBias:oldRec.monthBias||editFrame.monthBias||editFrame.bias||'', ma5Bias:oldRec.ma5Bias||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:entryReason || '', entryPsychology:entryPsychology || ''};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
