@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜Wave Range Fixed 2026-09-18</title>
+<title>每日衝浪板｜v79 進場原因心理可選修正版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -247,6 +247,17 @@ tr:last-child td { border-bottom:none; }
   transition:border-color 0.15s;
 }
 .fg select:focus { border-color:rgba(245,158,11,0.5); }
+/* v79：進場原因／進場心理固定使用明顯的可選下拉；新增與修改共用 */
+.entry-choice-select{
+  width:100%; background:var(--bg3); border:1px solid var(--border2);
+  border-radius:8px; padding:10px 36px 10px 11px; color:var(--text);
+  font-family:var(--font); font-size:13px; outline:none; cursor:pointer;
+  appearance:auto; -webkit-appearance:auto;
+  min-height:40px;
+}
+.entry-choice-select:focus{border-color:rgba(245,158,11,.65);box-shadow:0 0 0 2px rgba(245,158,11,.08);}
+.entry-choice-select option{background:#1c2030;color:#e8eaf0;}
+
 .submit-wrap { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .sbtn { font-size:13px; padding:10px 22px; border-radius:9px; cursor:pointer; font-family:var(--font); font-weight:500; border:none; }
 .sbtn-gray   { background:rgba(156,163,175,0.15); border:1px solid rgba(156,163,175,0.3); color:var(--gray); }
@@ -1073,8 +1084,10 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
     </div>
 
+    <!-- 今日振幅與停利參考：高低價旁即時顯示 -->
+    <div id="D-range-reference-row" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:10px;align-items:stretch">
     <!-- ★ 今日高低：系統自動抓取＋可手動覆蓋；一天設定一次即可 -->
-    <div class="card" id="D-high-low-card" style="margin-bottom:10px">
+    <div class="card" id="D-high-low-card" style="margin-bottom:0">
       <div class="card-hd"><span>📈 今日高低價</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">系統抓取｜可手動修正</span></div>
       <div class="card-bd" style="padding:10px 12px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -1093,6 +1106,12 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         </div>
       </div>
     </div>
+    <div class="card" id="D-range-reference-card" style="margin-bottom:0">
+      <div class="card-hd">🎯 即時振幅・浪級・停利參考</div>
+      <div class="card-bd" id="D-range-reference-body" style="padding:12px;line-height:1.65">輸入今日高低價後自動計算。</div>
+    </div>
+    </div>
+    <style>@media(max-width:760px){#D-range-reference-row{grid-template-columns:1fr!important}}</style>
 
     <!-- ★ 新增交易：唯一入口，首頁／側欄／上方按鈕都導向這裡 -->
     <div class="card hub-entry-card" id="hub-entry-card">
@@ -1117,7 +1136,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="fg"><label>進場時間</label><input id="D-entry-time" type="datetime-local" class="readonly-input"></div>
           <div class="fg"><label>出場時間</label><input id="D-exit-time" type="datetime-local" class="readonly-input"></div>
           <div class="fg"><label>進場原因</label>
-            <select id="D-entry-reason" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none">
+            <select id="D-entry-reason" class="entry-choice-select" aria-label="進場原因">
               <option value="">請選擇</option>
               <option value="長順勢">長順勢</option>
               <option value="回踩支撐">回踩支撐</option>
@@ -1133,7 +1152,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
             </select>
           </div>
           <div class="fg"><label>進場心理</label>
-            <select id="D-entry-psychology" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none">
+            <select id="D-entry-psychology" class="entry-choice-select" aria-label="進場心理">
               <option value="">請選擇</option>
               <option value="有把握">有把握</option>
               <option value="等待確認">等待確認</option>
@@ -1353,7 +1372,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="fg"><label>進場價</label><input id="Dedit-en" type="number" placeholder="22500"></div>
       <div class="fg"><label>出場價</label><input id="Dedit-ex" type="number" placeholder="22580"></div>
       <div class="fg"><label>進場原因</label>
-        <select id="Dedit-entry-reason" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
+        <select id="Dedit-entry-reason" class="entry-choice-select" aria-label="修改進場原因">
           <option value="">請選擇</option>
           <option value="長順勢">長順勢</option><option value="回踩支撐">回踩支撐</option><option value="回踩壓力">回踩壓力</option>
           <option value="突破壓力">突破壓力</option><option value="跌破支撐">跌破支撐</option><option value="突破回踩確認">突破回踩確認</option>
@@ -1362,7 +1381,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         </select>
       </div>
       <div class="fg"><label>進場心理</label>
-        <select id="Dedit-entry-psychology" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
+        <select id="Dedit-entry-psychology" class="entry-choice-select" aria-label="修改進場心理">
           <option value="">請選擇</option>
           <option value="有把握">有把握</option><option value="等待確認">等待確認</option><option value="試單">試單</option>
           <option value="順勢跟進">順勢跟進</option><option value="怕踏空">怕踏空</option><option value="追價">追價</option>
@@ -3010,6 +3029,31 @@ function getTradeShortStrategy(r){
   return follow ? '短順勢' : '短逆勢';
 }
 
+function renderRangeReference(){
+  var body=document.getElementById('D-range-reference-body'); if(!body) return;
+  var f=getTodayMarketFrame(), h=f.high, l=f.low;
+  var fmt=function(v){return v==null||!isFinite(Number(v))?'—':Math.round(Number(v)).toLocaleString();};
+  if(h==null||l==null||!isFinite(Number(h))||!isFinite(Number(l))||Number(h)<Number(l)){
+    body.innerHTML='<div style="font-size:13px;color:var(--muted)">請先輸入並儲存今日最高、最低價。</div>';
+    return;
+  }
+  var amp=Number(h)-Number(l), a=getDWaveMarketAmplitude()||{}, ranges=getDWaveRanges();
+  var level=classifyAmplitudeValue(amp);
+  var rangeText=function(r){return r&&r.min!=null&&r.max!=null?fmt(r.min)+'–'+fmt(r.max)+' 點':'等待20日振幅資料';};
+  var small=ranges.small, middle=ranges.middle, large=ranges.large;
+  var pct=small&&small.max>0?Math.round(amp/small.max*100):null;
+  var tp1,tp2,advice;
+  // 停利參考採保守固定區間；不可將日內已走振幅誤當成剩餘可走點數。
+  if(amp>=330){tp1='60–90 點';tp2='100–130 點';advice='今日振幅已達小浪常見規模，避免追價；優先分批停利。';}
+  else {tp1='80–100 點';tp2='120–150 點';advice='以小浪收縮環境先抓短目標；到 TP1 可先出部分，剩餘部位看價格是否延伸。';}
+  body.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+   +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前已走振幅</div><div style="font-size:24px;font-weight:800;font-family:monospace">'+fmt(amp)+' <span style="font-size:12px">點</span></div></div>'
+   +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前浪級</div><div style="font-size:17px;font-weight:800">'+level+'</div><div style="font-size:11px;color:var(--muted)">'+(pct==null?'小浪比例待資料':('小浪上緣使用 '+pct+'%'))+'</div></div></div>'
+   +'<div style="margin-top:10px;font-size:12px"><div>小浪區間：<b>'+rangeText(small)+'</b></div><div>中浪區間：<b>'+rangeText(middle)+'</b></div><div>大浪區間：<b>'+rangeText(large)+'</b></div></div>'
+   +'<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:9px"><div style="font-size:12px;color:var(--muted)">建議停利空間（點數）</div><div style="display:flex;gap:8px;margin-top:5px"><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP1 分批</span><div style="font-size:18px;font-weight:800">'+tp1+'</div></div><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP2 延伸</span><div style="font-size:18px;font-weight:800">'+tp2+'</div></div></div><div style="font-size:12px;margin-top:6px">'+advice+'</div></div>'
+   +'<div style="font-size:10px;color:var(--muted);margin-top:8px">注意：高低差是當日已發生振幅，不等於剩餘空間；浪級依20日資料判定，未載入時不猜測中／大浪。</div>';
+}
+
 function renderMarketRecognition(){
   var f=getTodayMarketFrame();
   var set=function(id,val){var el=document.getElementById(id);if(el)el.textContent=val;};
@@ -3032,6 +3076,7 @@ function renderMarketRecognition(){
   _marketBiasToday=(f.month && f.month===f.ma5)?f.month:'';
   set('D-bias-state', f.month&&f.ma5&&f.month===f.ma5 ? ('背景：'+f.month+'方') : (f.month&&f.ma5?'月線／5日均線分歧':'請先設定方向'));
   renderOpenPricePrompt();
+  renderRangeReference();
 }
 function renderOpenPricePrompt(){
   var box=document.getElementById('D-bias-note'); if(!box) return;
@@ -5006,6 +5051,9 @@ function renderHubWinrateStats(){
 // 預覽／離線時先用內嵌歷史資料，不等待 Firebase。
 /* 勝率統計：Firebase 優先；預覽若雲端為空，顯示已驗證 0918 資料，並明確標示非 Firebase。 */
 
+</script>
+<script>
+(function(){function bindRangeInputs(){['D-day-high','D-day-low'].forEach(function(id){var el=document.getElementById(id);if(el&&!el.dataset.rangeBound){el.dataset.rangeBound='1';el.addEventListener('input',function(){var h=parseFloat(document.getElementById('D-day-high').value),l=parseFloat(document.getElementById('D-day-low').value);var b=document.getElementById('D-range-reference-body');if(b&&isFinite(h)&&isFinite(l)&&h>=l){var amp=h-l;b.innerHTML='<div style="font-size:11px;color:var(--muted)">未儲存預覽｜目前已走振幅</div><div style="font-size:24px;font-weight:800">'+Math.round(amp).toLocaleString()+' 點</div><div style="font-size:12px;margin-top:8px">按「儲存高低」後顯示完整浪級與停利參考。</div>';}});}})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindRangeInputs);else bindRangeInputs();})();
 </script>
 </body>
 </html>
