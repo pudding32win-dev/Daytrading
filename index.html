@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v84 同Trade加碼修正版</title>
+<title>每日衝浪板｜v85 Firebase簽章與同步修正版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -783,9 +783,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v76-auto-manual-open-high-low-strategy-export">
+<meta name="x-surf-version" content="v85-canonical-firebase-signature">
 </head>
-<body class="light" data-hub-version="v75">
+<body class="light" data-hub-version="v85">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -1471,8 +1471,19 @@ function _dManagedSnapshot(obj) {
     D_marginPerLot: obj.D_marginPerLot || null
   };
 }
+// v85：使用 canonical JSON（遞迴排序物件鍵名），避免 Firestore 回傳鍵名順序與本機物件不同，
+// 導致相同資料被 JSON.stringify 判成不同簽章。陣列順序保留，因為交易明細順序有意義。
+function _dCanonical(value) {
+  if (value === null || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(_dCanonical);
+  var out = {};
+  Object.keys(value).sort().forEach(function(k) {
+    if (typeof value[k] !== 'undefined') out[k] = _dCanonical(value[k]);
+  });
+  return out;
+}
 function _dSignature(obj) {
-  try { return JSON.stringify(_dManagedSnapshot(obj)); }
+  try { return JSON.stringify(_dCanonical(_dManagedSnapshot(obj))); }
   catch (e) { return ''; }
 }
 const EDIT_KEY = 'pudding2026';
@@ -2233,21 +2244,18 @@ async function saveData() {
       var serverData = checkSnap.data() || {};
       var serverSig = _dSignature(serverData);
       if (_dBaseSig !== null && serverSig !== _dBaseSig) {
-        // v83 診斷：列出哪些受管理欄位與上次同步基準不同，方便區分真衝突與格式/時序差異。
+        // v85：顯示雲端與本機目前資料的差異欄位；簽章本身已採 canonical JSON。
         var __managedKeys = ['D','D_io','D_eq','D_premium','D_marketBias','D_archive','D_marginPerLot'];
-        var __changedKeys = __managedKeys.filter(function(k){
-          try { return JSON.stringify((_dManagedSnapshot(serverData))[k]) !== JSON.stringify((_dManagedSnapshot({_sigSource:0}))[k]) && false; } catch(e) { return false; }
-        });
-        // 比對基準內容無法反解欄位，故以本機目前資料與伺服器資料產生診斷摘要；不輸出交易明細內容。
         var __localManaged = _dManagedSnapshot(DATA), __serverManaged = _dManagedSnapshot(serverData);
-        __changedKeys = __managedKeys.filter(function(k){
-          try { return JSON.stringify(__serverManaged[k]) !== JSON.stringify(__localManaged[k]); } catch(e) { return true; }
+        var __changedKeys = __managedKeys.filter(function(k){
+          try { return JSON.stringify(_dCanonical(__serverManaged[k])) !== JSON.stringify(_dCanonical(__localManaged[k])); }
+          catch(e) { return true; }
         });
-        var __diag = '診斷欄位（雲端與本機目前內容不同）：' + (__changedKeys.join('、') || '未能從目前資料定位；可能是同步基準或格式差異') + '\n' +
+        var __diag = '診斷欄位（雲端與本機目前內容不同）：' + (__changedKeys.join('、') || '本機與雲端目前內容相同；雲端可能在上次同步後被更新') + '\n' +
           '雲端 D=' + ((serverData.D||[]).length) + '，本機 D=' + ((DATA.D||[]).length) +
           '；雲端封存=' + ((serverData.D_archive||[]).length) + '，本機封存=' + ((DATA.D_archive||[]).length) + '\n' +
-          '診斷碼：V84-SIG-MISMATCH';
-        console.warn('[V83 Firebase 衝突診斷]', {changedFields:__changedKeys, baseSignatureLength:(_dBaseSig||'').length, serverSignatureLength:serverSig.length, localCounts:{D:(DATA.D||[]).length,D_archive:(DATA.D_archive||[]).length}, serverCounts:{D:(serverData.D||[]).length,D_archive:(serverData.D_archive||[]).length}});
+          '診斷碼：V85-SIG-MISMATCH';
+        console.warn('[V85 Firebase 衝突診斷]', {changedFields:__changedKeys, baseSignatureLength:(_dBaseSig||'').length, serverSignatureLength:serverSig.length, localCounts:{D:(DATA.D||[]).length,D_archive:(DATA.D_archive||[]).length}, serverCounts:{D:(serverData.D||[]).length,D_archive:(serverData.D_archive||[]).length}});
         var NL = String.fromCharCode(10);
         var proceed = confirm(
           '⚠️ 偵測到雲端的當沖資料與上次同步基準不同。' + NL + NL +
@@ -2263,7 +2271,9 @@ async function saveData() {
       }
     }
   } catch (checkErr) {
-    console.error('版本檢查失敗，略過保護機制', checkErr);
+    console.error('版本檢查失敗，已中止存檔以保護雲端資料', checkErr);
+    alert('無法確認 Firebase 最新版本，本次已停止存檔以避免覆蓋雲端資料。請檢查網路後再試；本機資料仍保留在目前頁面。');
+    return;
   }
   autoBackup();
   updateLastBackupInfo();
