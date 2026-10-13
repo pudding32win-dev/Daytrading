@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v85 Firebase簽章與同步修正版</title>
+<title>每日衝浪板｜v86 同Trade加碼統計修正版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -783,9 +783,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v85-canonical-firebase-signature">
+<meta name="x-surf-version" content="v86-tradeid-grouping-fix">
 </head>
-<body class="light" data-hub-version="v85">
+<body class="light" data-hub-version="v86">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -1471,7 +1471,7 @@ function _dManagedSnapshot(obj) {
     D_marginPerLot: obj.D_marginPerLot || null
   };
 }
-// v85：使用 canonical JSON（遞迴排序物件鍵名），避免 Firestore 回傳鍵名順序與本機物件不同，
+// v86：統計與交易明細以手動 Trade ID 合併加碼；Firebase 使用 canonical JSON（遞迴排序物件鍵名），避免 Firestore 回傳鍵名順序與本機物件不同，
 // 導致相同資料被 JSON.stringify 判成不同簽章。陣列順序保留，因為交易明細順序有意義。
 function _dCanonical(value) {
   if (value === null || typeof value !== 'object') return value;
@@ -4166,7 +4166,7 @@ window.renderDDetailTab = function() {
     var groupRows = {};
     orderedDayTrades.forEach(function(rr){
       var oi = allSorted.indexOf(rr);
-      var gk = (rr.en!=null && rr.en!=='') ? String(rr.date||'')+'|'+String(rr.dir||'')+'|'+String(rr.en) : 'row|'+oi;
+      var gk = hubTradeGroupKey(rr,oi);
       (groupRows[gk]||(groupRows[gk]=[])).push({r:rr,idx:oi});
     });
     var groupList = Object.keys(groupRows).map(function(gk){
@@ -4234,7 +4234,7 @@ window.openTPBatchModal = function(date){
   if(title) title.textContent='日期：'+_tpBatchDate+'　共 '+rows.length+' 筆出場紀錄';
   var groups={};
   rows.forEach(function(r,i){
-    var k=(r.en!=null && r.en!=='') ? String(r.date||'')+'|'+String(r.dir||'')+'|'+String(r.en) : (r.tradeId||('無ID-'+i));
+    var k=hubTradeGroupKey(r,i);
     if(!groups[k]) groups[k]=[];
     groups[k].push({r:r,i:i});
   });
@@ -4263,7 +4263,7 @@ window.applyTPBatch = async function(){
   var rows=(DATA.D||[]).map(function(r,i){return {r:r,i:i};}).filter(function(x){return x.r.date===date;});
   if(!rows.length){ alert('這一天沒有交易資料'); return; }
   var groups={};
-  rows.forEach(function(x){var k=(x.r.en!=null && x.r.en!=='') ? String(x.r.date||'')+'|'+String(x.r.dir||'')+'|'+String(x.r.en) : (x.r.tradeId||('__NO_ID__'+x.i));if(!groups[k])groups[k]=[];groups[k].push(x);});
+  rows.forEach(function(x){var k=hubTradeGroupKey(x.r,x.i);if(!groups[k])groups[k]=[];groups[k].push(x);});
   Object.keys(groups).forEach(function(k){
     groups[k].sort(function(a,b){
       var ta=a.r.exitTime?new Date(a.r.exitTime).getTime():Infinity;
@@ -4640,6 +4640,18 @@ function hubSigned(v){ v=Number(v)||0; return (v>=0?'+':'')+Math.round(v).toLoca
 function hubMinutes(ms){ if(!isFinite(ms)||ms<0)return '—'; var m=Math.floor(ms/60000), h=Math.floor(m/60); m%=60; return h? h+'小時 '+m+'分':m+' 分鐘'; }
 // v52：首頁與統計都以「日期＋方向＋進場價」為同一 Trade；每一列出場若缺 lots，
 // 但有出場價／時間，視為 1 口出場，與交易明細表的顯示規則一致。
+// v86：手動指定同一 Trade 的加碼，所有統計與明細都優先依「日期＋Trade ID」分組。
+// 舊資料未指定手動 Trade 時，仍沿用「日期＋方向＋進場價」規則，避免把舊的分批出場拆開。
+function hubTradeGroupKey(r, fallbackIndex){
+  var date=String(r && r.date!=null ? r.date : '').replace(/-/g,'/');
+  var dir=String(r && r.dir!=null ? r.dir : '');
+  var en=(r && r.en!=null && r.en!=='') ? String(r.en) : '';
+  var tid=String(r && r.tradeId!=null ? r.tradeId : '');
+  if(tid && r && r.manualTradeGroup) return 'manual:'+date+'|'+tid;
+  if(date && dir && en) return date+'|'+dir+'|'+en;
+  if(tid) return 'id:'+date+'|'+tid;
+  return date+'|'+dir+'|row|'+String(fallbackIndex==null?0:fallbackIndex);
+}
 function hubTradeGroups(rows){
   // 每一個 Trade = 一次進場；分批出場仍合併成同一 Trade。
   // closed 必須以「進場口數 vs 累計實際出場口數」判斷，不能只看某一列。
@@ -4648,11 +4660,9 @@ function hubTradeGroups(rows){
     if(!r || typeof r!=='object') return;
     var date=String(r.date==null?'':r.date).replace(/-/g,'/');
     var dir=String(r.dir==null?'':r.dir);
-    var en=(r.en!=null && r.en!=='') ? String(r.en) : '';
     var tid=String(r.tradeId==null?'':r.tradeId);
-    // 依既定規則：同一天＋同方向＋同進場價視為同一次進場；
-    // 只有缺少進場價時才使用 Trade ID，避免舊資料的自動 ID 把分批出場拆開。
-    var key=(tid && r.manualTradeGroup) ? 'manual:'+date+'|'+tid : ((date && dir && en) ? date+'|'+dir+'|'+en : (tid ? 'id:'+date+'|'+tid : date+'|'+dir+'|'+String(i)));
+    // v86：手動指定同 Trade 的不同進場價／時間不可再按進場價拆組。
+    var key=hubTradeGroupKey(r,i);
     if(!map[key]){
       map[key]={key:key,rows:[],firstIndex:i,tradeId:tid,date:date||r.date||'',dir:dir,wave:r.wave||'',en:(r.en!=null?r.en:null),entryLots:0,exitLots:0,net:0,fee:0,entryTime:null,exitTime:null,exits:[],hasExit:false};
       order.push(key);
@@ -5006,9 +5016,8 @@ function hubStatsGroups(rows){
     if(!r || typeof r!=='object') return;
     var date=String(r.date==null?'':r.date).replace(/-/g,'/');
     var dir=String(r.dir==null?'':r.dir);
-    var en=(r.en!=null && r.en!=='') ? String(r.en) : '';
     var tid=String(r.tradeId==null?'':r.tradeId);
-    var key=(tid && r.manualTradeGroup) ? 'manual:'+date+'|'+tid : ((date && dir && en) ? date+'|'+dir+'|'+en : (tid ? 'id:'+date+'|'+tid : date+'|'+dir+'|'+String(i)));
+    var key=hubTradeGroupKey(r,i);
     if(!map[key]){
       map[key]={key:key,rows:[],firstIndex:i,tradeId:tid,date:date,dir:dir,wave:r.wave||'',en:(r.en!=null?r.en:null),entryLotsExplicit:0,exitLots:0,net:0,fee:0,entryTime:null,exitTime:null,exits:[]};
       order.push(key);
