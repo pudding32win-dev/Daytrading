@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v87 單次進場與整筆Trade雙層分析</title>
+<title>每日衝浪板｜v88 一鍵策略分析包</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -885,6 +885,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
     </div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:14px">選擇要匯出的資料，檔案會下載到裝置本機（Excel / 記事本皆可開啟）</div>
     <div style="display:flex;flex-direction:column;gap:9px">
+      <button onclick="exportStrategyWorkbook()" style="width:100%;text-align:left;padding:13px 14px;border-radius:9px;background:rgba(167,139,250,0.13);border:1px solid rgba(167,139,250,0.42);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">📦 一鍵匯出策略分析包（單一 Excel）<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:3px">進場明細、整筆 Trade、加碼對照、原始備份，一次下載</span></button>
       <button onclick="exportEntryAnalysisCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(96,165,250,0.10);border:1px solid rgba(96,165,250,0.3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">🎯 單次進場分析 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">同一筆 Trade 的不同進場／加碼分開分析，分批出場合併</span></button>
       <button onclick="exportTradeSummaryCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">📊 整筆 Trade 分析 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">同 Trade 加碼合併，只計一次整筆損益與勝敗</span></button>
       <button onclick="exportTradesCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(148,163,184,0.08);border:1px solid var(--border2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">📋 舊版策略明細 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">保留原本匯出欄位，方便相容舊分析</span></button>
@@ -1799,7 +1800,7 @@ window.exportTradesCSV = function() {
   var modal=document.getElementById('exportModal'); if(modal) modal.style.display='none';
 };
 
-// v87：雙層策略分析匯出。Entry=同一 Trade 內的不同進場腿；分批出場合併，不把出場列當新進場。
+// v88：一鍵策略分析包匯出。Entry=同一 Trade 內的不同進場腿；分批出場合併，不把出場列當新進場。
 function _hubCsvDownload(name, rows){
   var csv=String.fromCharCode(0xFEFF)+rows.map(function(row){return row.map(_csvCell).join(',');}).join(String.fromCharCode(13,10));
   _downloadFile(name+'_'+_exportTs()+'.csv',csv,'text/csv;charset=utf-8;');
@@ -1863,6 +1864,59 @@ window.exportTradeSummaryCSV=function(){
     rows.push([g.date||'',idx+1,g.tradeId||'',g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),bg,legOrder.length,entryTimes.join(' / '),entryPrices.join(' / '),openLots,exitLots,remaining,g.closed?'已完成':'未完成',_hubFmtExportTime(g.entryTime),_hubFmtExportTime(g.exitTime),_hubHoldMinutes(g.entryTime,g.exitTime),exitPrices.join(' / '),Math.round((Number(g.fee)||0)*100)/100,net,net>0?'W':(net<0?'L':''),reasons,psy,rr.length]);
   });
   _hubCsvDownload('每日衝浪板_整筆Trade分析',rows);
+};
+
+// v88：一鍵匯出單一 Excel 相容活頁簿（Excel 2003 XML 格式，不依賴外部 CDN）。
+window.exportStrategyWorkbook=function(){
+  try{
+    var raw=(DATA.D||[]).slice();
+    var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(raw):[];
+    groups.sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''))||((typeof hubTradeSort==='function')?hubTradeSort(a,b):0);});
+    function t(v){return v==null?'':String(v);}
+    function dir(v){return v==='B'?'多':(v==='S'?'空':t(v));}
+    function time(v){return (typeof _hubFmtExportTime==='function')?_hubFmtExportTime(v):t(v);}
+    function hold(a,b){return (typeof _hubHoldMinutes==='function')?_hubHoldMinutes(a,b):'';}
+    function esc(v){return t(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}
+    function cell(v){
+      if(typeof v==='number'&&isFinite(v)) return '<Cell><Data ss:Type="Number">'+v+'</Data></Cell>';
+      if(typeof v==='boolean') return '<Cell><Data ss:Type="String">'+(v?'TRUE':'FALSE')+'</Data></Cell>';
+      var x=t(v); if(x.length>30000)x=x.slice(0,29980)+'…[超過 Excel 單格字數限制，已截斷]';
+      return '<Cell><Data ss:Type="String">'+esc(x)+'</Data></Cell>';
+    }
+    function sheet(name,rows){return '<Worksheet ss:Name="'+esc(name)+'"><Table>'+rows.map(function(row){return '<Row>'+row.map(cell).join('')+'</Row>';}).join('')+'</Table></Worksheet>';}
+    // 工作表 1：依「同 Trade + 不同進場時間/價格」分組，出場列不另算進場。
+    var legs={},legOrder=[];
+    raw.forEach(function(r,i){if(!r||typeof r!=='object')return;var tk=hubTradeGroupKey(r,i),et=t(r.entryTime),en=t(r.en),d=t(r.dir),k=tk+'|ENTRY|'+et+'|'+en+'|'+d;
+      if(!legs[k]){legs[k]={key:k,tradeKey:tk,rows:[],first:r,index:i,date:r.date||'',dir:d,en:r.en,entryTime:r.entryTime||'',entryLots:0,exitLots:0,net:0,fee:0,exitTime:'',exitPrices:[],tradeId:r.tradeId||''};legOrder.push(k);}
+      var g=legs[k];g.rows.push(r);var el=Number(r.entryLots||0);if(isFinite(el)&&el>g.entryLots)g.entryLots=el;
+      var hasExit=(r.ex!=null&&r.ex!=='')||(r.exitTime!=null&&r.exitTime!=='');var lots=Number(r.lots);if((!isFinite(lots)||lots<=0)&&hasExit)lots=1;if(hasExit&&isFinite(lots)&&lots>0)g.exitLots+=lots;
+      g.net+=Number(r.net)||0;g.fee+=Number(r.fee)||0;if(r.exitTime&&(!g.exitTime||new Date(r.exitTime)>new Date(g.exitTime)))g.exitTime=r.exitTime;if(r.ex!=null&&r.ex!=='')g.exitPrices.push(Number(r.ex));
+    });
+    legOrder.sort(function(a,b){var x=legs[a],y=legs[b];return String(x.date).localeCompare(String(y.date))||((new Date(x.entryTime||0))-(new Date(y.entryTime||0)))||x.index-y.index;});
+    var entryRows=[['日期','Trade分組鍵','交易ID','進場腿編號','方向','進場價','進場時間','初始口數','實際出場口數','最後出場時間','出場價(各次)','持倉分鐘','進場原因','進場心理','市場方向認知','月線方向','5日均線方向','開盤價','當日最高','當日最低','進場腿淨損益','手續費','勝敗W/L','資料列數']];
+    legOrder.forEach(function(k,i){var g=legs[k],r=g.first||{},frame=(typeof getMarketFrameByDate==='function'?getMarketFrameByDate(g.date):null)||{},hi=null,lo=null;
+      g.rows.forEach(function(x){if(x.dayHigh!=null&&x.dayHigh!=='')hi=hi==null?Number(x.dayHigh):Math.max(hi,Number(x.dayHigh));if(x.dayLow!=null&&x.dayLow!=='')lo=lo==null?Number(x.dayLow):Math.min(lo,Number(x.dayLow));});
+      var net=Math.round(g.net*100)/100;entryRows.push([g.date,g.tradeKey,g.tradeId,i+1,dir(g.dir),g.en,time(g.entryTime),g.entryLots||'',g.exitLots||0,time(g.exitTime),g.exitPrices.join(' / '),hold(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',r.wave||'',r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),hi==null?'':hi,lo==null?'':lo,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
+    });
+    // 工作表 2：整筆 Trade 統計，一個 Trade 只列一行。
+    var tradeRows=[['日期','Trade編號','交易ID','方向','長順勢背景','進場腿數','各次進場時間','各次進場價格','總進場口數','累計出場口數','剩餘口數','整筆狀態','第一進場時間','最後出場時間','持倉分鐘','所有出場價','總手續費','整筆淨損益','勝敗W/L','進場原因(彙整)','進場心理(彙整)','資料列數']];
+    groups.forEach(function(g,idx){var rr=g.rows||[],first=rr[0]||{},frame=(typeof getMarketFrameByDate==='function'?getMarketFrameByDate(g.date):null)||{},map={},order=[];
+      rr.forEach(function(r){var k=t(r.entryTime)+'|'+t(r.en)+'|'+t(r.dir);if(!map[k]){map[k]={time:r.entryTime||'',en:r.en,reason:r.entryReason||'',psy:r.entryPsychology||''};order.push(k);}else{if(!map[k].reason&&r.entryReason)map[k].reason=r.entryReason;if(!map[k].psy&&r.entryPsychology)map[k].psy=r.entryPsychology;}});
+      order.sort(function(a,b){return (new Date(map[a].time||0))-(new Date(map[b].time||0));});var times=order.map(function(k){return time(map[k].time);}),prices=order.map(function(k){return map[k].en==null?'':map[k].en;}),reasons=order.map(function(k){return map[k].reason;}).filter(Boolean).join(' / '),psy=order.map(function(k){return map[k].psy;}).filter(Boolean).join(' / '),exits=[];
+      rr.forEach(function(r){if(r.ex!=null&&r.ex!=='')exits.push(r.ex);});var open=Number(g.entryLots)||0,out=Number(g.exitLots)||0,net=Math.round((Number(g.net)||0)*100)/100,month=first.monthBias||frame.monthBias||frame.bias||'',ma5=first.ma5Bias||frame.ma5Bias||'',bg=(month&&ma5&&month===ma5)?month:(month||ma5?'分歧':'');
+      tradeRows.push([g.date||'',idx+1,g.tradeId||'',dir(g.dir),bg,order.length,times.join(' / '),prices.join(' / '),open,out,Math.max(0,open-out),g.closed?'已完成':'未完成',time(g.entryTime),time(g.exitTime),hold(g.entryTime,g.exitTime),exits.join(' / '),Math.round((Number(g.fee)||0)*100)/100,net,net>0?'W':(net<0?'L':''),reasons,psy,rr.length]);
+    });
+    // 工作表 3：每一筆原始列映射至 Trade 分組鍵，方便稽核手動 Trade ID 與加碼合併。
+    var mapRows=[['原始列序','日期','Trade ID','系統分組鍵','方向','進場時間','進場價','entryLots','出場時間','出場價','出場口數(lots)','淨損益','備註']];
+    raw.forEach(function(r,i){if(!r||typeof r!=='object')return;mapRows.push([i+1,r.date||'',r.tradeId||'',hubTradeGroupKey(r,i),dir(r.dir),time(r.entryTime),r.en==null?'':r.en,r.entryLots==null?'':r.entryLots,time(r.exitTime),r.ex==null?'':r.ex,r.lots==null?'':r.lots,r.net==null?'':r.net,r.note||'']);});
+    // 工作表 4：DATA 所有欄位逐筆保留，作為原始備份；不是只備份已完成 Trade。
+    var backupRows=[['資料區','索引','原始 JSON']];
+    Object.keys(DATA||{}).forEach(function(k){var v=DATA[k];if(Array.isArray(v)){v.forEach(function(item,i){backupRows.push([k,i,JSON.stringify(item)]);});if(!v.length)backupRows.push([k,'','[]']);}else if(v&&typeof v==='object'){backupRows.push([k,'',JSON.stringify(v)]);}else{backupRows.push([k,'',JSON.stringify(v)]);}});
+    var xml='<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">'
+      +sheet('進場明細',entryRows)+sheet('Trade總表',tradeRows)+sheet('加碼對照',mapRows)+sheet('原始備份',backupRows)+'</Workbook>';
+    var blob=new Blob(['\ufeff',xml],{type:'application/vnd.ms-excel;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='每日衝浪板_策略分析包_'+_exportTs()+'.xls';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
+    var modal=document.getElementById('exportModal');if(modal)modal.style.display='none';
+  }catch(e){console.error('策略分析包匯出失敗',e);alert('策略分析包匯出失敗：'+(e&&e.message?e.message:'未知錯誤')+'。原有 CSV／JSON 匯出功能仍可使用。');}
 };
 
 window.exportIOCSV = function() {
