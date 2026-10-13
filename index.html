@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v86 同Trade加碼統計修正版</title>
+<title>每日衝浪板｜v86.1 同Trade加碼統計錯誤修正版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -783,9 +783,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v86-tradeid-grouping-fix">
+<meta name="x-surf-version" content="v86.1-global-tradeid-grouping-fix">
 </head>
-<body class="light" data-hub-version="v86">
+<body class="light" data-hub-version="v86.1">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -3207,6 +3207,18 @@ function getHubStatsSourceRows() {
   return rows;
 }
 
+// v86.1 hotfix：全域 Trade 分組鍵，避免首頁統計初始化時 ReferenceError。
+// 有 Trade ID 就優先以「日期＋Trade ID」合併；不依進場價或進場時間拆分。
+function hubTradeGroupKey(r, fallbackIndex){
+  var date=String(r && r.date!=null ? r.date : '').replace(/-/g,'/');
+  var dir=String(r && r.dir!=null ? r.dir : '');
+  var tid=String(r && r.tradeId!=null ? r.tradeId : '').trim();
+  if(tid) return 'id:'+date+'|'+tid;
+  var en=(r && r.en!=null && r.en!=='') ? String(r.en) : '';
+  if(date && dir && en) return date+'|'+dir+'|'+en;
+  return date+'|'+dir+'|row|'+String(fallbackIndex==null?0:fallbackIndex);
+}
+
 function getHubStatsTrades() {
   if(typeof hubStatsGroups !== 'function') return [];
   return hubStatsGroups(getHubStatsSourceRows())
@@ -4161,7 +4173,7 @@ window.renderDDetailTab = function() {
     });
     // 筆次的定義：同一天「每一次新的進場」就是第 1、2、3…筆。
     // 分批出場仍屬於同一筆，不能因為有 2～3 行出場紀錄就變成第 2、3、4 筆。
-    // 因此這裡先按「日期＋方向＋進場價」分組，再依首次進場時間排序，給整組唯一的 tradeNo。
+    // 因此這裡優先按「日期＋Trade ID」分組；沒有 Trade ID 的舊資料才退回「日期＋方向＋進場價」，再依首次進場時間排序，給整組唯一的 tradeNo。
     var rowGroupMeta = {};
     var groupRows = {};
     orderedDayTrades.forEach(function(rr){
