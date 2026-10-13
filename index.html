@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v86.1 同Trade加碼統計錯誤修正版</title>
+<title>每日衝浪板｜v86.2 同Trade加碼統計修正版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -3207,17 +3207,7 @@ function getHubStatsSourceRows() {
   return rows;
 }
 
-// v86.1 hotfix：全域 Trade 分組鍵，避免首頁統計初始化時 ReferenceError。
-// 有 Trade ID 就優先以「日期＋Trade ID」合併；不依進場價或進場時間拆分。
-function hubTradeGroupKey(r, fallbackIndex){
-  var date=String(r && r.date!=null ? r.date : '').replace(/-/g,'/');
-  var dir=String(r && r.dir!=null ? r.dir : '');
-  var tid=String(r && r.tradeId!=null ? r.tradeId : '').trim();
-  if(tid) return 'id:'+date+'|'+tid;
-  var en=(r && r.en!=null && r.en!=='') ? String(r.en) : '';
-  if(date && dir && en) return date+'|'+dir+'|'+en;
-  return date+'|'+dir+'|row|'+String(fallbackIndex==null?0:fallbackIndex);
-}
+// v86.2 hotfix：統一使用單一 hubTradeGroupKey 定義，避免重複宣告。
 
 function getHubStatsTrades() {
   if(typeof hubStatsGroups !== 'function') return [];
