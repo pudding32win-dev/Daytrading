@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v81 新增30k守低點</title>
+<title>每日衝浪板｜v84 同Trade加碼修正版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2246,7 +2246,7 @@ async function saveData() {
         var __diag = '診斷欄位（雲端與本機目前內容不同）：' + (__changedKeys.join('、') || '未能從目前資料定位；可能是同步基準或格式差異') + '\n' +
           '雲端 D=' + ((serverData.D||[]).length) + '，本機 D=' + ((DATA.D||[]).length) +
           '；雲端封存=' + ((serverData.D_archive||[]).length) + '，本機封存=' + ((DATA.D_archive||[]).length) + '\n' +
-          '診斷碼：V83-SIG-MISMATCH';
+          '診斷碼：V84-SIG-MISMATCH';
         console.warn('[V83 Firebase 衝突診斷]', {changedFields:__changedKeys, baseSignatureLength:(_dBaseSig||'').length, serverSignatureLength:serverSig.length, localCounts:{D:(DATA.D||[]).length,D_archive:(DATA.D_archive||[]).length}, serverCounts:{D:(serverData.D||[]).length,D_archive:(serverData.D_archive||[]).length}});
         var NL = String.fromCharCode(10);
         var proceed = confirm(
@@ -2544,9 +2544,21 @@ window.addDtrade = async function() {
   var selectedMergeId=(document.getElementById('D-merge-trade-id')||{}).value||'';
   var tradeId = selectedMergeId || (sameTrade && lastSame && lastSame.tradeId ? lastSame.tradeId : (tradeDateKey.replace(/\//g,'-') + '-' + String(prior.length + 1).padStart(2,'0')));
   var existingTradeRows=prior.filter(function(r){return String(r.tradeId||'')===String(tradeId);});
+  // v84：手動指定同一 Trade 加碼時，將該 Trade 既有明細一併標記為同組。
+  // 每一筆加碼保留自己的進場時間與進場價；彙總時依日期＋Trade ID 合併，不以進場價當分組條件。
+  if(selectedMergeId && existingTradeRows.length){
+    var mismatchDir=existingTradeRows.some(function(r){return String(r.dir||'')!==String(dir);});
+    if(mismatchDir){
+      var msgEl=document.getElementById('msg-D');
+      if(msgEl) msgEl.textContent='⚠️ 同一 Trade 加碼方向必須一致；若要反向進場，請改選「自動新建 Trade」。';
+      alert('同一 Trade 加碼方向必須一致。若要反向進場，請建立新 Trade。');
+      return;
+    }
+    existingTradeRows.forEach(function(r){ r.manualTradeGroup=true; });
+  }
   var tpStage = existingTradeRows.length ? (Math.max.apply(null,existingTradeRows.map(function(r){return Number(r.tpStage)||1;}))+1) : 1;
 
-  // 同一交易的分批出場：沿用第一段的進場時間/進場價。
+  // 分批出場延續模式才沿用原進場時間/價；手動指定同 Trade 加碼則保留本次新進場時間/價。
   var entryTime=nowVal;
   var mergeBase=existingTradeRows.length ? existingTradeRows.slice().sort(function(a,b){return String(a.entryTime||'').localeCompare(String(b.entryTime||''));})[0] : null;
   if(sameTrade && lastSame && lastSame.tradeId){
@@ -2554,6 +2566,7 @@ window.addDtrade = async function() {
     if(lastSame.entryTime) entryTime=lastSame.entryTime;
     if(lastSame.en!=null) en=Number(lastSame.en);
   } else if(selectedMergeId && mergeBase){
+    // 不覆蓋 en / entryTime：這是同一 Trade 的另一個實際加碼進場點。
     // 加碼明細保留本次進場價/時間；entryLots 記錄整組目標口數，群組按 Trade ID 彙總。
     entryLots=Math.max(Number(mergeBase.entryLots)||0, existingTradeRows.reduce(function(n,r){return n+(Number(r.addLots)||0);},0)+(Number(document.getElementById('D-entry-lots').value)||lots));
   }
