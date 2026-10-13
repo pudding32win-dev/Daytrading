@@ -2233,12 +2233,27 @@ async function saveData() {
       var serverData = checkSnap.data() || {};
       var serverSig = _dSignature(serverData);
       if (_dBaseSig !== null && serverSig !== _dBaseSig) {
+        // v83 診斷：列出哪些受管理欄位與上次同步基準不同，方便區分真衝突與格式/時序差異。
+        var __managedKeys = ['D','D_io','D_eq','D_premium','D_marketBias','D_archive','D_marginPerLot'];
+        var __changedKeys = __managedKeys.filter(function(k){
+          try { return JSON.stringify((_dManagedSnapshot(serverData))[k]) !== JSON.stringify((_dManagedSnapshot({_sigSource:0}))[k]) && false; } catch(e) { return false; }
+        });
+        // 比對基準內容無法反解欄位，故以本機目前資料與伺服器資料產生診斷摘要；不輸出交易明細內容。
+        var __localManaged = _dManagedSnapshot(DATA), __serverManaged = _dManagedSnapshot(serverData);
+        __changedKeys = __managedKeys.filter(function(k){
+          try { return JSON.stringify(__serverManaged[k]) !== JSON.stringify(__localManaged[k]); } catch(e) { return true; }
+        });
+        var __diag = '診斷欄位（雲端與本機目前內容不同）：' + (__changedKeys.join('、') || '未能從目前資料定位；可能是同步基準或格式差異') + '\n' +
+          '雲端 D=' + ((serverData.D||[]).length) + '，本機 D=' + ((DATA.D||[]).length) +
+          '；雲端封存=' + ((serverData.D_archive||[]).length) + '，本機封存=' + ((DATA.D_archive||[]).length) + '\n' +
+          '診斷碼：V83-SIG-MISMATCH';
+        console.warn('[V83 Firebase 衝突診斷]', {changedFields:__changedKeys, baseSignatureLength:(_dBaseSig||'').length, serverSignatureLength:serverSig.length, localCounts:{D:(DATA.D||[]).length,D_archive:(DATA.D_archive||[]).length}, serverCounts:{D:(serverData.D||[]).length,D_archive:(serverData.D_archive||[]).length}});
         var NL = String.fromCharCode(10);
         var proceed = confirm(
-          '⚠️ 偵測到雲端的當沖資料已被其他分頁或裝置更新過！' + NL + NL +
-          '如果現在繼續存檔，會把雲端上比較新的資料覆蓋掉。' + NL + NL +
-          '建議按「取消」，讓頁面重新整理載入最新資料，再重新輸入這筆。' + NL + NL +
-          '確定要「強制覆蓋」雲端資料嗎？（不建議，可能會遺失剛剛其他裝置存的內容）'
+          '⚠️ 偵測到雲端的當沖資料與上次同步基準不同。' + NL + NL +
+          __diag + NL + NL +
+          '目前先保留衝突保護。若不確定，請按「取消」，不要強制覆蓋雲端資料。' + NL + NL +
+          '仍要強制覆蓋雲端資料嗎？（可能造成資料遺失）'
         );
         if (!proceed) {
           alert('已取消存檔，即將重新整理頁面以載入最新資料…');
