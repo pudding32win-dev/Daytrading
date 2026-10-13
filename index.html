@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v86.2 同Trade加碼統計修正版</title>
+<title>每日衝浪板｜v86.3 同Trade加碼統計錯誤修正版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -3207,8 +3207,16 @@ function getHubStatsSourceRows() {
   return rows;
 }
 
-// v86.2 hotfix：統一使用單一 hubTradeGroupKey 定義，避免重複宣告。
-
+// v86.3 hotfix：將 Trade 分組鍵明確掛到 window，確保首頁統計與其他區塊都能存取。
+window.hubTradeGroupKey = function(r, fallbackIndex){
+  var date=String(r && r.date!=null ? r.date : '').replace(/-/g,'/');
+  var dir=String(r && r.dir!=null ? r.dir : '');
+  var tid=String(r && r.tradeId!=null ? r.tradeId : '').trim();
+  if(tid) return 'id:'+date+'|'+tid;
+  var en=(r && r.en!=null && r.en!=='') ? String(r.en) : '';
+  if(date && dir && en) return date+'|'+dir+'|'+en;
+  return date+'|'+dir+'|row|'+String(fallbackIndex==null?0:fallbackIndex);
+};
 function getHubStatsTrades() {
   if(typeof hubStatsGroups !== 'function') return [];
   return hubStatsGroups(getHubStatsSourceRows())
@@ -4644,16 +4652,7 @@ function hubMinutes(ms){ if(!isFinite(ms)||ms<0)return '—'; var m=Math.floor(m
 // 但有出場價／時間，視為 1 口出場，與交易明細表的顯示規則一致。
 // v86：手動指定同一 Trade 的加碼，所有統計與明細都優先依「日期＋Trade ID」分組。
 // 舊資料未指定手動 Trade 時，仍沿用「日期＋方向＋進場價」規則，避免把舊的分批出場拆開。
-function hubTradeGroupKey(r, fallbackIndex){
-  var date=String(r && r.date!=null ? r.date : '').replace(/-/g,'/');
-  var dir=String(r && r.dir!=null ? r.dir : '');
-  var en=(r && r.en!=null && r.en!=='') ? String(r.en) : '';
-  var tid=String(r && r.tradeId!=null ? r.tradeId : '');
-  if(tid && r && r.manualTradeGroup) return 'manual:'+date+'|'+tid;
-  if(date && dir && en) return date+'|'+dir+'|'+en;
-  if(tid) return 'id:'+date+'|'+tid;
-  return date+'|'+dir+'|row|'+String(fallbackIndex==null?0:fallbackIndex);
-}
+// v86.3：分組鍵已統一在全域 window.hubTradeGroupKey 定義，這裡不再重複宣告。
 function hubTradeGroups(rows){
   // 每一個 Trade = 一次進場；分批出場仍合併成同一 Trade。
   // closed 必須以「進場口數 vs 累計實際出場口數」判斷，不能只看某一列。
