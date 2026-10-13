@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v86.3 同Trade加碼統計錯誤修正版</title>
+<title>每日衝浪板｜v87 單次進場與整筆Trade雙層分析</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -885,7 +885,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
     </div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:14px">選擇要匯出的資料，檔案會下載到裝置本機（Excel / 記事本皆可開啟）</div>
     <div style="display:flex;flex-direction:column;gap:9px">
-      <button onclick="exportTradesCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">📋 交易明細 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">每筆當沖交易（日期/口數/波段/方向/進出場/損益）</span></button>
+      <button onclick="exportEntryAnalysisCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(96,165,250,0.10);border:1px solid rgba(96,165,250,0.3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">🎯 單次進場分析 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">同一筆 Trade 的不同進場／加碼分開分析，分批出場合併</span></button>
+      <button onclick="exportTradeSummaryCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(52,211,153,0.10);border:1px solid rgba(52,211,153,0.3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">📊 整筆 Trade 分析 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">同 Trade 加碼合併，只計一次整筆損益與勝敗</span></button>
+      <button onclick="exportTradesCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(148,163,184,0.08);border:1px solid var(--border2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)">📋 舊版策略明細 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">保留原本匯出欄位，方便相容舊分析</span></button>
       <button onclick="exportIOCSV()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">↕ 出入金紀錄 CSV<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">資金投入/提領紀錄</span></button>
       <button onclick="exportFullJSON()" style="width:100%;text-align:left;padding:12px 14px;border-radius:9px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">💾 完整資料 JSON<span style="display:block;font-size:10.5px;color:var(--muted);font-weight:400;margin-top:2px">所有頁籤完整備份，可用於還原或搬移資料</span></button>
     </div>
@@ -1795,6 +1797,72 @@ window.exportTradesCSV = function() {
   var csv=String.fromCharCode(0xFEFF)+rows.map(function(row){return row.map(_csvCell).join(',');}).join(String.fromCharCode(13,10));
   _downloadFile('當沖交易明細_策略分析版_'+_exportTs()+'.csv',csv,'text/csv;charset=utf-8;');
   var modal=document.getElementById('exportModal'); if(modal) modal.style.display='none';
+};
+
+// v87：雙層策略分析匯出。Entry=同一 Trade 內的不同進場腿；分批出場合併，不把出場列當新進場。
+function _hubCsvDownload(name, rows){
+  var csv=String.fromCharCode(0xFEFF)+rows.map(function(row){return row.map(_csvCell).join(',');}).join(String.fromCharCode(13,10));
+  _downloadFile(name+'_'+_exportTs()+'.csv',csv,'text/csv;charset=utf-8;');
+  var modal=document.getElementById('exportModal'); if(modal) modal.style.display='none';
+}
+function _hubFmtExportTime(t){
+  if(!t) return ''; var d=new Date(t); if(isNaN(d.getTime())) return String(t);
+  return d.getFullYear()+'/'+_pad2(d.getMonth()+1)+'/'+_pad2(d.getDate())+' '+_pad2(d.getHours())+':'+_pad2(d.getMinutes());
+}
+function _hubHoldMinutes(a,b){
+  if(!a||!b) return ''; var x=new Date(a).getTime(),y=new Date(b).getTime();
+  return isFinite(x)&&isFinite(y)&&y>=x?Math.round((y-x)/60000):'';
+}
+window.exportEntryAnalysisCSV=function(){
+  var raw=(DATA.D||[]).slice();
+  var legs={}, order=[];
+  raw.forEach(function(r,i){
+    if(!r||typeof r!=='object') return;
+    var tradeKey=hubTradeGroupKey(r,i);
+    // 進場時間+進場價識別同 Trade 內的不同進場腿；同腿分批出場仍併在一起。
+    var et=String(r.entryTime||''), en=String(r.en==null?'':r.en), dir=String(r.dir||'');
+    var legKey=tradeKey+'|ENTRY|'+et+'|'+en+'|'+dir;
+    if(!legs[legKey]){ legs[legKey]={key:legKey,tradeKey:tradeKey,rows:[],first:r,index:i,date:r.date||'',dir:dir,en:r.en,entryTime:r.entryTime||'',entryLots:0,exitLots:0,net:0,fee:0,exitTime:'',exitPrices:[],tradeId:r.tradeId||''}; order.push(legKey); }
+    var g=legs[legKey]; g.rows.push(r);
+    var el=Number(r.entryLots||0); if(isFinite(el)&&el>g.entryLots) g.entryLots=el;
+    var hasExit=(r.ex!=null&&r.ex!=='')||(r.exitTime!=null&&r.exitTime!=='');
+    var lots=Number(r.lots); if((!isFinite(lots)||lots<=0)&&hasExit) lots=1;
+    if(hasExit&&isFinite(lots)&&lots>0) g.exitLots+=lots;
+    g.net+=Number(r.net)||0; g.fee+=Number(r.fee)||0;
+    if(r.exitTime&&(!g.exitTime||new Date(r.exitTime)>new Date(g.exitTime))) g.exitTime=r.exitTime;
+    if(r.ex!=null&&r.ex!=='') g.exitPrices.push(Number(r.ex));
+  });
+  order.sort(function(a,b){var x=legs[a],y=legs[b];return String(x.date).localeCompare(String(y.date))||((new Date(x.entryTime||0))-(new Date(y.entryTime||0)))||x.index-y.index;});
+  var tradeNos={};
+  var rows=[['日期','Trade分組鍵','交易ID','當日第幾筆進場腿','進場腿編號','方向','進場價','進場時間','進場時段','初始口數(欄位值)','實際出場口數','出場時間(最後)','出場價(各次)','持倉分鐘','進場原因','進場心理','市場方向認知','月線方向','5日均線方向','開盤價','當日最高','當日最低','此進場腿淨損益(列加總)','手續費(列加總)','勝敗W/L','資料列數']];
+  order.forEach(function(k,idx){var g=legs[k],r=g.first||{}, frame=getMarketFrameByDate(g.date)||{};
+    var short=(typeof getTradeShortStrategy==='function')?getTradeShortStrategy(r):'';
+    var base=String(g.date)+'|'+g.tradeKey; tradeNos[base]=(tradeNos[base]||0)+1;
+    var high=null,low=null;g.rows.forEach(function(x){if(x.dayHigh!=null&&x.dayHigh!=='')high=high==null?Number(x.dayHigh):Math.max(high,Number(x.dayHigh));if(x.dayLow!=null&&x.dayLow!=='')low=low==null?Number(x.dayLow):Math.min(low,Number(x.dayLow));});
+    var net=Math.round(g.net*100)/100;
+    rows.push([g.date,g.tradeKey,g.tradeId,tradeNos[base],idx+1,g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),g.en,_hubFmtExportTime(g.entryTime),short,g.entryLots||'',g.exitLots||0,_hubFmtExportTime(g.exitTime),g.exitPrices.join(' / '),_hubHoldMinutes(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',r.wave||'',r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),high==null?'':high,low==null?'':low,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
+  });
+  _hubCsvDownload('每日衝浪板_單次進場分析',rows);
+};
+window.exportTradeSummaryCSV=function(){
+  var raw=(DATA.D||[]).slice();
+  var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(raw):[];
+  groups.sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''))||hubTradeSort(a,b);});
+  var rows=[['日期','Trade編號(依匯出排序)','交易ID','方向','長順勢背景','進場次數/加碼腿數','各次進場時間','各次進場價格','總進場口數(最大entryLots)','累計出場口數','剩餘口數','整筆狀態','第一進場時間','最後出場時間','整筆持倉分鐘','所有出場價','總手續費','整筆淨損益','勝敗W/L','進場原因(彙整)','進場心理(彙整)','資料列數']];
+  groups.forEach(function(g,idx){var rr=g.rows||[],first=rr[0]||{}, frame=getMarketFrameByDate(g.date)||{};
+    var legs={}, legOrder=[]; rr.forEach(function(r,i){var k=String(r.entryTime||'')+'|'+String(r.en==null?'':r.en)+'|'+String(r.dir||'');if(!legs[k]){legs[k]={time:r.entryTime||'',en:r.en,reason:r.entryReason||'',psy:r.entryPsychology||''};legOrder.push(k);}else{if(!legs[k].reason&&r.entryReason)legs[k].reason=r.entryReason;if(!legs[k].psy&&r.entryPsychology)legs[k].psy=r.entryPsychology;}});
+    legOrder.sort(function(a,b){return (new Date(legs[a].time||0))-(new Date(legs[b].time||0));});
+    var entryTimes=legOrder.map(function(k){return _hubFmtExportTime(legs[k].time);});
+    var entryPrices=legOrder.map(function(k){return legs[k].en==null?'':legs[k].en;});
+    var reasons=legOrder.map(function(k){return legs[k].reason;}).filter(Boolean).join(' / ');
+    var psy=legOrder.map(function(k){return legs[k].psy;}).filter(Boolean).join(' / ');
+    var exitPrices=[];rr.forEach(function(r){if(r.ex!=null&&r.ex!=='')exitPrices.push(r.ex);});
+    var openLots=Number(g.entryLots)||0, exitLots=Number(g.exitLots)||0, remaining=Math.max(0,openLots-exitLots);
+    var net=Math.round((Number(g.net)||0)*100)/100, month=first.monthBias||frame.monthBias||frame.bias||'',ma5=first.ma5Bias||frame.ma5Bias||'';
+    var bg=(month&&ma5&&month===ma5)?month:(month||ma5?'分歧':'');
+    rows.push([g.date||'',idx+1,g.tradeId||'',g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),bg,legOrder.length,entryTimes.join(' / '),entryPrices.join(' / '),openLots,exitLots,remaining,g.closed?'已完成':'未完成',_hubFmtExportTime(g.entryTime),_hubFmtExportTime(g.exitTime),_hubHoldMinutes(g.entryTime,g.exitTime),exitPrices.join(' / '),Math.round((Number(g.fee)||0)*100)/100,net,net>0?'W':(net<0?'L':''),reasons,psy,rr.length]);
+  });
+  _hubCsvDownload('每日衝浪板_整筆Trade分析',rows);
 };
 
 window.exportIOCSV = function() {
