@@ -3171,6 +3171,21 @@ function autoFillQuoteInputs(){
   if(ex && !String(ex.value).trim()) ex.value=_mtxQuote.price;
   if(typeof window._updateDPreview==='function') window._updateDPreview();
 }
+// v93：每日紀錄表的市場認知必須顯示四種盤態，不可誤用振幅浪級。
+function getTradeMarketRecognition(r){
+  r=r||{};
+  var date=String(r.date||'').replace(/\//g,'-').replace(/-(\d)(?=-|$)/g,'-0$1');
+  var frame=(DATA.D_marketBias||[]).find(function(x){return String(x.date||'').replace(/\//g,'-').replace(/-(\d)(?=-|$)/g,'-0$1')===date;})||{};
+  var month=r.monthBias||frame.monthBias||frame.bias||'';
+  var ma5=r.ma5Bias||frame.ma5Bias||'';
+  if(!month||!ma5) return '待設定';
+  if(month==='多'&&ma5==='多') return '強多';
+  if(month==='多'&&ma5==='空') return '偏多';
+  if(month==='空'&&ma5==='多') return '偏空';
+  if(month==='空'&&ma5==='空') return '強空';
+  return '待設定';
+}
+
 function getTodayMarketFrame(){
   var d=dTodayKey(), r=(DATA.D_marketBias||[]).find(function(x){return x.date===d;})||{};
   var qh=(_mtxQuote&&isFinite(Number(_mtxQuote.todayHigh)))?Number(_mtxQuote.todayHigh):null;
@@ -4355,7 +4370,7 @@ window.renderDDetailTab = function() {
       var cumVal = cumMap[origIdx];
       html += '<tr>'
         + '<td style="padding:9px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-family:monospace;font-weight:700"><div style="font-family:var(--font);font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px">第'+meta.tradeNo+'筆</div><span style="display:inline-flex;align-items:center;gap:7px;padding:4px 9px;border-radius:7px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20)">'+(meta.isFirst?Number(r.entryLots||r.lots||1)+'口 → '+Number(r.lots||1)+'口':'↳ 再出 '+Number(r.lots||1)+'口')+'</span></td>'
-        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:700;color:'+getDWaveColor(getDWaveLevel(r))+'"><div>'+getDWaveLevel(r)+'</div>'+((function(){var st=getTradeShortStrategy(r);return st==='短順勢'?'<span class="trade-strategy follow">短順勢</span>':st==='短逆勢'?'<span class="trade-strategy contra">短逆勢</span>':st==='開盤'?'<span class="trade-strategy">開盤</span>':'<span class="trade-strategy">—</span>';})())+'</td>'
+        + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:700;color:'+(({"強多":"#34d399","偏多":"#6ee7b7","偏空":"#c4b5fd","強空":"#a78bfa"})[getTradeMarketRecognition(r)]||'var(--muted)')+'"><div>'+getTradeMarketRecognition(r)+'</div>'+((function(){var st=getTradeShortStrategy(r);return st==='短順勢'?'<span class="trade-strategy follow">短順勢</span>':st==='短逆勢'?'<span class="trade-strategy contra">短逆勢</span>':st==='開盤'?'<span class="trade-strategy">開盤</span>':'<span class="trade-strategy">—</span>';})())+'</td>'
         + '<td style="padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)"><span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;'
         + (r.dir==='B'?'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#34d399':'background:rgba(167,139,250,.1);border:1px solid rgba(167,139,139,.25);color:#a78bfa')
         + '">'+(r.dir==='B'?'多 B':'空 S')+'</span></td>'
@@ -4449,7 +4464,7 @@ window.toggleDGroup = function(uid) {
   if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
 };
 
-// v92：選定日期後，一次更新該日的市場認知設定與所有交易列，不必逐筆修改。
+// v93：選定日期後，一次更新該日的市場認知設定與所有交易列，不必逐筆修改。
 window.applyDailyMarketRecognition = async function(){
   var dateEl=document.getElementById('D-quick-date'), monthEl=document.getElementById('D-bulk-month'), ma5El=document.getElementById('D-bulk-ma5');
   var date=String(dateEl&&dateEl.value||'').trim();
