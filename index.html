@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v88 一鍵策略分析包</title>
+<title>每日衝浪板｜v89 一鍵策略分析包</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1129,6 +1129,16 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
               <option value="多">多</option><option value="空">空</option>
             </select>
           </div>
+          <div class="fg"><label>月線方向</label>
+            <select id="D-month-bias" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none">
+              <option value="">沿用當日設定／未設定</option><option value="多">多</option><option value="空">空</option>
+            </select>
+          </div>
+          <div class="fg"><label>5日均線方向</label>
+            <select id="D-ma5-bias" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none">
+              <option value="">沿用當日設定／未設定</option><option value="多">多</option><option value="空">空</option>
+            </select>
+          </div>
           <div class="fg"><label>方向</label>
             <select id="D-dir" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none;-webkit-appearance:none">
               <option value="B">多 B</option><option value="S">空 S</option>
@@ -1372,6 +1382,16 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="fg"><label>市場方向認知</label>
         <select id="Dedit-wave" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
           <option value="多">多</option><option value="空">空</option>
+        </select>
+      </div>
+      <div class="fg"><label>月線方向</label>
+        <select id="Dedit-month-bias" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
+          <option value="">沿用當日設定／未設定</option><option value="多">多</option><option value="空">空</option>
+        </select>
+      </div>
+      <div class="fg"><label>5日均線方向</label>
+        <select id="Dedit-ma5-bias" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
+          <option value="">沿用當日設定／未設定</option><option value="多">多</option><option value="空">空</option>
         </select>
       </div>
       <div class="fg"><label>方向</label>
@@ -1800,7 +1820,7 @@ window.exportTradesCSV = function() {
   var modal=document.getElementById('exportModal'); if(modal) modal.style.display='none';
 };
 
-// v88：一鍵策略分析包匯出。Entry=同一 Trade 內的不同進場腿；分批出場合併，不把出場列當新進場。
+// v89：一鍵策略分析包匯出。Entry=同一 Trade 內的不同進場腿；分批出場合併，不把出場列當新進場。
 function _hubCsvDownload(name, rows){
   var csv=String.fromCharCode(0xFEFF)+rows.map(function(row){return row.map(_csvCell).join(',');}).join(String.fromCharCode(13,10));
   _downloadFile(name+'_'+_exportTs()+'.csv',csv,'text/csv;charset=utf-8;');
@@ -1866,7 +1886,7 @@ window.exportTradeSummaryCSV=function(){
   _hubCsvDownload('每日衝浪板_整筆Trade分析',rows);
 };
 
-// v88：一鍵匯出單一 Excel 相容活頁簿（Excel 2003 XML 格式，不依賴外部 CDN）。
+// v89：一鍵匯出單一 Excel 相容活頁簿（Excel 2003 XML 格式，不依賴外部 CDN）。
 window.exportStrategyWorkbook=function(){
   try{
     var raw=(DATA.D||[]).slice();
@@ -2705,6 +2725,8 @@ window.addDtrade = async function() {
   var exitTime=formatLocalDateTimeInput(new Date());
   var net = Math.round(pts * D_MULT * lots) - fee;
   var tradeFrame=getMarketFrameByDate(tradeDateKey);
+  var monthBiasInput=(document.getElementById('D-month-bias')||{}).value||'';
+  var ma5BiasInput=(document.getElementById('D-ma5-bias')||{}).value||'';
   var openPrice=(sameTrade && lastSame && lastSame.openPrice!=null) ? Number(lastSame.openPrice) : (tradeFrame.openPrice!=null ? Number(tradeFrame.openPrice) : null);
   var entryReasonEl=document.getElementById('D-entry-reason'), psychEl=document.getElementById('D-entry-psychology');
   var entryReason=(sameTrade && lastSame && lastSame.entryReason) ? lastSame.entryReason : ((entryReasonEl&&entryReasonEl.value)||'').trim();
@@ -2714,7 +2736,7 @@ window.addDtrade = async function() {
     openPrice: isFinite(openPrice) ? openPrice : null,
     dayHigh: tradeFrame.dayHigh!=null ? Number(tradeFrame.dayHigh) : ((_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayHigh!=null) ? Number(_mtxQuote.todayHigh) : (sameTrade&&lastSame&&lastSame.dayHigh!=null?Number(lastSame.dayHigh):null)),
     dayLow: tradeFrame.dayLow!=null ? Number(tradeFrame.dayLow) : ((_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayLow!=null) ? Number(_mtxQuote.todayLow) : (sameTrade&&lastSame&&lastSame.dayLow!=null?Number(lastSame.dayLow):null)),
-    monthBias: tradeFrame.monthBias||tradeFrame.bias||'', ma5Bias: tradeFrame.ma5Bias||'',
+    monthBias: monthBiasInput || tradeFrame.monthBias || tradeFrame.bias || '', ma5Bias: ma5BiasInput || tradeFrame.ma5Bias || '',
     entryTime: entryTime, exitTime: exitTime, entryReason: entryReason, entryPsychology: entryPsychology
   };
 
@@ -2785,6 +2807,9 @@ window.openEditDtrade = function(idx) {
   document.getElementById('Dedit-trade-id').value = r.tradeId || '';
   document.getElementById('Dedit-tp-stage').value = r.tpStage || 1;
   document.getElementById('Dedit-wave').value = r.wave || '多';
+  var editFrameForFields=getMarketFrameByDate(r.date||'');
+  document.getElementById('Dedit-month-bias').value = r.monthBias || editFrameForFields.monthBias || editFrameForFields.bias || '';
+  document.getElementById('Dedit-ma5-bias').value = r.ma5Bias || editFrameForFields.ma5Bias || '';
   document.getElementById('Dedit-dir').value  = r.dir  || 'B';
   document.getElementById('Dedit-en').value   = r.en   || '';
   document.getElementById('Dedit-ex').value   = r.ex   || '';
@@ -2802,6 +2827,8 @@ window.saveEditDtrade = async function() {
   var tradeId = document.getElementById('Dedit-trade-id').value.trim();
   var tpStage = parseInt(document.getElementById('Dedit-tp-stage').value) || 1;
   var wave = document.getElementById('Dedit-wave').value || '多';
+  var monthBiasInput=(document.getElementById('Dedit-month-bias')||{}).value||'';
+  var ma5BiasInput=(document.getElementById('Dedit-ma5-bias')||{}).value||'';
   var dir  = document.getElementById('Dedit-dir').value  || 'B';
   var en   = parseFloat(document.getElementById('Dedit-en').value);
   var ex   = parseFloat(document.getElementById('Dedit-ex').value);
@@ -2818,7 +2845,7 @@ window.saveEditDtrade = async function() {
   var editDateKey=dParseDate(dateVal);
   var editFrame=getMarketFrameByDate(editDateKey);
   var editOpen=(oldRec.openPrice!=null && isFinite(Number(oldRec.openPrice))) ? Number(oldRec.openPrice) : (editFrame.openPrice!=null ? Number(editFrame.openPrice) : null);
-  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:(editFrame.dayHigh!=null?editFrame.dayHigh:null), dayLow:oldRec.dayLow!=null?oldRec.dayLow:(editFrame.dayLow!=null?editFrame.dayLow:null), monthBias:oldRec.monthBias||editFrame.monthBias||editFrame.bias||'', ma5Bias:oldRec.ma5Bias||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:entryReason || '', entryPsychology:entryPsychology || ''};
+  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:(editFrame.dayHigh!=null?editFrame.dayHigh:null), dayLow:oldRec.dayLow!=null?oldRec.dayLow:(editFrame.dayLow!=null?editFrame.dayLow:null), monthBias:monthBiasInput||editFrame.monthBias||editFrame.bias||'', ma5Bias:ma5BiasInput||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:entryReason || '', entryPsychology:entryPsychology || ''};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
