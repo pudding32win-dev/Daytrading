@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v89 一鍵策略分析包</title>
+<title>每日衝浪板｜v91 六項整合版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1004,7 +1004,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       </div>
     </div>
     <div class="card" style="margin-bottom:0">
-      <div class="card-hd"><span>今日方向＋開盤基準</span><span style="font-size:10px;color:var(--muted)">一天設定一次</span></div>
+      <div class="card-hd"><span>市場方向設定｜月線＋5日均線</span><span style="font-size:10px;color:var(--muted)">一天設定一次</span></div>
       <div class="card-bd">
         <div class="dboard-mini-grid">
           <div class="dboard-mini"><div class="k">月線</div><div class="v" id="D-month-state">未選</div><div style="margin-top:6px;display:flex;gap:6px"><button id="D-month-bull" type="button" onclick="setMarketFrame('month','多')" style="flex:1">多</button><button id="D-month-bear" type="button" onclick="setMarketFrame('month','空')" style="flex:1">空</button></div></div>
@@ -1075,34 +1075,18 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="card-hd">📊 20日市場振幅｜Apps Script 自動更新</div>
       <div class="card-bd" id="D-wave-amplitude-body"></div>
     </div>
-    <!-- ★ 今日開盤基準：放在新增當沖交易附近，當天只需設定一次 -->
-    <div class="card" id="D-open-price-card" style="margin-bottom:10px">
-      <div class="card-hd"><span>📌 今日開盤價</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">一天設定一次</span></div>
-      <div class="card-bd" style="padding:10px 12px">
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="D-open-price" type="number" inputmode="numeric" placeholder="輸入今日開盤價，例如 48600" style="flex:1;min-width:0;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 11px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700">
-          <button type="button" onclick="saveDailyOpenPrice()" style="padding:10px 15px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">設定</button>
-        </div>
-        <div id="D-open-price-hint" style="margin-top:7px;font-size:12px;color:var(--muted)">設定後今天會沿用，不需要重複輸入。</div>
-      </div>
-    </div>
-
     <!-- 今日振幅與停利參考：高低價旁即時顯示 -->
     <div id="D-range-reference-row" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:10px;align-items:stretch">
     <!-- ★ 今日高低：系統自動抓取＋可手動覆蓋；一天設定一次即可 -->
     <div class="card" id="D-high-low-card" style="margin-bottom:0">
-      <div class="card-hd"><span>📈 今日高低價</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">系統抓取｜可手動修正</span></div>
+      <div class="card-hd"><span>📌 今日行情基準｜開盤・最高・最低</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">一天設定一次</span></div>
       <div class="card-bd" style="padding:10px 12px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">今日最高</div>
-            <input id="D-day-high" type="number" inputmode="numeric" placeholder="系統自動抓取" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 11px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700">
-          </div>
-          <div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">今日最低</div>
-            <input id="D-day-low" type="number" inputmode="numeric" placeholder="系統自動抓取" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 11px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700">
-          </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">今日開盤</div><input id="D-open-price" type="number" inputmode="numeric" placeholder="輸入開盤價" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 8px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">今日最高</div><input id="D-day-high" type="number" inputmode="numeric" placeholder="系統抓取" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 8px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">今日最低</div><input id="D-day-low" type="number" inputmode="numeric" placeholder="系統抓取" style="width:100%;box-sizing:border-box;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:10px 8px;color:var(--text);font-family:monospace;font-size:15px;font-weight:700"></div>
         </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><button type="button" onclick="saveDailyOpenPrice()" style="padding:9px 15px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">儲存開盤</button><span id="D-open-price-hint" style="font-size:12px;color:var(--muted)">設定後今天會沿用，不需要重複輸入。</span></div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
           <button type="button" onclick="saveDailyHighLow()" style="padding:9px 15px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:700;cursor:pointer">儲存高低</button>
           <span id="D-high-low-hint" style="font-size:12px;color:var(--muted)">尚未取得今日高低價</span>
@@ -1202,6 +1186,15 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <button type="button" onclick="verifyFirebaseTradeData()" style="padding:8px 11px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;white-space:nowrap">☁ 驗證 Firebase</button>
           <span class="form-msg" id="msg-D"></span>
         </div>
+      </div>
+    </div>
+    <!-- v91：快速日期編輯＋展開狀態保留 -->
+    <div class="card" id="D-quick-date-card" style="margin-bottom:8px">
+      <div class="card-bd" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px">
+        <label for="D-quick-date" style="font-size:13px;font-weight:700;color:var(--text)">快速編輯日期</label>
+        <input id="D-quick-date" type="date" value="" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px">
+        <button type="button" onclick="quickLocateDDate()" style="padding:8px 12px;border-radius:8px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.35);color:#93c5fd;font-size:13px;font-weight:700;cursor:pointer">定位並展開</button>
+        <span style="font-size:11px;color:var(--muted)">選日期後直接展開當日交易，可進行原有編輯操作</span>
       </div>
     </div>
     <!-- 日期分組明細列表 -->
@@ -3288,7 +3281,8 @@ function renderMarketRecognition(){
     if(p1) p1.classList.toggle('active',b==='多'); if(p2) p2.classList.toggle('active',b==='空');
   });
   _marketBiasToday=(f.month && f.month===f.ma5)?f.month:'';
-  set('D-bias-state', f.month&&f.ma5&&f.month===f.ma5 ? ('背景：'+f.month+'方') : (f.month&&f.ma5?'月線／5日均線分歧':'請先設定方向'));
+  var recog = !f.month || !f.ma5 ? '待設定' : (f.month==='多' && f.ma5==='多' ? '強多' : (f.month==='多' && f.ma5==='空' ? '偏多' : (f.month==='空' && f.ma5==='多' ? '偏空' : '強空')));
+  set('D-bias-state', recog==='待設定' ? '請先設定月線與5日均線' : ('市場認知：'+recog+'｜月線 '+f.month+'／5日均線 '+f.ma5));
   renderOpenPricePrompt();
   renderRangeReference();
 }
@@ -4283,7 +4277,7 @@ window.renderDDetailTab = function() {
        + '<span id="'+uid+'-arrow" class="dgrp-arrow-open" style="font-size:12px;color:var(--muted);transition:transform 0.2s;margin-left:4px">▼</span>'
       + '</div>'
       + '</div>'
-       + '<div id="'+uid+'" style="display:none;border-top:1px solid var(--border);overflow-x:auto">'
+       + '<div id="'+uid+'" style="display:'+((window._dGroupOpenState&&window._dGroupOpenState[uid])?'block':'none')+';border-top:1px solid var(--border);overflow-x:auto">'
       + '<div style="padding:7px 10px;background:var(--bg3);color:var(--muted);font-size:11px">交易／口數：<b style="color:var(--text)">第一筆、第二筆…＋口數變化</b>；分批出場直接列出，不顯示 TP1／TP2</div>'
       + '<table class="hub-trade-detail-table" style="width:1500px;min-width:1500px;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:14px;white-space:nowrap">'
       + '<colgroup>'
@@ -4439,14 +4433,46 @@ window.applyTPBatch = async function(){
   alert('✓ '+date+' TP 已依出場時間重新整理完成');
 };
 
-// 折疊/展開日期分組
+// 折疊/展開日期分組；重繪清單後沿用使用者展開狀態。
+var _dGroupOpenState = window._dGroupOpenState || (window._dGroupOpenState = {});
 window.toggleDGroup = function(uid) {
   var el = document.getElementById(uid);
   var arrow = document.getElementById(uid+'-arrow');
   if (!el) return;
   var isOpen = el.style.display !== 'none';
   el.style.display = isOpen ? 'none' : 'block';
+  _dGroupOpenState[uid] = !isOpen;
   if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
+
+// v90：選定日期後，定位並自動展開該日交易明細。
+window.quickLocateDDate = function() {
+  var input = document.getElementById('D-quick-date');
+  if (!input || !input.value) { alert('請先選擇要編輯的日期。'); return; }
+  var date = input.value;
+  var uid = 'dgrp-' + date.split('/').join('-');
+  var panel = document.getElementById(uid);
+  if (!panel) {
+    // 日期顯示格式可能為 YYYY/M/D 或 YYYY-MM-DD，嘗試對應現有日期分組。
+    var groups = document.querySelectorAll('#D-date-group-list [data-uid]');
+    for (var i=0; i<groups.length; i++) {
+      var label = (groups[i].querySelector('span') || {}).textContent || '';
+      var normalized = label.replace(/\\//g,'-').replace(/-(\\d)(?=-|$)/g,'-0$1');
+      var target = date.replace(/-(\\d)(?=-|$)/g,'-0$1');
+      if (normalized === target || label.replace(/\\//g,'-') === date) {
+        uid = groups[i].getAttribute('data-uid');
+        panel = document.getElementById(uid);
+        break;
+      }
+    }
+  }
+  if (!panel) { alert('找不到 ' + date + ' 的交易紀錄。請確認日期或先切換到交易紀錄頁。'); return; }
+  if (panel.style.display === 'none' || !panel.style.display) {
+    window.toggleDGroup(uid);
+  } else { window._dGroupOpenState = window._dGroupOpenState || {}; window._dGroupOpenState[uid] = true; }
+  var card = panel.closest('.card');
+  if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
+  else panel.scrollIntoView({behavior:'smooth', block:'start'});
 };
 
 // ══ Firebase 載入（完整讀取 G/Y/C/T 只為了不遺失欄位資訊、方便日後擴充，
