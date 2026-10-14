@@ -1188,13 +1188,17 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         </div>
       </div>
     </div>
-    <!-- v91：快速日期編輯＋展開狀態保留 -->
+    <!-- v92：按日期整日批次更新市場認知＋展開狀態保留 -->
     <div class="card" id="D-quick-date-card" style="margin-bottom:8px">
       <div class="card-bd" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px">
         <label for="D-quick-date" style="font-size:13px;font-weight:700;color:var(--text)">快速編輯日期</label>
         <input id="D-quick-date" type="date" value="" style="background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px">
         <button type="button" onclick="quickLocateDDate()" style="padding:8px 12px;border-radius:8px;background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.35);color:#93c5fd;font-size:13px;font-weight:700;cursor:pointer">定位並展開</button>
-        <span style="font-size:11px;color:var(--muted)">選日期後直接展開當日交易，可進行原有編輯操作</span>
+        <span style="font-size:11px;color:var(--muted)">整日市場認知設定（一次修改，套用當日全部交易）</span>
+        <label for="D-bulk-month" style="font-size:12px">月線</label><select id="D-bulk-month" style="background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:7px;color:var(--text)"><option value="">不修改</option><option value="多">多</option><option value="空">空</option></select>
+        <label for="D-bulk-ma5" style="font-size:12px">5日均線</label><select id="D-bulk-ma5" style="background:var(--bg3);border:1px solid var(--border2);border-radius:7px;padding:7px;color:var(--text)"><option value="">不修改</option><option value="多">多</option><option value="空">空</option></select>
+        <button type="button" onclick="applyDailyMarketRecognition()" style="padding:8px 12px;border-radius:8px;background:var(--green);border:1px solid var(--green);color:#07110b;font-size:13px;font-weight:800;cursor:pointer">套用整日交易</button>
+        <span id="D-bulk-market-msg" style="font-size:11px;color:var(--muted)">先選日期，再選要修改的方向</span>
       </div>
     </div>
     <!-- 日期分組明細列表 -->
@@ -4443,6 +4447,40 @@ window.toggleDGroup = function(uid) {
   el.style.display = isOpen ? 'none' : 'block';
   _dGroupOpenState[uid] = !isOpen;
   if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
+
+// v92：選定日期後，一次更新該日的市場認知設定與所有交易列，不必逐筆修改。
+window.applyDailyMarketRecognition = async function(){
+  var dateEl=document.getElementById('D-quick-date'), monthEl=document.getElementById('D-bulk-month'), ma5El=document.getElementById('D-bulk-ma5');
+  var date=String(dateEl&&dateEl.value||'').trim();
+  if(!date){alert('請先選擇要修改的日期。');return;}
+  var month=String(monthEl&&monthEl.value||''), ma5=String(ma5El&&ma5El.value||'');
+  if(!month&&!ma5){alert('請至少選擇月線或5日均線其中一項。');return;}
+  var norm=function(v){return String(v||'').replace(/\//g,'-').replace(/-(\d)(?=-|$)/g,'-0$1');};
+  var key=norm(date), arr=DATA.D_marketBias||(DATA.D_marketBias=[]), idx=arr.findIndex(function(x){return norm(x.date)===key;});
+  if(idx<0){arr.push({date:key});idx=arr.length-1;}
+  var frame=arr[idx];
+  if(month) frame.monthBias=month;
+  if(ma5) frame.ma5Bias=ma5;
+  frame.bias=(frame.monthBias&&frame.monthBias===frame.ma5Bias)?frame.monthBias:'';
+  var count=0;
+  (DATA.D||[]).forEach(function(r){
+    if(norm(r.date)!==key)return;
+    if(month)r.monthBias=month;
+    if(ma5)r.ma5Bias=ma5;
+    count++;
+  });
+  arr.sort(function(a,b){return norm(a.date).localeCompare(norm(b.date));});
+  try{
+    await saveData();
+    if(typeof renderD==='function')renderD();
+    else if(typeof renderDTrades==='function')renderDTrades();
+    if(typeof renderMarketRecognition==='function' && key===norm(dTodayKey()))renderMarketRecognition();
+    var msg=document.getElementById('D-bulk-market-msg');
+    if(msg)msg.textContent='已更新 '+date+'：'+count+' 筆交易；市場認知 '+(frame.monthBias||'未設定')+'／'+(frame.ma5Bias||'未設定');
+    if(typeof renderDStats==='function')renderDStats();
+    alert('已將 '+date+' 的市場認知設定套用到 '+count+' 筆交易。');
+  }catch(e){console.error('整日市場認知更新失敗',e);alert('儲存失敗，請確認 Firebase 連線後重試。');}
 };
 
 // v90：選定日期後，定位並自動展開該日交易明細。
