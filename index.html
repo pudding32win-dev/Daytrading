@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜v91 六項整合版</title>
+<title>每日衝浪板｜V94</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -783,9 +783,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v86.1-global-tradeid-grouping-fix">
+<meta name="x-surf-version" content="v94-market-recognition-auto">
 </head>
-<body class="light" data-hub-version="v86.1">
+<body class="light" data-hub-version="v94">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -1108,7 +1108,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="fg"><label>日期</label><input id="D-date" placeholder="2026/5/27" onblur="autoFormatDDate(this);refreshMergeTradeOptions()"></div>
           <div class="fg"><label>初始口數</label><input id="D-entry-lots" type="number" min="1" placeholder="例：3"></div>
           <div class="fg"><label>本次出場口數</label><input id="D-lots" type="number" min="1" placeholder="例：1"></div>
-          <div class="fg"><label>市場方向認知</label>
+          <div class="fg" style="display:none!important" aria-hidden="true"><label>市場方向認知</label>
             <select id="D-wave" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none;-webkit-appearance:none">
               <option value="多">多</option><option value="空">空</option>
             </select>
@@ -1135,17 +1135,16 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="fg"><label>進場原因</label>
             <select id="D-entry-reason" class="entry-choice-select" aria-label="進場原因">
               <option value="">請選擇</option>
-              <option value="長順勢">長順勢</option>
-              <option value="30k守低點">30k守低點</option>
-              <option value="回踩支撐">回踩支撐</option>
-              <option value="回踩壓力">回踩壓力</option>
-              <option value="突破壓力">突破壓力</option>
-              <option value="跌破支撐">跌破支撐</option>
-              <option value="突破回踩確認">突破回踩確認</option>
-              <option value="站回開盤">站回開盤</option>
-              <option value="開盤延續">開盤延續</option>
+              <option value="開盤多空">開盤多空</option>
+              <option value="階梯順勢">階梯順勢</option>
+              <option value="30k守高低">30k守高低</option>
+              <option value="回踩支撐V">回踩支撐V</option>
+              <option value="突破壓力▲">突破壓力▲</option>
+              <option value="回測壓力A">回測壓力A</option>
+              <option value="跌破支撐▼">跌破支撐▼</option>
+              <option value="回測開盤">回測開盤</option>
+              <option value="逆勢停損短">逆勢停損短</option>
               <option value="歷史打法">歷史打法</option>
-              <option value="逆勢反轉">逆勢反轉</option>
               <option value="其他">其他</option>
             </select>
           </div>
@@ -1188,7 +1187,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         </div>
       </div>
     </div>
-    <!-- v92：按日期整日批次更新市場認知＋展開狀態保留 -->
+    <!-- 日期分組明細列表 -->
+    <div id="D-date-group-list"></div>
+    <!-- V94：快速編輯日期／整日市場認知批次更新 -->
     <div class="card" id="D-quick-date-card" style="margin-bottom:8px">
       <div class="card-bd" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px">
         <label for="D-quick-date" style="font-size:13px;font-weight:700;color:var(--text)">快速編輯日期</label>
@@ -1201,8 +1202,6 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         <span id="D-bulk-market-msg" style="font-size:11px;color:var(--muted)">先選日期，再選要修改的方向</span>
       </div>
     </div>
-    <!-- 日期分組明細列表 -->
-    <div id="D-date-group-list"></div>
     <!-- 統計分析（含圖表展開）-->
     <div class="card">
       <div class="card-hd" style="cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px" onclick="toggleDStatsCharts()">
@@ -1376,7 +1375,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="fg"><label>本次出場口數</label><input id="Dedit-lots" type="number" min="1" placeholder="1"></div>
       <div class="fg"><label>交易ID</label><input id="Dedit-trade-id" type="text" placeholder="2026-09-17-01"></div>
       <div class="fg"><label>TP段次</label><input id="Dedit-tp-stage" type="number" min="1" placeholder="1"></div>
-      <div class="fg"><label>市場方向認知</label>
+      <div class="fg" style="display:none!important" aria-hidden="true"><label>市場方向認知</label>
         <select id="Dedit-wave" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
           <option value="多">多</option><option value="空">空</option>
         </select>
@@ -1401,10 +1400,10 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
       <div class="fg"><label>進場原因</label>
         <select id="Dedit-entry-reason" class="entry-choice-select" aria-label="修改進場原因">
           <option value="">請選擇</option>
-          <option value="長順勢">長順勢</option><option value="30k守低點">30k守低點</option><option value="回踩支撐">回踩支撐</option><option value="回踩壓力">回踩壓力</option>
-          <option value="突破壓力">突破壓力</option><option value="跌破支撐">跌破支撐</option><option value="突破回踩確認">突破回踩確認</option>
-          <option value="站回開盤">站回開盤</option><option value="開盤延續">開盤延續</option><option value="歷史打法">歷史打法</option>
-          <option value="逆勢反轉">逆勢反轉</option><option value="其他">其他</option>
+          <option value="開盤多空">開盤多空</option><option value="階梯順勢">階梯順勢</option><option value="30k守高低">30k守高低</option>
+          <option value="回踩支撐V">回踩支撐V</option><option value="突破壓力▲">突破壓力▲</option><option value="回測壓力A">回測壓力A</option>
+          <option value="跌破支撐▼">跌破支撐▼</option><option value="回測開盤">回測開盤</option><option value="逆勢停損短">逆勢停損短</option>
+          <option value="歷史打法">歷史打法</option><option value="其他">其他</option>
         </select>
       </div>
       <div class="fg"><label>進場心理</label>
@@ -1806,7 +1805,7 @@ window.exportTradesCSV = function() {
     var psychology=first.entryPsychology||'';
     var pts=(en!=null&&ex!=null)?(dir==='B'?(Number(ex)-Number(en)):(Number(en)-Number(ex))):'';
     rows.push([
-      g.date||'', g.no||idx+1, g.tradeId||'', g.entryLots||'', g.exitLots||'', g.wave||'', month, ma5, bg,
+      g.date||'', g.no||idx+1, g.tradeId||'', g.entryLots||'', g.exitLots||'', getTradeMarketRecognition(first), month, ma5, bg,
       dir==='B'?'多':'空', open!=null?open:'', high!=null?high:'', low!=null?low:'', en!=null?en:'', short,
       fmtTime(entryTime), timeBucket(entryTime), reason, psychology, fmtTime(exitTime), ex!=null?ex:'',
       holdingMin(entryTime,exitTime), pts, g.fee||0, net, wl
@@ -1858,7 +1857,7 @@ window.exportEntryAnalysisCSV=function(){
     var base=String(g.date)+'|'+g.tradeKey; tradeNos[base]=(tradeNos[base]||0)+1;
     var high=null,low=null;g.rows.forEach(function(x){if(x.dayHigh!=null&&x.dayHigh!=='')high=high==null?Number(x.dayHigh):Math.max(high,Number(x.dayHigh));if(x.dayLow!=null&&x.dayLow!=='')low=low==null?Number(x.dayLow):Math.min(low,Number(x.dayLow));});
     var net=Math.round(g.net*100)/100;
-    rows.push([g.date,g.tradeKey,g.tradeId,tradeNos[base],idx+1,g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),g.en,_hubFmtExportTime(g.entryTime),short,g.entryLots||'',g.exitLots||0,_hubFmtExportTime(g.exitTime),g.exitPrices.join(' / '),_hubHoldMinutes(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',r.wave||'',r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),high==null?'':high,low==null?'':low,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
+    rows.push([g.date,g.tradeKey,g.tradeId,tradeNos[base],idx+1,g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),g.en,_hubFmtExportTime(g.entryTime),short,g.entryLots||'',g.exitLots||0,_hubFmtExportTime(g.exitTime),g.exitPrices.join(' / '),_hubHoldMinutes(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',getTradeMarketRecognition(r),r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),high==null?'':high,low==null?'':low,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
   });
   _hubCsvDownload('每日衝浪板_單次進場分析',rows);
 };
@@ -1913,7 +1912,7 @@ window.exportStrategyWorkbook=function(){
     var entryRows=[['日期','Trade分組鍵','交易ID','進場腿編號','方向','進場價','進場時間','初始口數','實際出場口數','最後出場時間','出場價(各次)','持倉分鐘','進場原因','進場心理','市場方向認知','月線方向','5日均線方向','開盤價','當日最高','當日最低','進場腿淨損益','手續費','勝敗W/L','資料列數']];
     legOrder.forEach(function(k,i){var g=legs[k],r=g.first||{},frame=(typeof getMarketFrameByDate==='function'?getMarketFrameByDate(g.date):null)||{},hi=null,lo=null;
       g.rows.forEach(function(x){if(x.dayHigh!=null&&x.dayHigh!=='')hi=hi==null?Number(x.dayHigh):Math.max(hi,Number(x.dayHigh));if(x.dayLow!=null&&x.dayLow!=='')lo=lo==null?Number(x.dayLow):Math.min(lo,Number(x.dayLow));});
-      var net=Math.round(g.net*100)/100;entryRows.push([g.date,g.tradeKey,g.tradeId,i+1,dir(g.dir),g.en,time(g.entryTime),g.entryLots||'',g.exitLots||0,time(g.exitTime),g.exitPrices.join(' / '),hold(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',r.wave||'',r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),hi==null?'':hi,lo==null?'':lo,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
+      var net=Math.round(g.net*100)/100;entryRows.push([g.date,g.tradeKey,g.tradeId,i+1,dir(g.dir),g.en,time(g.entryTime),g.entryLots||'',g.exitLots||0,time(g.exitTime),g.exitPrices.join(' / '),hold(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',getTradeMarketRecognition(r),r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),hi==null?'':hi,lo==null?'':lo,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
     });
     // 工作表 2：整筆 Trade 統計，一個 Trade 只列一行。
     var tradeRows=[['日期','Trade編號','交易ID','方向','長順勢背景','進場腿數','各次進場時間','各次進場價格','總進場口數','累計出場口數','剩餘口數','整筆狀態','第一進場時間','最後出場時間','持倉分鐘','所有出場價','總手續費','整筆淨損益','勝敗W/L','進場原因(彙整)','進場心理(彙整)','資料列數']];
@@ -2670,7 +2669,11 @@ window.addDtrade = async function() {
       document.getElementById('msg-D').textContent = '⚠️ '+(brake.msg||'請注意今日交易狀態')+'｜本次成交仍可儲存。';
     }
   }
-  var wave = document.getElementById('D-wave').value || _marketBiasToday || '多';
+  var waveFrame=getMarketFrameByDate(dParseDate(dateVal));
+  var waveMonth=(document.getElementById('D-month-bias')||{}).value || waveFrame.monthBias || waveFrame.bias || '';
+  var waveMa5=(document.getElementById('D-ma5-bias')||{}).value || waveFrame.ma5Bias || '';
+  var wave=getLegacyWaveDirection(waveMonth,waveMa5);
+  var hiddenAddWave=document.getElementById('D-wave'); if(hiddenAddWave) hiddenAddWave.value=wave;
   var dir  = document.getElementById('D-dir').value || 'B';
   var en   = parseFloat(document.getElementById('D-en').value);
   var ex   = parseFloat(document.getElementById('D-ex').value);
@@ -2803,8 +2806,8 @@ window.openEditDtrade = function(idx) {
   document.getElementById('Dedit-lots').value = r.lots || 1;
   document.getElementById('Dedit-trade-id').value = r.tradeId || '';
   document.getElementById('Dedit-tp-stage').value = r.tpStage || 1;
-  document.getElementById('Dedit-wave').value = r.wave || '多';
   var editFrameForFields=getMarketFrameByDate(r.date||'');
+  document.getElementById('Dedit-wave').value = getLegacyWaveDirection(r.monthBias || editFrameForFields.monthBias || editFrameForFields.bias || '', r.ma5Bias || editFrameForFields.ma5Bias || '');
   document.getElementById('Dedit-month-bias').value = r.monthBias || editFrameForFields.monthBias || editFrameForFields.bias || '';
   document.getElementById('Dedit-ma5-bias').value = r.ma5Bias || editFrameForFields.ma5Bias || '';
   document.getElementById('Dedit-dir').value  = r.dir  || 'B';
@@ -2823,9 +2826,13 @@ window.saveEditDtrade = async function() {
   var entryLots = parseInt(document.getElementById('Dedit-entry-lots').value) || lots;
   var tradeId = document.getElementById('Dedit-trade-id').value.trim();
   var tpStage = parseInt(document.getElementById('Dedit-tp-stage').value) || 1;
-  var wave = document.getElementById('Dedit-wave').value || '多';
   var monthBiasInput=(document.getElementById('Dedit-month-bias')||{}).value||'';
   var ma5BiasInput=(document.getElementById('Dedit-ma5-bias')||{}).value||'';
+  var waveFrame=getMarketFrameByDate(dParseDate(dateVal));
+  var waveMonth=monthBiasInput || waveFrame.monthBias || waveFrame.bias || '';
+  var waveMa5=ma5BiasInput || waveFrame.ma5Bias || '';
+  var wave=getLegacyWaveDirection(waveMonth,waveMa5);
+  var hiddenEditWave=document.getElementById('Dedit-wave'); if(hiddenEditWave) hiddenEditWave.value=wave;
   var dir  = document.getElementById('Dedit-dir').value  || 'B';
   var en   = parseFloat(document.getElementById('Dedit-en').value);
   var ex   = parseFloat(document.getElementById('Dedit-ex').value);
@@ -3170,6 +3177,12 @@ function autoFillQuoteInputs(){
   if(en && !String(en.value).trim()) en.value=_mtxQuote.price;
   if(ex && !String(ex.value).trim()) ex.value=_mtxQuote.price;
   if(typeof window._updateDPreview==='function') window._updateDPreview();
+}
+function getLegacyWaveDirection(month, ma5){
+  // 舊 wave 欄位仍供既有多空風險分析使用；不再由使用者手動選擇。
+  if(month==='多' || month==='空') return month;
+  if(ma5==='多' || ma5==='空') return ma5;
+  return '多';
 }
 // v93：每日紀錄表的市場認知必須顯示四種盤態，不可誤用振幅浪級。
 function getTradeMarketRecognition(r){
