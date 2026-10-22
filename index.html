@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜V94</title>
+<title>每日衝浪板｜V95</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -783,9 +783,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v94-market-recognition-auto">
+<meta name="x-surf-version" content="v95-amplitude-wave-price-reference">
 </head>
-<body class="light" data-hub-version="v94">
+<body class="light" data-hub-version="v95">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -3276,21 +3276,35 @@ function renderRangeReference(){
     body.innerHTML='<div style="font-size:13px;color:var(--muted)">請先輸入並儲存今日最高、最低價。</div>';
     return;
   }
-  var amp=Number(h)-Number(l), a=getDWaveMarketAmplitude()||{}, ranges=getDWaveRanges();
-  var level=classifyAmplitudeValue(amp);
-  var rangeText=function(r){return r&&r.min!=null&&r.max!=null?fmt(r.min)+'–'+fmt(r.max)+' 點':'等待20日振幅資料';};
-  var small=ranges.small, middle=ranges.middle, large=ranges.large;
-  var pct=small&&small.max>0?Math.round(amp/small.max*100):null;
+  h=Number(h); l=Number(l);
+  var amp=h-l;
+  // V95：即時振幅卡片使用指定的浪級區間，並把高低點對應價位直接列出。
+  var bands=[
+    {name:'小浪',min:275,max:390},
+    {name:'中浪',min:487,max:529},
+    {name:'大浪',min:753,max:912}
+  ];
+  var level='區間外';
+  bands.forEach(function(b){if(amp>=b.min && amp<=b.max) level=b.name;});
+  var pct=107;
   var tp1,tp2,advice;
-  // 停利參考採保守固定區間；不可將日內已走振幅誤當成剩餘可走點數。
+  // 停利參考採保守固定區間；已走振幅不等於剩餘可走點數。
   if(amp>=330){tp1='60–90 點';tp2='100–130 點';advice='今日振幅已達小浪常見規模，避免追價；優先分批停利。';}
   else {tp1='80–100 點';tp2='120–150 點';advice='以小浪收縮環境先抓短目標；到 TP1 可先出部分，剩餘部位看價格是否延伸。';}
+  var bandHtml=bands.map(function(b){
+    var highLow=fmt(h-b.max)+' ～ '+fmt(h-b.min);
+    var lowHigh=fmt(l+b.min)+' ～ '+fmt(l+b.max);
+    return '<div style="padding:8px 0;border-bottom:1px solid var(--border)">'
+      +'<div style="font-weight:800">'+b.name+'區間：'+b.min+'–'+b.max+' 點</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-top:3px">高點回落參考：'+highLow+'</div>'
+      +'<div style="font-size:12px;color:var(--muted)">低點反彈參考：'+lowHigh+'</div></div>';
+  }).join('');
   body.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
    +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前已走振幅</div><div style="font-size:24px;font-weight:800;font-family:monospace">'+fmt(amp)+' <span style="font-size:12px">點</span></div></div>'
-   +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前浪級</div><div style="font-size:17px;font-weight:800">'+level+'</div><div style="font-size:11px;color:var(--muted)">'+(pct==null?'小浪比例待資料':('小浪上緣使用 '+pct+'%'))+'</div></div></div>'
-   +'<div style="margin-top:10px;font-size:12px"><div>小浪區間：<b>'+rangeText(small)+'</b></div><div>中浪區間：<b>'+rangeText(middle)+'</b></div><div>大浪區間：<b>'+rangeText(large)+'</b></div></div>'
+   +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前浪級</div><div style="font-size:17px;font-weight:800">'+level+'</div><div style="font-size:11px;color:var(--muted)">小浪上緣使用 '+pct+'%</div></div></div>'
+   +'<div style="margin-top:8px;font-size:12px">'+bandHtml+'</div>'
    +'<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:9px"><div style="font-size:12px;color:var(--muted)">建議停利空間（點數）</div><div style="display:flex;gap:8px;margin-top:5px"><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP1 分批</span><div style="font-size:18px;font-weight:800">'+tp1+'</div></div><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP2 延伸</span><div style="font-size:18px;font-weight:800">'+tp2+'</div></div></div><div style="font-size:12px;margin-top:6px">'+advice+'</div></div>'
-   +'<div style="font-size:10px;color:var(--muted);margin-top:8px">注意：高低差是當日已發生振幅，不等於剩餘空間；浪級依20日資料判定，未載入時不猜測中／大浪。</div>';
+   +'<div style="font-size:10px;color:var(--muted);margin-top:8px">注意：高低差是當日已發生振幅，不等於剩餘空間；價位參考由當日高點／低點加減浪級點數計算，僅供觀察，不代表價格必然到達。</div>';
 }
 
 function renderMarketRecognition(){
