@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜V96</title>
+<title>每日衝浪板｜V97</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -783,9 +783,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v96-amplitude-wave-price-reference">
+<meta name="x-surf-version" content="v97-amplitude-wave-price-reference">
 </head>
-<body class="light" data-hub-version="v96">
+<body class="light" data-hub-version="v97">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -1276,7 +1276,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
         <div id="D-io-block" style="margin-top:10px"></div>
       </div>
     </div>
-    <div class="card" style="margin-bottom:10px"><div class="card-bd" style="font-size:11px;line-height:1.7;color:var(--muted)">V96 歷史每日損益已補入：2026/01/02–04/30、2026/08/03–08/25。這些資料只計入每日／每月損益與圖表，不會當成逐筆 Trade，也不會影響單筆勝率、敗率及策略統計；若同日已有逐筆交易，優先採用逐筆資料避免重複。</div></div>
+    <div class="card" style="margin-bottom:10px"><div class="card-bd" style="font-size:11px;line-height:1.7;color:var(--muted)">V97 歷史每日損益已補入：2026/01/02–04/30、2026/08/03–08/25。這些資料只計入每日／每月損益與圖表，不會當成逐筆 Trade，也不會影響單筆勝率、敗率及策略統計；若同日已有逐筆交易，優先採用逐筆資料避免重複。 首次成功連線 Firebase 時，另會精準移除 2026/04/01 封存 Trade +42,044，並重算封存筆數與淨額；當日結算 +65,434 仍保留在每日損益。</div></div>
     <!-- 日明細表 -->
     <div class="card">
       <div class="card-hd">📋 每日彙總</div>
@@ -1445,7 +1445,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   </div>
 </div>
 
-<div class="footer">每日衝浪板 V96 · 歷史每日損益補入 · Firebase 雲端同步 · 僅供參考</div>
+<div class="footer">每日衝浪板 V97 · 歷史每日損益補入 · Firebase 雲端同步 · 僅供參考</div>
 
 <script type="module">
 
@@ -1471,7 +1471,7 @@ const SIGNAL_REF = doc(db, 'dashboard', 'signals');
 const DEFAULT_DATA = { G:[], Y:[], C:[], T:[], D:[], D_io:[], D_eq:[], D_archive:[], D_premium:[], D_marketBias:[], D_marginPerLot: null, PL:[], RC:{}, RB:null };
 
 let DATA = { G:[], Y:[], C:[], T:[], D:[], D_io:[], D_eq:[], D_premium:[], D_marketBias:[], PL:[], RC:{}, RB:null };
-// V96：歷史每日結算資料（只補每日／每月損益；不視為 Trade，不參與單筆勝率與策略統計）
+// V97：歷史每日結算資料（只補每日／每月損益；不視為 Trade，不參與單筆勝率與策略統計）
 const D_HISTORY_DAILY = [{"date":"2026/01/02","lots":11,"net":2266,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/05","lots":12,"net":24598,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/06","lots":6,"net":18674,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/07","lots":3,"net":3856,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/07","lots":8,"net":-2332,"product":"微型臺指期01","source":"歷史每日結算"},{"date":"2026/01/08","lots":5,"net":3730,"product":"微型臺指期01","source":"歷史每日結算"},{"date":"2026/01/09","lots":4,"net":2454,"product":"微型臺指期01","source":"歷史每日結算"},{"date":"2026/01/12","lots":62,"net":-35226,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/13","lots":24,"net":45248,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/14","lots":3,"net":13056,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/15","lots":4,"net":5758,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/16","lots":6,"net":-18838,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/19","lots":7,"net":8614,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/20","lots":4,"net":17856,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/21","lots":2,"net":8754,"product":"小型台指01","source":"歷史每日結算"},{"date":"2026/01/22","lots":3,"net":6500,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/01/23","lots":3,"net":-1402,"product":"微型臺指期02","source":"歷史每日結算"},{"date":"2026/01/26","lots":11,"net":7300,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/01/27","lots":7,"net":9500,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/01/28","lots":29,"net":-54358,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/01/29","lots":9,"net":35532,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/01/30","lots":51,"net":-137852,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/02/02","lots":12,"net":8600,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/02/06","lots":1,"net":-14850,"product":"小型台指02","source":"歷史每日結算"},{"date":"2026/02/24","lots":2,"net":-12508,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/02/25","lots":6,"net":64714,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/02/26","lots":13,"net":-19249,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/02","lots":4,"net":-22832,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/03","lots":12,"net":-36422,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/04","lots":3,"net":104290,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/06","lots":9,"net":19971,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/09","lots":2,"net":26396,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/09","lots":4,"net":40200,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/10","lots":5,"net":10640,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/11","lots":12,"net":18872,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/12","lots":9,"net":25015,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/13","lots":9,"net":53372,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/16","lots":13,"net":572,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/17","lots":22,"net":-19988,"product":"小型台指03","source":"歷史每日結算"},{"date":"2026/03/17","lots":3,"net":-20506,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/18","lots":9,"net":-11640,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/19","lots":8,"net":-34884,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/20","lots":16,"net":-70264,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/23","lots":2,"net":10246,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/24","lots":2,"net":43896,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/25","lots":26,"net":-86718,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/26","lots":19,"net":-14021,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/27","lots":6,"net":139484,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/30","lots":4,"net":-29804,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/03/31","lots":55,"net":-189664,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/04/01","lots":13,"net":65434,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/04/02","lots":8,"net":12774,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/04/07","lots":3,"net":25949,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/04/08","lots":19,"net":16370,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/04/09","lots":26,"net":-34356,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/04/10","lots":12,"net":73728,"product":"小型台指04","source":"歷史每日結算"},{"date":"2026/04/13","lots":3,"net":18226,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/14","lots":6,"net":51300,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/15","lots":4,"net":5960,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/16","lots":12,"net":5830,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/17","lots":4,"net":9860,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/20","lots":7,"net":27823,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/21","lots":12,"net":-9491,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/22","lots":11,"net":-4932,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/23","lots":13,"net":-4012,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/24","lots":22,"net":-47244,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/27","lots":44,"net":-198204,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/28","lots":2,"net":22468,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/29","lots":17,"net":30108,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/04/30","lots":3,"net":16653,"product":"小型台指05","source":"歷史每日結算"},{"date":"2026/08/03","lots":20,"net":-211496,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/04","lots":35,"net":25433,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/05","lots":38,"net":-291243,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/06","lots":29,"net":-249496,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/07","lots":10,"net":30556,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/10","lots":25,"net":71904,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/11","lots":56,"net":-124456,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/12","lots":34,"net":-17138,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/13","lots":16,"net":110754,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/14","lots":21,"net":96262,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/17","lots":10,"net":-39780,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/18","lots":16,"net":72756,"product":"小型台指08","source":"歷史每日結算"},{"date":"2026/08/19","lots":8,"net":-62254,"product":"小型台指09","source":"歷史每日結算"},{"date":"2026/08/20","lots":25,"net":45250,"product":"小型台指09","source":"歷史每日結算"},{"date":"2026/08/21","lots":44,"net":-103544,"product":"小型台指09","source":"歷史每日結算"},{"date":"2026/08/24","lots":21,"net":53554,"product":"小型台指09","source":"歷史每日結算"},{"date":"2026/08/25","lots":24,"net":-103706,"product":"小型台指09","source":"歷史每日結算"}];
 function getDCombinedDailyMap(){
   var map={};
@@ -3302,7 +3302,7 @@ function renderRangeReference(){
   }
   h=Number(h); l=Number(l);
   var amp=h-l;
-  // V96：即時振幅卡片使用指定的浪級區間，並把高低點對應價位直接列出。
+  // V97：即時振幅卡片使用指定的浪級區間，並把高低點對應價位直接列出。
   var bands=[
     {name:'小浪',min:275,max:390},
     {name:'中浪',min:487,max:529},
@@ -4597,6 +4597,34 @@ async function initData() {
       // 造成本機基準與 Firebase 原始內容字串不同，進而每次「延續上一筆」存檔都誤跳衝突。
       _dBaseSig = _dSignature(d);
       normalizeDDates(DATA);
+      // V97：依使用者指示，從 2026/04-2026/07 封存批次移除唯一一筆錯誤 Trade（2026/04/01 +42,044）。
+      // 僅在封存批次、日期、方向、口數、進出場價、手續費與淨損益全部吻合時刪除；其他資料與出入金不動。
+      try {
+        var __archivesV97 = Array.isArray(DATA.D_archive) ? DATA.D_archive : [];
+        var __fixedV97 = false;
+        __archivesV97.forEach(function(__batch){
+          if (!__batch || __batch.label !== '2026/04-2026/07' || !Array.isArray(__batch.trades)) return;
+          var __matches = __batch.trades.filter(function(__t){
+            return __t && String(__t.date||'').replace(/-/g,'/') === '2026/04/01' &&
+              Number(__t.net) === 42044 && (__t.dir === 'B' || __t.dir === '多') &&
+              Number(__t.lots) === 2 && Number(__t.en) === 22500 && Number(__t.ex) === 22921 && Number(__t.fee) === 56;
+          });
+          if (__matches.length === 1) {
+            var __remove = __matches[0];
+            __batch.trades = __batch.trades.filter(function(__t){ return __t !== __remove; });
+            __batch.count = __batch.trades.length;
+            __batch.netSum = __batch.trades.reduce(function(__sum,__t){ return __sum + (Number(__t && __t.net) || 0); }, 0);
+            __fixedV97 = true;
+          }
+        });
+        if (__fixedV97) {
+          await saveData();
+          console.info('[V97] 已修正封存：刪除 2026/04/01 +42,044；封存筆數與淨額已重算，出入金保持不變。');
+        }
+      } catch (__fixErrV97) {
+        console.error('[V97] 封存修正未能同步至 Firebase，原資料仍保留：', __fixErrV97);
+        alert('V97 已辨識到封存修正需求，但 Firebase 尚未完成同步。原封存資料未被確認修改，請檢查網路後重新載入。');
+      }
       // 不在這裡重新用 DATA 建基準；DATA 可能已被日期/Trade 正規化改寫。
       // v61：記住這次「真正從伺服器讀到的內容」作為衝突比較基準。
       // 後續即使 _revD 變動，只要雲端 D 內容沒變，就不應誤判衝突。
