@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜V99</title>
+<title>每日衝浪板｜V100</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -783,9 +783,9 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 #D-wave-cards{display:none!important;}
 @media(max-width:699px){.hub-trade-detail-table{min-width:1500px!important;width:1500px!important}.hub-trade-detail-table th,.hub-trade-detail-table td{padding:9px 10px!important}}
 </style>
-<meta name="x-surf-version" content="v99-amplitude-wave-price-reference">
+<meta name="x-surf-version" content="v100-mini-micro-product-selector">
 </head>
-<body class="light" data-hub-version="v99">
+<body class="light" data-hub-version="v100">
 
 <div class="hub-sidebar" id="hubSidebar">
   <div class="hub-brand">每日衝浪板</div>
@@ -901,7 +901,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
 </div>
 <div class="panel active" id="panel-D">
   <div style="padding:12px 0 6px;font-size:12px;color:var(--muted)" id="dSubtitleBar">
-    小台指當沖　｜　每點 $50　｜　原始保證金 <span id="dMarginDisplay">$175,250</span>/口 <button onclick="editMarginPerLot()" title="手動調整原始保證金" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0 2px;vertical-align:middle">✎</button>　｜　資金基礎（累計出入金）<span id="dCapitalBaseDisplay">$0</span>
+    小台／微台當沖　｜　小台每點 $50・微台每點 $10　｜　原始保證金 <span id="dMarginDisplay">$175,250</span>/口 <button onclick="editMarginPerLot()" title="手動調整原始保證金" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0 2px;vertical-align:middle">✎</button>　｜　資金基礎（累計出入金）<span id="dCapitalBaseDisplay">$0</span>
   </div>
 
    <!-- ══ 首頁／每日衝浪板總覽：只做顯示，不取代原有交易／統計功能 ══ -->
@@ -1126,6 +1126,11 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <div class="fg"><label>5日均線方向</label>
             <select id="D-ma5-bias" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none">
               <option value="">沿用當日設定／未設定</option><option value="多">多</option><option value="空">空</option>
+            </select>
+          </div>
+          <div class="fg"><label>交易商品</label>
+            <select id="D-product" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:monospace;font-size:13px;outline:none" onchange="if(window._updateDPreview)window._updateDPreview()">
+              <option value="MINI" selected>小台（每點 50 元）</option><option value="MICRO">微台（每點 10 元）</option>
             </select>
           </div>
           <div class="fg"><label>方向</label>
@@ -1396,6 +1401,11 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
           <option value="">沿用當日設定／未設定</option><option value="多">多</option><option value="空">空</option>
         </select>
       </div>
+      <div class="fg"><label>交易商品</label>
+        <select id="Dedit-product" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
+          <option value="MINI">小台（每點 50 元）</option><option value="MICRO">微台（每點 10 元）</option>
+        </select>
+      </div>
       <div class="fg"><label>方向</label>
         <select id="Dedit-dir" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;outline:none">
           <option value="B">多 B</option><option value="S">空 S</option>
@@ -1450,7 +1460,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   </div>
 </div>
 
-<div class="footer">每日衝浪板 V99 · 歷史每日損益補入 · Firebase 雲端同步 · 僅供參考</div>
+<div class="footer">每日衝浪板 V100 · 小台／微台商品切換 · Firebase 雲端同步 · 僅供參考</div>
 
 <script type="module">
 
@@ -1896,13 +1906,13 @@ window.exportEntryAnalysisCSV=function(){
   });
   order.sort(function(a,b){var x=legs[a],y=legs[b];return String(x.date).localeCompare(String(y.date))||((new Date(x.entryTime||0))-(new Date(y.entryTime||0)))||x.index-y.index;});
   var tradeNos={};
-  var rows=[['日期','Trade分組鍵','交易ID','當日第幾筆進場腿','進場腿編號','方向','進場價','進場時間','進場時段','初始口數(欄位值)','實際出場口數','出場時間(最後)','出場價(各次)','持倉分鐘','進場原因','進場心理','市場方向認知','月線方向','5日均線方向','開盤價','當日最高','當日最低','此進場腿淨損益(列加總)','手續費(列加總)','勝敗W/L','資料列數']];
+  var rows=[['日期','Trade分組鍵','交易ID','商品','每點價值','當日第幾筆進場腿','進場腿編號','方向','進場價','進場時間','進場時段','初始口數(欄位值)','實際出場口數','出場時間(最後)','出場價(各次)','持倉分鐘','進場原因','進場心理','市場方向認知','月線方向','5日均線方向','開盤價','當日最高','當日最低','此進場腿淨損益(列加總)','手續費(列加總)','勝敗W/L','資料列數']];
   order.forEach(function(k,idx){var g=legs[k],r=g.first||{}, frame=getMarketFrameByDate(g.date)||{};
     var short=(typeof getTradeShortStrategy==='function')?getTradeShortStrategy(r):'';
     var base=String(g.date)+'|'+g.tradeKey; tradeNos[base]=(tradeNos[base]||0)+1;
     var high=null,low=null;g.rows.forEach(function(x){if(x.dayHigh!=null&&x.dayHigh!=='')high=high==null?Number(x.dayHigh):Math.max(high,Number(x.dayHigh));if(x.dayLow!=null&&x.dayLow!=='')low=low==null?Number(x.dayLow):Math.min(low,Number(x.dayLow));});
     var net=Math.round(g.net*100)/100;
-    rows.push([g.date,g.tradeKey,g.tradeId,tradeNos[base],idx+1,g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),g.en,_hubFmtExportTime(g.entryTime),short,g.entryLots||'',g.exitLots||0,_hubFmtExportTime(g.exitTime),g.exitPrices.join(' / '),_hubHoldMinutes(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',getTradeMarketRecognition(r),r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),high==null?'':high,low==null?'':low,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
+    rows.push([g.date,g.tradeKey,g.tradeId,getDProductLabel(r.productType||'MINI'),getDPointValue(r.productType||'MINI'),tradeNos[base],idx+1,g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),g.en,_hubFmtExportTime(g.entryTime),short,g.entryLots||'',g.exitLots||0,_hubFmtExportTime(g.exitTime),g.exitPrices.join(' / '),_hubHoldMinutes(g.entryTime,g.exitTime),r.entryReason||'',r.entryPsychology||'',getTradeMarketRecognition(r),r.monthBias||frame.monthBias||frame.bias||'',r.ma5Bias||frame.ma5Bias||'',r.openPrice!=null?r.openPrice:(frame.openPrice!=null?frame.openPrice:''),high==null?'':high,low==null?'':low,net,Math.round(g.fee*100)/100,net>0?'W':(net<0?'L':''),g.rows.length]);
   });
   _hubCsvDownload('每日衝浪板_單次進場分析',rows);
 };
@@ -1910,7 +1920,7 @@ window.exportTradeSummaryCSV=function(){
   var raw=(DATA.D||[]).slice();
   var groups=(typeof hubTradeGroups==='function')?hubTradeGroups(raw):[];
   groups.sort(function(a,b){return String(a.date||'').localeCompare(String(b.date||''))||hubTradeSort(a,b);});
-  var rows=[['日期','Trade編號(依匯出排序)','交易ID','方向','長順勢背景','進場次數/加碼腿數','各次進場時間','各次進場價格','總進場口數(最大entryLots)','累計出場口數','剩餘口數','整筆狀態','第一進場時間','最後出場時間','整筆持倉分鐘','所有出場價','總手續費','整筆淨損益','勝敗W/L','進場原因(彙整)','進場心理(彙整)','資料列數']];
+  var rows=[['日期','Trade編號(依匯出排序)','交易ID','商品','每點價值','方向','長順勢背景','進場次數/加碼腿數','各次進場時間','各次進場價格','總進場口數(最大entryLots)','累計出場口數','剩餘口數','整筆狀態','第一進場時間','最後出場時間','整筆持倉分鐘','所有出場價','總手續費','整筆淨損益','勝敗W/L','進場原因(彙整)','進場心理(彙整)','資料列數']];
   groups.forEach(function(g,idx){var rr=g.rows||[],first=rr[0]||{}, frame=getMarketFrameByDate(g.date)||{};
     var legs={}, legOrder=[]; rr.forEach(function(r,i){var k=String(r.entryTime||'')+'|'+String(r.en==null?'':r.en)+'|'+String(r.dir||'');if(!legs[k]){legs[k]={time:r.entryTime||'',en:r.en,reason:r.entryReason||'',psy:r.entryPsychology||''};legOrder.push(k);}else{if(!legs[k].reason&&r.entryReason)legs[k].reason=r.entryReason;if(!legs[k].psy&&r.entryPsychology)legs[k].psy=r.entryPsychology;}});
     legOrder.sort(function(a,b){return (new Date(legs[a].time||0))-(new Date(legs[b].time||0));});
@@ -1922,7 +1932,7 @@ window.exportTradeSummaryCSV=function(){
     var openLots=Number(g.entryLots)||0, exitLots=Number(g.exitLots)||0, remaining=Math.max(0,openLots-exitLots);
     var net=Math.round((Number(g.net)||0)*100)/100, month=first.monthBias||frame.monthBias||frame.bias||'',ma5=first.ma5Bias||frame.ma5Bias||'';
     var bg=(month&&ma5&&month===ma5)?month:(month||ma5?'分歧':'');
-    rows.push([g.date||'',idx+1,g.tradeId||'',g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),bg,legOrder.length,entryTimes.join(' / '),entryPrices.join(' / '),openLots,exitLots,remaining,g.closed?'已完成':'未完成',_hubFmtExportTime(g.entryTime),_hubFmtExportTime(g.exitTime),_hubHoldMinutes(g.entryTime,g.exitTime),exitPrices.join(' / '),Math.round((Number(g.fee)||0)*100)/100,net,net>0?'W':(net<0?'L':''),reasons,psy,rr.length]);
+    rows.push([g.date||'',idx+1,g.tradeId||'',getDProductLabel(first.productType||'MINI'),getDPointValue(first.productType||'MINI'),g.dir==='B'?'多':(g.dir==='S'?'空':g.dir),bg,legOrder.length,entryTimes.join(' / '),entryPrices.join(' / '),openLots,exitLots,remaining,g.closed?'已完成':'未完成',_hubFmtExportTime(g.entryTime),_hubFmtExportTime(g.exitTime),_hubHoldMinutes(g.entryTime,g.exitTime),exitPrices.join(' / '),Math.round((Number(g.fee)||0)*100)/100,net,net>0?'W':(net<0?'L':''),reasons,psy,rr.length]);
   });
   _hubCsvDownload('每日衝浪板_整筆Trade分析',rows);
 };
@@ -2497,7 +2507,10 @@ async function saveData() {
 // ══ 當沖面板 ══
 // 投入資金改用出入金 D_io 累計取代固定 D_CAPITAL
 const D_INIT_MARGIN_DEFAULT = 175250;    // 小台原始保證金/口（預設值，可在畫面上手動調整，存於 DATA.D_marginPerLot）
-const D_MULT = 50;               // 每點50元
+const D_MULT = 50;               // 小台每點50元（舊資料預設）
+function getDPointValue(product){ return String(product||'MINI').toUpperCase()==='MICRO' ? 10 : 50; }
+function getDProductLabel(product){ return getDPointValue(product)===10 ? '微台' : '小台'; }
+function getDMarginPerLot(product){ return Math.round(_dMargin() * getDPointValue(product) / 50); }
 var _mtxQuote = { price:null, todayHigh:null, todayLow:null, amplitude:null, timestamp:null, source:null, stale:true };
 var _marketBiasToday = '';
 function dTodayKey(){
@@ -2733,6 +2746,7 @@ window.addDtrade = async function() {
   var selectedMergeId=(document.getElementById('D-merge-trade-id')||{}).value||'';
   var tradeId = selectedMergeId || (sameTrade && lastSame && lastSame.tradeId ? lastSame.tradeId : (tradeDateKey.replace(/\//g,'-') + '-' + String(prior.length + 1).padStart(2,'0')));
   var existingTradeRows=prior.filter(function(r){return String(r.tradeId||'')===String(tradeId);});
+  if(existingTradeRows.length && document.getElementById('D-product')) document.getElementById('D-product').value=String(existingTradeRows[0].productType||'MINI').toUpperCase();
   // v84：手動指定同一 Trade 加碼時，將該 Trade 既有明細一併標記為同組。
   // 每一筆加碼保留自己的進場時間與進場價；彙總時依日期＋Trade ID 合併，不以進場價當分組條件。
   if(selectedMergeId && existingTradeRows.length){
@@ -2745,6 +2759,18 @@ window.addDtrade = async function() {
     }
     existingTradeRows.forEach(function(r){ r.manualTradeGroup=true; });
   }
+  var selectedProduct=(document.getElementById('D-product')||{}).value||'MINI';
+  if(existingTradeRows.length){
+    var existingProduct=String(existingTradeRows[0].productType||'MINI').toUpperCase();
+    if(existingTradeRows.some(function(r){return String(r.productType||'MINI').toUpperCase()!==existingProduct;})){
+      alert('同一 Trade 的商品資料不一致，請先檢查原交易。'); return;
+    }
+    if(existingProduct!==String(selectedProduct).toUpperCase()){
+      alert('同一筆 Trade（含分批出場／加碼）必須使用相同商品。請選擇 '+getDProductLabel(existingProduct)+'，或建立新 Trade。'); return;
+    }
+    selectedProduct=existingProduct;
+  }
+  if(sameTrade && lastSame) selectedProduct=String(lastSame.productType||'MINI').toUpperCase();
   var tpStage = existingTradeRows.length ? (Math.max.apply(null,existingTradeRows.map(function(r){return Number(r.tpStage)||1;}))+1) : 1;
 
   // 分批出場延續模式才沿用原進場時間/價；手動指定同 Trade 加碼則保留本次新進場時間/價。
@@ -2760,7 +2786,7 @@ window.addDtrade = async function() {
     entryLots=Math.max(Number(mergeBase.entryLots)||0, existingTradeRows.reduce(function(n,r){return n+(Number(r.addLots)||0);},0)+(Number(document.getElementById('D-entry-lots').value)||lots));
   }
   var exitTime=formatLocalDateTimeInput(new Date());
-  var net = Math.round(pts * D_MULT * lots) - fee;
+  var net = Math.round(pts * getDPointValue(selectedProduct) * lots) - fee;
   var tradeFrame=getMarketFrameByDate(tradeDateKey);
   var monthBiasInput=(document.getElementById('D-month-bias')||{}).value||'';
   var ma5BiasInput=(document.getElementById('D-ma5-bias')||{}).value||'';
@@ -2769,7 +2795,7 @@ window.addDtrade = async function() {
   var entryReason=(sameTrade && lastSame && lastSame.entryReason) ? lastSame.entryReason : ((entryReasonEl&&entryReasonEl.value)||'').trim();
   var entryPsychology=(sameTrade && lastSame && lastSame.entryPsychology) ? lastSame.entryPsychology : ((psychEl&&psychEl.value)||'').trim();
   var rec = {
-    date: tradeDateKey, tradeId, manualTradeGroup: !!selectedMergeId, tpStage, tradeNo: prior.length+1, entryLots, addLots: selectedMergeId ? (parseInt(document.getElementById('D-entry-lots').value)||lots) : entryLots, lots, wave, dir, en, ex, fee, net,
+    date: tradeDateKey, tradeId, productType:selectedProduct, manualTradeGroup: !!selectedMergeId, tpStage, tradeNo: prior.length+1, entryLots, addLots: selectedMergeId ? (parseInt(document.getElementById('D-entry-lots').value)||lots) : entryLots, lots, wave, dir, en, ex, fee, net,
     openPrice: isFinite(openPrice) ? openPrice : null,
     dayHigh: tradeFrame.dayHigh!=null ? Number(tradeFrame.dayHigh) : ((_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayHigh!=null) ? Number(_mtxQuote.todayHigh) : (sameTrade&&lastSame&&lastSame.dayHigh!=null?Number(lastSame.dayHigh):null)),
     dayLow: tradeFrame.dayLow!=null ? Number(tradeFrame.dayLow) : ((_mtxQuote&&tradeDateKey===dTodayKey()&&_mtxQuote.todayLow!=null) ? Number(_mtxQuote.todayLow) : (sameTrade&&lastSame&&lastSame.dayLow!=null?Number(lastSame.dayLow):null)),
@@ -2843,6 +2869,7 @@ window.openEditDtrade = function(idx) {
   document.getElementById('Dedit-lots').value = r.lots || 1;
   document.getElementById('Dedit-trade-id').value = r.tradeId || '';
   document.getElementById('Dedit-tp-stage').value = r.tpStage || 1;
+  document.getElementById('Dedit-product').value = String(r.productType||'MINI').toUpperCase();
   var editFrameForFields=getMarketFrameByDate(r.date||'');
   document.getElementById('Dedit-wave').value = getLegacyWaveDirection(r.monthBias || editFrameForFields.monthBias || editFrameForFields.bias || '', r.ma5Bias || editFrameForFields.ma5Bias || '');
   document.getElementById('Dedit-month-bias').value = r.monthBias || editFrameForFields.monthBias || editFrameForFields.bias || '';
@@ -2874,6 +2901,7 @@ window.saveEditDtrade = async function() {
   var en   = parseFloat(document.getElementById('Dedit-en').value);
   var ex   = parseFloat(document.getElementById('Dedit-ex').value);
   var fee  = parseFloat(document.getElementById('Dedit-fee').value) || 0;
+  var productType=(document.getElementById('Dedit-product')||{}).value||'MINI';
   var entryReason = (document.getElementById('Dedit-entry-reason').value || '').trim();
   var entryPsychology = (document.getElementById('Dedit-entry-psychology').value || '').trim();
   var entryTime = document.getElementById('Dedit-entry-time').value || '';
@@ -2881,12 +2909,12 @@ window.saveEditDtrade = async function() {
   if (!dateVal || isNaN(en) || isNaN(ex)) { alert('日期/進場價/出場價必填'); return; }
 
   var pts = dir === 'B' ? (ex - en) : (en - ex);
-  var net = Math.round(pts * D_MULT * lots) - fee;
+  var net = Math.round(pts * getDPointValue(productType) * lots) - fee;
   var oldRec = DATA.D[idx] || {};
   var editDateKey=dParseDate(dateVal);
   var editFrame=getMarketFrameByDate(editDateKey);
   var editOpen=(oldRec.openPrice!=null && isFinite(Number(oldRec.openPrice))) ? Number(oldRec.openPrice) : (editFrame.openPrice!=null ? Number(editFrame.openPrice) : null);
-  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:(editFrame.dayHigh!=null?editFrame.dayHigh:null), dayLow:oldRec.dayLow!=null?oldRec.dayLow:(editFrame.dayLow!=null?editFrame.dayLow:null), monthBias:monthBiasInput||editFrame.monthBias||editFrame.bias||'', ma5Bias:ma5BiasInput||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:entryReason || '', entryPsychology:entryPsychology || ''};
+  var rec = {date: editDateKey, tradeId: tradeId || oldRec.tradeId || (editDateKey.replace(/\//g,'-')+'-01'), productType:productType, tpStage, tradeNo:oldRec.tradeNo||null, entryLots, lots, wave, dir, en, ex, fee, net, openPrice:isFinite(editOpen)?editOpen:null, dayHigh:oldRec.dayHigh!=null?oldRec.dayHigh:(editFrame.dayHigh!=null?editFrame.dayHigh:null), dayLow:oldRec.dayLow!=null?oldRec.dayLow:(editFrame.dayLow!=null?editFrame.dayLow:null), monthBias:monthBiasInput||editFrame.monthBias||editFrame.bias||'', ma5Bias:ma5BiasInput||editFrame.ma5Bias||'', entryTime:entryTime || oldRec.entryTime || '', exitTime:exitTime || oldRec.exitTime || '', entryReason:entryReason || '', entryPsychology:entryPsychology || ''};
 
   var isContra = (wave === '多' && dir === 'S') || (wave === '空' && dir === 'B');
   var tradeDate = new Date(dParseDate(dateVal).split('/').join('-'));
@@ -2898,7 +2926,16 @@ window.saveEditDtrade = async function() {
     isMonthEnd = (lastDay - monthDay) < 7;
   }
 
-  DATA.D[idx] = rec;
+  // 同一 Trade 的分批出場／加碼必須使用相同商品；修改商品時同步整筆 Trade 並重算各出場列淨額。
+  var editGroupDate=oldRec.date||editDateKey, editGroupId=oldRec.tradeId||tradeId;
+  (DATA.D||[]).forEach(function(item,i){
+    if(i===idx){ DATA.D[i]=rec; return; }
+    if(String(item.date||'')===String(editGroupDate) && String(item.tradeId||'')===String(editGroupId)){
+      var itemPts=(String(item.dir||'B')==='B') ? (Number(item.ex)-Number(item.en)) : (Number(item.en)-Number(item.ex));
+      item.productType=productType;
+      item.net=Math.round(itemPts*getDPointValue(productType)*(Number(item.lots)||1))-(Number(item.fee)||0);
+    }
+  });
   DATA.D.sort(function(a,b){ return a.date.localeCompare(b.date); });
   await saveData();
   document.getElementById('D-edit-modal').style.display = 'none';
@@ -3075,10 +3112,13 @@ function renderDEquityKPI() {
     if (!el) return;
     if (!lots || isNaN(en) || isNaN(ex)) { el.textContent = '輸入後自動計算淨額'; el.style.color='var(--muted)'; if(warnEl) warnEl.style.display='none'; return; }
     var pts = dir === 'B' ? (ex-en) : (en-ex);
-    var net = Math.round(pts * D_MULT * lots) - fee;
-    var margin = entryLots * _dMargin();
+    var productType=(document.getElementById('D-product')||{}).value||'MINI';
+    var pointValue=getDPointValue(productType);
+    var net = Math.round(pts * pointValue * lots) - fee;
+    var marginPerLot=getDMarginPerLot(productType);
+    var margin = entryLots * marginPerLot;
     el.style.color = net >= 0 ? 'var(--gain)' : 'var(--loss)';
-    el.innerHTML = '🌊 '+getDWaveLevel({en:en,ex:ex,dir:dir})+'　｜　差價 ' + (pts>=0?'+':'')+pts + ' 點　淨額 ' + (net>=0?'+':'') + net.toLocaleString()
+    el.innerHTML = '🌊 '+getDProductLabel(productType)+'（每點 $'+pointValue+'）　｜　'+getDWaveLevel({en:en,ex:ex,dir:dir})+'　｜　差價 ' + (pts>=0?'+':'')+pts + ' 點　淨額 ' + (net>=0?'+':'') + net.toLocaleString()
       + '　｜　初始 '+entryLots+'口／本次出 '+lots+'口　保證金佔用 $' + margin.toLocaleString() + '（'+entryLots+'口×$'+_dMargin().toLocaleString()+'）';
     // 即時顯示警告
     if (warnEl) {
@@ -3112,6 +3152,7 @@ function renderDEquityKPI() {
       var el = document.getElementById(id);
       if (el) el.addEventListener('input', updatePreview);
     });
+    var productEl=document.getElementById('D-product'); if(productEl) productEl.addEventListener('change',updatePreview);
     var ddir = document.getElementById('D-dir');
     if (ddir) ddir.addEventListener('change', updatePreview);
     var same = document.getElementById('D-same-trade');
@@ -3146,7 +3187,7 @@ function prefillDForm() {
   var fields = {};
   if (trades.length) {
     var last = trades[trades.length - 1];
-    fields = { 'D-date': last.date, 'D-entry-lots': last.entryLots || last.lots, 'D-lots': last.lots, 'D-wave': last.wave, 'D-dir': last.dir, 'D-en': last.en, 'D-ex': last.ex, 'D-fee': last.fee, 'D-entry-reason': last.entryReason || '', 'D-entry-psychology': last.entryPsychology || '' };
+    fields = { 'D-date': last.date, 'D-entry-lots': last.entryLots || last.lots, 'D-lots': last.lots, 'D-wave': last.wave, 'D-dir': last.dir, 'D-en': last.en, 'D-ex': last.ex, 'D-fee': last.fee, 'D-entry-reason': last.entryReason || '', 'D-entry-psychology': last.entryPsychology || '', 'D-product': last.productType || 'MINI' };
   } else {
     fields = { 'D-date': today, 'D-wave': '多', 'D-dir': 'B' };
   }
