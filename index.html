@@ -2591,7 +2591,7 @@ function getDWaveRanges(){
   function valid(v){ return v!=null && isFinite(Number(v)); }
   function make(min,max){ return {min:valid(min)?Number(min):null,max:valid(max)?Number(max):null}; }
   // V101：快取只能供檢視，過期／失敗資料不可用於即時浪級判定。
-  if(!a.dataReady || a.stale) return {small:make(null,null),middle:make(null,null),large:make(null,null)};
+  if(!a.dataReady) return {small:make(null,null),middle:make(null,null),large:make(null,null)}; // 更新失敗時仍沿用最後一次成功資料
   // 優先使用 Apps Script 依新版公式計算出的 rankValues。
   var s=make(rv.rank1,rv.rank1to7Average);
   var m=make(rv.rank5to10Average,rv.rank5to15Average);
@@ -2603,7 +2603,7 @@ function getDWaveRanges(){
 }
 function classifyAmplitudeValue(value){
   var ampState=getDWaveMarketAmplitude() || {};
-  if(!ampState.dataReady || ampState.stale) return '資料未同步';
+  if(!ampState.dataReady) return '資料未同步'; // stale 代表日期可能舊，不代表沒有資料
   if (value==null || !isFinite(Number(value))) return '—';
   value=Math.abs(Number(value));
   var r=getDWaveRanges(), hit=[];
@@ -3372,7 +3372,7 @@ function renderRangeReference(){
   var validBands=bands.filter(function(b){return b.range&&b.range.min!=null&&b.range.max!=null;});
   var level=classifyAmplitudeValue(amp);
   var smallMax=ranges.small&&ranges.small.max;
-  var pct=(a.dataReady&&!a.stale&&smallMax>0)?Math.round(amp/smallMax*100):null;
+  var pct=(a.dataReady&&smallMax>0)?Math.round(amp/smallMax*100):null;
   var tp1,tp2,advice;
   if(amp>=330){tp1='60–90 點';tp2='100–130 點';advice='今日振幅已達小浪常見規模，避免追價；優先分批停利。';}
   else {tp1='80–100 點';tp2='120–150 點';advice='以短目標分批停利；到 TP1 可先出部分，剩餘部位觀察是否延伸。';}
@@ -3385,13 +3385,13 @@ function renderRangeReference(){
       +'<div style="font-size:12px;color:var(--muted);margin-top:3px">高點回落參考：'+highLow+'</div>'
       +'<div style="font-size:12px;color:var(--muted)">低點反彈參考：'+lowHigh+'</div></div>';
   }).join('');
-  var freshness=a.dataReady&&!a.stale
-    ? '<div style="font-size:10px;color:var(--muted);margin:0 0 8px">20日資料日期：'+String(a.date||'—')+'｜有效交易日：'+fmt(a.records&&a.records.length)+'/20</div>'
-    : '<div style="padding:8px;border:1px solid rgba(248,113,113,.45);border-radius:7px;color:var(--loss);font-size:11px;margin-bottom:8px">⚠ 三浪資料未通過最新性檢查，暫不顯示舊區間，也不進行浪級判定。請重新抓取或檢查 Apps Script 網址。</div>';
+  var freshness=a.dataReady
+    ? (a.stale ? '<div style="padding:8px;border:1px solid rgba(245,158,11,.5);border-radius:7px;color:var(--warn);font-size:11px;margin-bottom:8px">⚠ 最新資料更新失敗；目前保留並沿用上次成功資料。最近抓到日期：<b>'+String(a.date||'—')+'</b>。請依此日期判斷是否過舊。</div>' : '<div style="font-size:10px;color:var(--muted);margin:0 0 8px">20日資料日期：'+String(a.date||'—')+'｜有效交易日：'+fmt(a.records&&a.records.length)+'/20</div>')
+    : '<div style="padding:8px;border:1px solid rgba(248,113,113,.45);border-radius:7px;color:var(--loss);font-size:11px;margin-bottom:8px">⚠ 尚無任何成功抓取過的資料。請確認 Apps Script 網址及部署。</div>';
   body.innerHTML=freshness
    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
    +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前已走振幅</div><div style="font-size:24px;font-weight:800;font-family:monospace">'+fmt(amp)+' <span style="font-size:12px">點</span></div></div>'
-   +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前浪級</div><div style="font-size:17px;font-weight:800">'+(a.dataReady&&!a.stale?level:'資料未同步')+'</div><div style="font-size:11px;color:var(--muted)">'+(pct==null?'尚無有效小浪區間':('小浪上緣使用 '+pct+'%'))+'</div></div></div>'
+   +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前浪級</div><div style="font-size:17px;font-weight:800">'+(a.dataReady?level:'資料未同步')+'</div><div style="font-size:11px;color:var(--muted)">'+(pct==null?'尚無有效小浪區間':('小浪上緣使用 '+pct+'%'))+'</div></div></div>'
    +(validBands.length?'<div style="margin-top:8px;font-size:12px">'+bandHtml+'</div>':'')
    +'<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:9px"><div style="font-size:12px;color:var(--muted)">建議停利空間（點數）</div><div style="display:flex;gap:8px;margin-top:5px"><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP1 分批</span><div style="font-size:18px;font-weight:800">'+tp1+'</div></div><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP2 延伸</span><div style="font-size:18px;font-weight:800">'+tp2+'</div></div></div><div style="font-size:12px;margin-top:6px">'+advice+'</div></div>'
    +'<div style="font-size:10px;color:var(--muted);margin-top:8px">注意：高低差是當日已發生振幅，不等於剩餘空間；價位參考由當日高點／低點加減各浪級點數計算，僅供觀察。</div>';
@@ -4808,12 +4808,17 @@ function validateWavePayload_(data){
   if(age==null || age<0) throw new Error('API 最新資料日期無效：'+date);
   // 超過5個日曆日即標記待核對；不擅自猜測台灣休市日。
   if(age>5) throw new Error('資料日期已距今 '+age+' 天（'+date+'），疑似未更新，停止套用舊浪級');
-  var generatedAt=src.generatedAt || data.generatedAt;
-  if(!generatedAt) throw new Error('API 缺少產生時間，請重新部署 V101 Apps Script');
-  var generatedDate=new Date(String(generatedAt).replace(/-/g,'/'));
-  if(isNaN(generatedDate.getTime())) throw new Error('API 產生時間格式無效：'+generatedAt);
-  if(Date.now()-generatedDate.getTime()>36*60*60*1000) throw new Error('API 回傳時間已超過36小時，請確認 Web App 部署');
-  return {src:src,rv:rv,records:records,date:date,generatedAt:generatedAt,uniqueCount:uniqueCount};
+  // 相容舊版 Web App：產生時間缺漏不再阻斷有效的 20 日資料；
+  // 但會明確標示 API 未提供產生時間，避免誤認為已完成後端版本驗證。
+  var generatedAt=src.generatedAt || data.generatedAt || null;
+  var generatedTimeVerified=false;
+  if(generatedAt){
+    var generatedDate=new Date(String(generatedAt).replace(/-/g,'/'));
+    if(isNaN(generatedDate.getTime())) throw new Error('API 產生時間格式無效：'+generatedAt);
+    if(Date.now()-generatedDate.getTime()>36*60*60*1000) throw new Error('API 回傳時間已超過36小時，請確認 Web App 部署');
+    generatedTimeVerified=true;
+  }
+  return {src:src,rv:rv,records:records,date:date,generatedAt:generatedAt,generatedTimeVerified:generatedTimeVerified,uniqueCount:uniqueCount};
 }
 function waveNum_(v){ return v!=null && v!=='' && isFinite(Number(v)) ? Number(v) : null; }
 function setWaveStatus_(message, good){
@@ -4865,7 +4870,10 @@ async function loadAmplitude(forceRefresh){
     window.D_WAVE_AMPLITUDE=D_WAVE_AMPLITUDE;
     try{localStorage.setItem(AMP_CACHE_KEY,JSON.stringify(data));}catch(cacheErr){console.warn('[三浪] 快取寫入失敗',cacheErr);}
     var age=waveDataAgeDays_(checked.date);
-    setWaveStatus_('✓ 最新資料 '+checked.date+'｜20個不重複交易日｜API產生 '+checked.generatedAt+'｜資料距今 '+age+' 天',true);
+    setWaveStatus_(checked.generatedTimeVerified
+      ? '✓ 最新資料 '+checked.date+'｜20個不重複交易日｜API產生 '+checked.generatedAt+'｜資料距今 '+age+' 天'
+      : '✓ 已取得20日資料：'+checked.date+'｜資料距今 '+age+' 天；⚠ API未提供產生時間，請更新 Apps Script 部署',
+      checked.generatedTimeVerified);
     renderAmpCard();renderDPanel();
     return data;
   }catch(e){
@@ -4884,10 +4892,11 @@ async function loadAmplitude(forceRefresh){
         records:Array.isArray(csrc.records)?csrc.records:(Array.isArray(cached.records)?cached.records:[]),
         recent3Days:Array.isArray(csrc.recent3Days)?csrc.recent3Days:(cached.recent3Days||[]),
         volatilityStructure:csrc.volatilityStructure||cached.volatilityStructure||null,
-        source:'上次成功快取（僅供參考）',dataReady:false,stale:true,error:String(e.message||e)
+        source:'上次成功快取（更新失敗，沿用上次資料）',dataReady:true,stale:true,error:String(e.message||e)
       };
       window.D_WAVE_AMPLITUDE=D_WAVE_AMPLITUDE;
-      setWaveStatus_('⚠ 即時資料未通過驗證；目前只保留舊快取供參考，不會套用於浪級判定。原因：'+D_WAVE_AMPLITUDE.error,false);
+      _ampData=cached;
+      setWaveStatus_('⚠ 更新失敗｜沿用最近成功資料，資料日期：'+(D_WAVE_AMPLITUDE.date||'—')+'｜原因：'+D_WAVE_AMPLITUDE.error,false);
       renderAmpCard();renderDPanel();
       return cached;
     }
@@ -4929,7 +4938,7 @@ function renderAmpCard() {
     + '<div style="background:var(--bg3);border-radius:8px;padding:10px 12px">'
     + '<div style="font-size:11px;color:var(--muted)">20日平均振幅</div>'
     + '<div style="font-size:20px;font-weight:700;font-family:monospace;color:var(--text)">' + avg20 + ' 點</div>'
-    + '<div style="font-size:10px;color:var(--muted);margin-top:2px">資料最後日期：' + (_ampData.lastDate || '—') + '</div>'
+    + '<div style="font-size:10px;color:var(--muted);margin-top:2px">資料最後日期：' + (D_WAVE_AMPLITUDE.date || _ampData.lastDate || '—') + (D_WAVE_AMPLITUDE.stale ? '｜更新失敗，沿用上次資料' : '') + '</div>'
     + '</div>'
     + '<div style="background:var(--bg3);border-radius:8px;padding:10px 12px">'
     + '<div style="font-size:11px;color:var(--muted)">你的平均每日獲利點數</div>'
@@ -4950,7 +4959,7 @@ function renderDWaveAmplitude(){
     if(!Array.isArray(records)||!records.length) return '<div style="font-size:11px;color:var(--muted)">沒有可顯示的20日明細。</div>';
     return '<div style="overflow-x:auto;margin-top:10px"><table style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap"><thead><tr style="color:var(--muted);text-align:right"><th style="text-align:left;padding:6px">日期</th><th>最高</th><th>最低</th><th>收盤</th><th>振幅</th></tr></thead><tbody>'+records.slice(0,20).map(function(d){return '<tr style="border-top:1px solid var(--border)"><td style="padding:6px;text-align:left">'+esc(d.date||'—')+'</td><td style="text-align:right">'+fmt(d.high)+'</td><td style="text-align:right">'+fmt(d.low)+'</td><td style="text-align:right">'+fmt(d.close)+'</td><td style="text-align:right;font-weight:700">'+fmt(d.amplitude)+'</td></tr>';}).join('')+'</tbody></table></div>';
   }
-  if(!a.dataReady || a.stale){
+  if(!a.dataReady){
     var oldRanges=[['小浪',a.smallWave],['中浪',a.middleWave],['大浪',a.largeWave]];
     var cachedHtml=a.stale?'<div style="margin-top:10px;padding:10px;border:1px dashed var(--border2);border-radius:8px"><b>舊快取（僅供參考，不參與判定）</b><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">'+oldRanges.map(function(x){var o=x[1]||{};return '<div style="font-size:11px"><div style="color:var(--muted)">'+x[0]+'</div><b>'+fmt(o.min)+' ～ '+fmt(o.max)+'</b></div>';}).join('')+'</div><div style="font-size:10px;color:var(--muted);margin-top:6px">快取日期：'+esc(a.date||'—')+'；失敗原因：'+esc(a.error||'未取得最新資料')+'</div></div>':'';
     el.innerHTML='<div style="padding:13px;border:1px solid rgba(248,113,113,.45);border-radius:9px;background:var(--bg3);line-height:1.8"><b style="color:var(--loss)">⚠ 三浪資料尚未通過最新性檢查</b><div style="font-size:12px;color:var(--muted);margin-top:4px">目前不會使用舊快取判定小浪／中浪／大浪。請確認 Apps Script 已部署最新版，並重新抓取資料。</div>'+cachedHtml+'</div>';
@@ -4958,12 +4967,13 @@ function renderDWaveAmplitude(){
     return;
   }
   var ranges=[['🌊 小浪',a.smallWave,'#60a5fa'],['🌊 中浪',a.middleWave,'#fbbf24'],['🌊 大浪',a.largeWave,'#f87171']];
+  var staleNotice=a.stale?'<div style="padding:8px;margin-bottom:9px;border:1px solid rgba(245,158,11,.5);border-radius:7px;color:var(--warn);font-size:11px">⚠ 更新失敗，以下沿用上次成功資料。最近抓到日期：<b>'+esc(a.date||'—')+'</b>；'+esc(a.error||'')+'</div>':'';
   var cards='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">'+ranges.map(function(x){return '<div style="padding:11px 6px;border:1px solid '+x[2]+'55;border-radius:9px;text-align:center;background:var(--bg3)"><div style="font-size:12px;font-weight:700;color:'+x[2]+'">'+x[0]+'</div><div style="font-size:17px;font-weight:800;margin-top:5px">'+fmt(x[1]&&x[1].min)+' ～ '+fmt(x[1]&&x[1].max)+'</div><div style="font-size:10px;color:var(--muted)">點</div></div>';}).join('')+'</div>';
   var seq=a.recent3Days||[];
   var summary='<div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:8px;font-size:11px;color:var(--muted);line-height:1.8">20日平均 <b style="color:var(--text)">'+fmt(a.avg20)+' 點</b>　｜　最新日振幅 <b style="color:var(--text)">'+fmt(a.latest)+' 點</b><br>資料日期 <b style="color:var(--text)">'+esc(a.date||'—')+'</b>　｜　API產生時間 <b style="color:var(--text)">'+esc(a.generatedAt||'—')+'</b><br>有效不重複交易日 <b style="color:var(--text)">'+fmt(a.records&&a.records.length)+'/20</b></div>';
   var ranks='<div style="margin-top:9px;padding:10px;background:var(--bg3);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.8">Rank 1 <b style="color:var(--text)">'+fmt(rv.rank1)+'</b>　1～7平均 <b style="color:var(--text)">'+fmt(rv.rank1to7Average)+'</b>　5～10平均 <b style="color:var(--text)">'+fmt(rv.rank5to10Average)+'</b><br>5～15平均 <b style="color:var(--text)">'+fmt(rv.rank5to15Average)+'</b>　15～20平均 <b style="color:var(--text)">'+fmt(rv.rank15to20Average)+'</b>　Rank 20 <b style="color:var(--text)">'+fmt(rv.rank20)+'</b></div>';
   var recent='<div style="margin-top:9px;font-size:11px;color:var(--muted)"><b>最近3個交易日</b>：'+(seq.length?seq.slice(0,3).map(function(d){return esc(d.date)+' '+fmt(d.amplitude)+'點';}).join('　／　'):'尚無資料')+'</div>';
-  el.innerHTML=cards+summary+ranks+recent+'<div style="margin-top:12px;font-size:12px;font-weight:700">最近20個交易日明細（由新到舊）</div>'+makeRecordsTable(a.records);
+  el.innerHTML=staleNotice+cards+summary+ranks+recent+'<div style="margin-top:12px;font-size:12px;font-weight:700">最近20個交易日明細（由新到舊）</div>'+makeRecordsTable(a.records);
 }
 
 // ══ 首頁總覽：沿用 DATA.D / D_io / D_marketBias / Apps Script 振幅資料 ══
