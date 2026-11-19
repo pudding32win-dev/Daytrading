@@ -3382,8 +3382,8 @@ function renderRangeReference(){
     var lowHigh=fmt(l+min)+' ～ '+fmt(l+max);
     return '<div style="padding:8px 0;border-bottom:1px solid var(--border)">'
       +'<div style="font-weight:800">'+b.name+'區間：'+fmt(min)+'–'+fmt(max)+' 點</div>'
-      +'<div style="font-size:12px;color:var(--muted);margin-top:3px">高點回落參考：'+highLow+'</div>'
-      +'<div style="font-size:12px;color:var(--muted)">低點反彈參考：'+lowHigh+'</div></div>';
+      +'<div style="font-size:12px;color:#16a34a;margin-top:3px">高點回落參考：'+highLow+'</div>'
+      +'<div style="font-size:12px;color:#dc2626">低點反彈參考：'+lowHigh+'</div></div>';
   }).join('');
   var freshness=a.dataReady
     ? (a.stale ? '<div style="padding:8px;border:1px solid rgba(245,158,11,.5);border-radius:7px;color:var(--warn);font-size:11px;margin-bottom:8px">⚠ 最新資料更新失敗；目前保留並沿用上次成功資料。最近抓到日期：<b>'+String(a.date||'—')+'</b>。請依此日期判斷是否過舊。</div>' : '<div style="font-size:10px;color:var(--muted);margin:0 0 8px">20日資料日期：'+String(a.date||'—')+'｜有效交易日：'+fmt(a.records&&a.records.length)+'/20</div>')
