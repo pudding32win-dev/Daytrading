@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0d0f14">
-<title>每日衝浪板｜V101</title>
+<title>每日衝浪板｜V102</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1464,7 +1464,7 @@ body.light .modal-box,body.light #allTimeModal>div,body.light #archiveModal>div,
   </div>
 </div>
 
-<div class="footer">每日衝浪板 V101 · 小台／微台商品切換 · Firebase 雲端同步 · 僅供參考</div>
+<div class="footer">每日衝浪板 V102 · 動態停利空間 · 小台／微台商品切換 · Firebase 雲端同步 · 僅供參考</div>
 
 <script type="module">
 
@@ -3373,9 +3373,37 @@ function renderRangeReference(){
   var level=classifyAmplitudeValue(amp);
   var smallMax=ranges.small&&ranges.small.max;
   var pct=(a.dataReady&&smallMax>0)?Math.round(amp/smallMax*100):null;
-  var tp1,tp2,advice;
-  if(amp>=330){tp1='60–90 點';tp2='100–130 點';advice='今日振幅已達小浪常見規模，避免追價；優先分批停利。';}
-  else {tp1='80–100 點';tp2='120–150 點';advice='以短目標分批停利；到 TP1 可先出部分，剩餘部位觀察是否延伸。';}
+  // V102 動態停利：以近20日平均振幅扣除今日已走振幅，估算尚未消耗的日內波動空間。
+  // 這是市場空間估算，不是保證行情一定會走完；不再使用固定60–90／100–130點。
+  var avg20=Number(a.avg20);
+  if(!(isFinite(avg20)&&avg20>0) && Array.isArray(a.records)){
+    var vals=a.records.map(function(x){
+      if(x && x.amplitude!=null && isFinite(Number(x.amplitude))) return Number(x.amplitude);
+      if(x && x.high!=null && x.low!=null && isFinite(Number(x.high)) && isFinite(Number(x.low))) return Number(x.high)-Number(x.low);
+      return null;
+    }).filter(function(v){return v!=null&&v>0;});
+    if(vals.length) avg20=vals.reduce(function(sum,v){return sum+v;},0)/vals.length;
+  }
+  var remaining=(isFinite(avg20)&&avg20>0)?Math.max(0,avg20-amp):null;
+  var round5=function(v){return Math.max(0,Math.round(v/5)*5);};
+  var tp1=null,tp2=null,tp3=null,advice='',spaceText='—',usedText='—';
+  if(remaining==null){
+    tp1=tp2=tp3='待取得20日均幅';
+    advice='目前缺少有效的近20日平均振幅，暫不提供停利點數，避免用固定數字誤導。';
+  }else{
+    spaceText=fmt(remaining)+' 點';
+    usedText=Math.round(amp/avg20*100)+'%';
+    if(remaining<=0){
+      tp1=tp2=tp3='空間有限';
+      advice='今日已走振幅達到或超過近20日平均振幅；不宜追價，已有部位優先分批落袋並收緊移動停利。';
+    }else{
+      tp1=round5(remaining*0.45)+' 點';
+      tp2=round5(remaining*0.75)+' 點';
+      tp3=round5(remaining*0.90)+' 點';
+      advice='估算剩餘波動空間 '+spaceText+'；TP1先分批，TP2觀察延伸，TP3僅供順勢單參考。若行情轉弱，不必等滿目標。';
+      if(amp/avg20>=0.8) advice='今日已消耗近20日均幅 '+usedText+'，剩餘空間可能有限；避免追價，優先分批停利。'+advice;
+    }
+  }
   var bandHtml=validBands.map(function(b){
     var min=b.range.min,max=b.range.max;
     var highLow=fmt(h-max)+' ～ '+fmt(h-min);
@@ -3393,8 +3421,8 @@ function renderRangeReference(){
    +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前已走振幅</div><div style="font-size:24px;font-weight:800;font-family:monospace">'+fmt(amp)+' <span style="font-size:12px">點</span></div></div>'
    +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:11px;color:var(--muted)">目前浪級</div><div style="font-size:17px;font-weight:800">'+(a.dataReady?level:'資料未同步')+'</div><div style="font-size:11px;color:var(--muted)">'+(pct==null?'尚無有效小浪區間':('小浪上緣使用 '+pct+'%'))+'</div></div></div>'
    +(validBands.length?'<div style="margin-top:8px;font-size:12px">'+bandHtml+'</div>':'')
-   +'<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:9px"><div style="font-size:12px;color:var(--muted)">建議停利空間（點數）</div><div style="display:flex;gap:8px;margin-top:5px"><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP1 分批</span><div style="font-size:18px;font-weight:800">'+tp1+'</div></div><div style="flex:1"><span style="font-size:11px;color:var(--muted)">TP2 延伸</span><div style="font-size:18px;font-weight:800">'+tp2+'</div></div></div><div style="font-size:12px;margin-top:6px">'+advice+'</div></div>'
-   +'<div style="font-size:10px;color:var(--muted);margin-top:8px">注意：高低差是當日已發生振幅，不等於剩餘空間；價位參考由當日高點／低點加減各浪級點數計算，僅供觀察。</div>';
+   +'<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:9px"><div style="font-size:12px;color:var(--muted)">建議停利空間（點數）</div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:6px"><div style="background:var(--bg3);border-radius:7px;padding:8px"><span style="font-size:11px;color:var(--muted)">TP1 分批</span><div style="font-size:17px;font-weight:800">'+tp1+'</div></div><div style="background:var(--bg3);border-radius:7px;padding:8px"><span style="font-size:11px;color:var(--muted)">TP2 延伸</span><div style="font-size:17px;font-weight:800">'+tp2+'</div></div><div style="background:var(--bg3);border-radius:7px;padding:8px"><span style="font-size:11px;color:var(--muted)">TP3 趨勢</span><div style="font-size:17px;font-weight:800">'+tp3+'</div></div></div><div style="font-size:11px;color:var(--muted);margin-top:7px">近20日平均振幅：'+(isFinite(avg20)&&avg20>0?fmt(avg20)+' 點':'—')+'｜今日振幅消耗：'+usedText+'｜估算剩餘空間：'+spaceText+'</div><div style="font-size:12px;margin-top:6px">'+advice+'</div></div>'
+   +'<div style="font-size:10px;color:var(--muted);margin-top:8px">計算方式：近20日平均振幅－今日已走振幅＝估算剩餘空間；TP1／TP2／TP3 分別取剩餘空間的45%／75%／90%。此為日內波動估算，並非單筆進場後的保證目標；高低差也不等於實際可取得的剩餘行情。</div>';
 }
 
 function renderMarketRecognition(){
